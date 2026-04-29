@@ -59,6 +59,8 @@ interface AppState {
     name: string;
     ownerName: string;
     ownerEmail: string;
+    ownerUsername: string;
+    ownerPassword: string;
     subdomain: string;
     operatingHoursStart: number;
     operatingHoursEnd: number;
@@ -363,8 +365,8 @@ export const useStore = create<AppState>()(
         const adminUser: User = {
           id: `user-${generateId()}`,
           tenantId,
-          username: data.ownerEmail.split('@')[0],
-          password: 'admin123',
+          username: data.ownerUsername,
+          password: data.ownerPassword,
           role: 'tenant_admin',
           displayName: data.ownerName,
           email: data.ownerEmail,

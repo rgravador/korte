@@ -25,7 +25,7 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: "Court Books",
-  description: "Pickleball court booking for Philippine facilities",
+  description: "Pickleball court booking for your facilities",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

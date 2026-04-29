@@ -42,6 +42,8 @@ export default function OnboardingPage() {
   const [facilityName, setFacilityName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [ownerEmail, setOwnerEmail] = useState('');
+  const [ownerUsername, setOwnerUsername] = useState('');
+  const [ownerPassword, setOwnerPassword] = useState('');
   const [hoursStart, setHoursStart] = useState(6);
   const [hoursEnd, setHoursEnd] = useState(22);
 
@@ -118,6 +120,8 @@ export default function OnboardingPage() {
       name: facilityName,
       ownerName,
       ownerEmail,
+      ownerUsername,
+      ownerPassword,
       subdomain,
       operatingHoursStart: hoursStart,
       operatingHoursEnd: hoursEnd,
@@ -134,7 +138,8 @@ export default function OnboardingPage() {
         operatingHoursEnd: hoursEnd,
         ownerName,
         ownerEmail,
-        ownerPassword: 'admin123', // default password for new tenants
+        ownerUsername,
+        ownerPassword,
         courts,
         items: allItems,
       });
@@ -238,6 +243,36 @@ export default function OnboardingPage() {
                 />
               </div>
 
+              <div className="h-px bg-line my-1" />
+
+              <div className="font-mono text-[8px] text-ink-3 tracking-wider uppercase">Login credentials</div>
+
+              <div>
+                <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Username</label>
+                <input
+                  type="text"
+                  placeholder="e.g. marco"
+                  value={ownerUsername}
+                  onChange={(e) => setOwnerUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                  autoComplete="username"
+                  className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-mono border border-line focus:outline-none focus:border-ink"
+                />
+              </div>
+
+              <div>
+                <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Password</label>
+                <input
+                  type="password"
+                  placeholder="Min 6 characters"
+                  value={ownerPassword}
+                  onChange={(e) => setOwnerPassword(e.target.value)}
+                  autoComplete="new-password"
+                  className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink"
+                />
+              </div>
+
+              <div className="h-px bg-line my-1" />
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Opens at</label>
@@ -275,7 +310,7 @@ export default function OnboardingPage() {
               </button>
               <button
                 onClick={() => setStep('courts')}
-                disabled={!facilityName.trim() || !ownerName.trim()}
+                disabled={!facilityName.trim() || !ownerName.trim() || !ownerUsername.trim() || ownerPassword.length < 6}
                 className="flex-1 bg-ink text-paper py-3 rounded-lg font-sans text-xs font-medium disabled:opacity-40"
               >
                 Next
@@ -506,6 +541,9 @@ export default function OnboardingPage() {
               </div>
               <div className="font-mono text-[9px] text-ink-3 mt-1">
                 Owner: {ownerName} · {ownerEmail}
+              </div>
+              <div className="font-mono text-[9px] text-ink-3 mt-1">
+                Login: <span className="text-ink">@{ownerUsername}</span>
               </div>
             </div>
 

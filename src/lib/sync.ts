@@ -197,6 +197,7 @@ export async function setupTenantOnline(data: {
   operatingHoursEnd: number;
   ownerName: string;
   ownerEmail: string;
+  ownerUsername: string;
   ownerPassword: string;
   courts: { name: string; hourlyRate: number }[];
   items: { name: string; price: number; type: ItemType }[];
@@ -216,7 +217,7 @@ export async function setupTenantOnline(data: {
 
   // 2. Create admin user
   const user = await dbCreateUser(sb, tenant.id, {
-    username: data.ownerEmail.split('@')[0],
+    username: data.ownerUsername,
     password: data.ownerPassword,
     role: 'tenant_admin',
     displayName: data.ownerName,
