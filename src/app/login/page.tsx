@@ -5,19 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 export default function LoginPage() {
-  const { login, currentUser, isOnboarded } = useStore();
+  const { login, currentUser } = useStore();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!isOnboarded) {
-      router.replace('/onboarding');
-    } else if (currentUser) {
-      router.replace('/');
+    if (currentUser) {
+      router.replace('/dashboard');
     }
-  }, [isOnboarded, currentUser, router]);
+  }, [currentUser, router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +23,7 @@ export default function LoginPage() {
 
     const user = login(username, password);
     if (user) {
-      router.push('/');
+      router.push('/dashboard');
     } else {
       setError('Invalid username or password');
     }

@@ -17,7 +17,7 @@ const ALL_ROLES: UserRole[] = ['system_admin', 'tenant_admin', 'tenant_staff'];
 const NAV_ITEMS: NavItem[] = [
   {
     label: 'Today',
-    href: '/',
+    href: '/dashboard',
     roles: ALL_ROLES,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
@@ -96,9 +96,7 @@ export function BottomNav() {
       style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
     >
       {visibleItems.map((item) => {
-        const isActive = item.href === '/'
-          ? pathname === '/'
-          : pathname.startsWith(item.href);
+        const isActive = pathname.startsWith(item.href);
 
         return (
           <Link

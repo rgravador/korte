@@ -299,7 +299,7 @@ export default function SettingsPage() {
           )}
 
           <button
-            onClick={() => { resetToFresh(); router.push('/onboarding'); }}
+            onClick={() => { resetToFresh(); router.push('/'); }}
             className="w-full bg-paper rounded-card p-3 text-left mt-2"
           >
             <div className="font-medium text-sm text-ink-2">Start Fresh</div>

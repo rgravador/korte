@@ -32,7 +32,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 }
 
 export default function OnboardingPage() {
-  const { setupTenant, isOnboarded } = useStore();
+  const { setupTenant, isOnboarded, currentUser } = useStore();
   const router = useRouter();
 
   const [step, setStep] = useState<Step>('welcome');
@@ -57,12 +57,12 @@ export default function OnboardingPage() {
   const [customPrice, setCustomPrice] = useState('');
   const [customType, setCustomType] = useState<ItemType>('rental');
 
-  // Redirect if already onboarded
+  // Redirect if already onboarded and logged in
   useEffect(() => {
-    if (isOnboarded) {
-      router.replace('/');
+    if (isOnboarded && currentUser) {
+      router.replace('/dashboard');
     }
-  }, [isOnboarded, router]);
+  }, [isOnboarded, currentUser, router]);
 
   const subdomain = facilityName
     .toLowerCase()
@@ -122,7 +122,7 @@ export default function OnboardingPage() {
       courts,
       items: allItems,
     });
-    router.push('/');
+    router.push('/dashboard');
   };
 
   return (
@@ -160,7 +160,7 @@ export default function OnboardingPage() {
             <button
               onClick={() => {
                 useStore.getState().resetData();
-                router.push('/');
+                router.push('/dashboard');
               }}
               className="w-full mt-3 text-ink-3 py-3 font-mono text-[10px] tracking-wider uppercase"
             >
