@@ -38,7 +38,6 @@ END $$;
 -- Tables
 -- ============================================================
 
--- Tenants
 DROP TABLE IF EXISTS booking_items CASCADE;
 DROP TABLE IF EXISTS bookings CASCADE;
 DROP TABLE IF EXISTS members CASCADE;
@@ -57,7 +56,6 @@ CREATE TABLE tenants (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Users (custom auth — not Supabase Auth)
 CREATE TABLE users (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -72,7 +70,6 @@ CREATE TABLE users (
   UNIQUE(tenant_id, username)
 );
 
--- Courts
 CREATE TABLE courts (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -82,7 +79,6 @@ CREATE TABLE courts (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Items (rentals and sale items)
 CREATE TABLE items (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -93,7 +89,6 @@ CREATE TABLE items (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Members (players / customers)
 CREATE TABLE members (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -108,7 +103,6 @@ CREATE TABLE members (
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Bookings
 CREATE TABLE bookings (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id        UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -127,7 +121,6 @@ CREATE TABLE bookings (
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Booking items (add-ons per booking)
 CREATE TABLE booking_items (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   booking_id     UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
@@ -142,28 +135,50 @@ CREATE TABLE booking_items (
 -- ============================================================
 -- Indexes
 -- ============================================================
-CREATE INDEX IF NOT EXISTS idx_users_tenant        ON users(tenant_id);
-CREATE INDEX IF NOT EXISTS idx_courts_tenant       ON courts(tenant_id);
-CREATE INDEX IF NOT EXISTS idx_items_tenant        ON items(tenant_id);
-CREATE INDEX IF NOT EXISTS idx_members_tenant      ON members(tenant_id);
-CREATE INDEX IF NOT EXISTS idx_bookings_tenant     ON bookings(tenant_id);
-CREATE INDEX IF NOT EXISTS idx_bookings_date       ON bookings(tenant_id, date);
-CREATE INDEX IF NOT EXISTS idx_bookings_court_date ON bookings(court_id, date);
-CREATE INDEX IF NOT EXISTS idx_bookings_member     ON bookings(member_id);
+CREATE INDEX IF NOT EXISTS idx_users_tenant          ON users(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_courts_tenant         ON courts(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_items_tenant          ON items(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_members_tenant        ON members(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_tenant       ON bookings(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_date         ON bookings(tenant_id, date);
+CREATE INDEX IF NOT EXISTS idx_bookings_court_date   ON bookings(court_id, date);
+CREATE INDEX IF NOT EXISTS idx_bookings_member       ON bookings(member_id);
 CREATE INDEX IF NOT EXISTS idx_booking_items_booking ON booking_items(booking_id);
+
+-- ============================================================
+-- Grants — allow anon and authenticated roles to use tables + functions
+-- ============================================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+
+GRANT ALL ON tenants       TO anon, authenticated;
+GRANT ALL ON users         TO anon, authenticated;
+GRANT ALL ON courts        TO anon, authenticated;
+GRANT ALL ON items         TO anon, authenticated;
+GRANT ALL ON members       TO anon, authenticated;
+GRANT ALL ON bookings      TO anon, authenticated;
+GRANT ALL ON booking_items TO anon, authenticated;
 
 -- ============================================================
 -- Row-Level Security
 -- ============================================================
 
 -- Helper: read tenant_id from a session variable set per-request
--- Usage: SET LOCAL app.current_tenant_id = '<uuid>';
 CREATE OR REPLACE FUNCTION current_tenant_id() RETURNS UUID AS $$
   SELECT COALESCE(
     NULLIF(current_setting('app.current_tenant_id', true), ''),
     '00000000-0000-0000-0000-000000000000'
   )::UUID;
 $$ LANGUAGE sql STABLE;
+
+-- RPC function to set tenant context (callable from Supabase JS client)
+CREATE OR REPLACE FUNCTION set_tenant_context(p_tenant_id UUID)
+RETURNS void AS $$
+BEGIN
+  PERFORM set_config('app.current_tenant_id', p_tenant_id::TEXT, true);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION set_tenant_context(UUID) TO anon, authenticated;
 
 -- Enable RLS on all tenant-scoped tables
 ALTER TABLE tenants       ENABLE ROW LEVEL SECURITY;
@@ -174,46 +189,111 @@ ALTER TABLE members       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE booking_items ENABLE ROW LEVEL SECURITY;
 
--- Policies: each table scoped to current_tenant_id()
--- Tenants: can only see own tenant
-DROP POLICY IF EXISTS tenants_tenant_isolation ON tenants;
-CREATE POLICY tenants_tenant_isolation ON tenants
-  FOR ALL USING (id = current_tenant_id());
+-- ── Tenants ──────────────────────────────────────────────────
+-- SELECT/UPDATE/DELETE: only own tenant
+DROP POLICY IF EXISTS tenants_select ON tenants;
+CREATE POLICY tenants_select ON tenants
+  FOR SELECT USING (id = current_tenant_id());
 
--- Users
-DROP POLICY IF EXISTS users_tenant_isolation ON users;
-CREATE POLICY users_tenant_isolation ON users
-  FOR ALL USING (tenant_id = current_tenant_id());
+DROP POLICY IF EXISTS tenants_update ON tenants;
+CREATE POLICY tenants_update ON tenants
+  FOR UPDATE USING (id = current_tenant_id());
 
--- Courts
-DROP POLICY IF EXISTS courts_tenant_isolation ON courts;
-CREATE POLICY courts_tenant_isolation ON courts
-  FOR ALL USING (tenant_id = current_tenant_id());
+-- INSERT: allow creating new tenants (no tenant context yet)
+DROP POLICY IF EXISTS tenants_insert ON tenants;
+CREATE POLICY tenants_insert ON tenants
+  FOR INSERT WITH CHECK (true);
 
--- Items
-DROP POLICY IF EXISTS items_tenant_isolation ON items;
-CREATE POLICY items_tenant_isolation ON items
-  FOR ALL USING (tenant_id = current_tenant_id());
+-- ── Users ────────────────────────────────────────────────────
+-- SELECT: allow without tenant context for login (match by username)
+DROP POLICY IF EXISTS users_select ON users;
+CREATE POLICY users_select ON users
+  FOR SELECT USING (
+    tenant_id = current_tenant_id()
+    OR current_tenant_id() = '00000000-0000-0000-0000-000000000000'::UUID
+  );
 
--- Members
-DROP POLICY IF EXISTS members_tenant_isolation ON members;
-CREATE POLICY members_tenant_isolation ON members
-  FOR ALL USING (tenant_id = current_tenant_id());
+DROP POLICY IF EXISTS users_insert ON users;
+CREATE POLICY users_insert ON users
+  FOR INSERT WITH CHECK (true);
 
--- Bookings
-DROP POLICY IF EXISTS bookings_tenant_isolation ON bookings;
-CREATE POLICY bookings_tenant_isolation ON bookings
-  FOR ALL USING (tenant_id = current_tenant_id());
+DROP POLICY IF EXISTS users_update ON users;
+CREATE POLICY users_update ON users
+  FOR UPDATE USING (tenant_id = current_tenant_id());
 
--- Booking items: scoped via booking's tenant
-DROP POLICY IF EXISTS booking_items_tenant_isolation ON booking_items;
-CREATE POLICY booking_items_tenant_isolation ON booking_items
-  FOR ALL USING (
+-- ── Courts ───────────────────────────────────────────────────
+DROP POLICY IF EXISTS courts_select ON courts;
+CREATE POLICY courts_select ON courts
+  FOR SELECT USING (tenant_id = current_tenant_id());
+
+DROP POLICY IF EXISTS courts_insert ON courts;
+CREATE POLICY courts_insert ON courts
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS courts_update ON courts;
+CREATE POLICY courts_update ON courts
+  FOR UPDATE USING (tenant_id = current_tenant_id());
+
+DROP POLICY IF EXISTS courts_delete ON courts;
+CREATE POLICY courts_delete ON courts
+  FOR DELETE USING (tenant_id = current_tenant_id());
+
+-- ── Items ────────────────────────────────────────────────────
+DROP POLICY IF EXISTS items_select ON items;
+CREATE POLICY items_select ON items
+  FOR SELECT USING (tenant_id = current_tenant_id());
+
+DROP POLICY IF EXISTS items_insert ON items;
+CREATE POLICY items_insert ON items
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS items_update ON items;
+CREATE POLICY items_update ON items
+  FOR UPDATE USING (tenant_id = current_tenant_id());
+
+DROP POLICY IF EXISTS items_delete ON items;
+CREATE POLICY items_delete ON items
+  FOR DELETE USING (tenant_id = current_tenant_id());
+
+-- ── Members ──────────────────────────────────────────────────
+DROP POLICY IF EXISTS members_select ON members;
+CREATE POLICY members_select ON members
+  FOR SELECT USING (tenant_id = current_tenant_id());
+
+DROP POLICY IF EXISTS members_insert ON members;
+CREATE POLICY members_insert ON members
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS members_update ON members;
+CREATE POLICY members_update ON members
+  FOR UPDATE USING (tenant_id = current_tenant_id());
+
+-- ── Bookings ─────────────────────────────────────────────────
+DROP POLICY IF EXISTS bookings_select ON bookings;
+CREATE POLICY bookings_select ON bookings
+  FOR SELECT USING (tenant_id = current_tenant_id());
+
+DROP POLICY IF EXISTS bookings_insert ON bookings;
+CREATE POLICY bookings_insert ON bookings
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS bookings_update ON bookings;
+CREATE POLICY bookings_update ON bookings
+  FOR UPDATE USING (tenant_id = current_tenant_id());
+
+-- ── Booking Items ────────────────────────────────────────────
+DROP POLICY IF EXISTS booking_items_select ON booking_items;
+CREATE POLICY booking_items_select ON booking_items
+  FOR SELECT USING (
     booking_id IN (SELECT id FROM bookings WHERE tenant_id = current_tenant_id())
   );
 
+DROP POLICY IF EXISTS booking_items_insert ON booking_items;
+CREATE POLICY booking_items_insert ON booking_items
+  FOR INSERT WITH CHECK (true);
+
 -- ============================================================
--- Helper function: hash password with pgcrypto
+-- Helper functions: password hashing
 -- ============================================================
 CREATE OR REPLACE FUNCTION hash_password(plain TEXT) RETURNS TEXT AS $$
   SELECT crypt(plain, gen_salt('bf', 10));
@@ -222,6 +302,9 @@ $$ LANGUAGE sql;
 CREATE OR REPLACE FUNCTION verify_password(plain TEXT, hashed TEXT) RETURNS BOOLEAN AS $$
   SELECT hashed = crypt(plain, hashed);
 $$ LANGUAGE sql;
+
+GRANT EXECUTE ON FUNCTION hash_password(TEXT)        TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION verify_password(TEXT, TEXT) TO anon, authenticated;
 
 -- ============================================================
 -- Trigger: auto-update updated_at on users

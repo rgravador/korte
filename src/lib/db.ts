@@ -113,12 +113,7 @@ function toBooking(r: Record<string, unknown>, items: BookingItem[]): Booking {
  * Must be called before any tenant-scoped query.
  */
 async function setTenantContext(sb: SupabaseClient, tenantId: string) {
-  // Use raw SQL via rpc to SET LOCAL the session variable
-  await sb.rpc('set_config', {
-    setting: 'app.current_tenant_id',
-    value: tenantId,
-    is_local: true,
-  });
+  await sb.rpc('set_tenant_context', { p_tenant_id: tenantId });
 }
 
 /**

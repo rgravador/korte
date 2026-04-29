@@ -78,7 +78,7 @@ function clearQueue() {
 
 // ── Flush queue to Supabase ──────────────────────────────────
 
-export async function flushQueue(): Promise<{ flushed: number; failed: number }> {
+export async function flushQueue(tenantId?: string): Promise<{ flushed: number; failed: number }> {
   const sb = getSupabase();
   if (!sb || !getOnlineStatus()) return { flushed: 0, failed: 0 };
 
@@ -90,7 +90,7 @@ export async function flushQueue(): Promise<{ flushed: number; failed: number }>
 
   for (const mutation of queue) {
     try {
-      const ok = await executeMutation(sb, mutation);
+      const ok = await executeMutation(sb, mutation, tenantId);
       if (ok) flushed++;
       else failed++;
     } catch {
@@ -103,8 +103,13 @@ export async function flushQueue(): Promise<{ flushed: number; failed: number }>
   return { flushed, failed };
 }
 
-async function executeMutation(sb: ReturnType<typeof getSupabase>, mutation: MutationType): Promise<boolean> {
+async function executeMutation(sb: ReturnType<typeof getSupabase>, mutation: MutationType, tenantId?: string): Promise<boolean> {
   if (!sb) return false;
+
+  // Set tenant context for RLS before mutations
+  if (tenantId) {
+    await sb.rpc('set_tenant_context', { p_tenant_id: tenantId });
+  }
 
   switch (mutation.kind) {
     case 'createBooking': {

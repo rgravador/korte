@@ -32,7 +32,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
       setOnline(online);
       if (online) {
         // Flush queued mutations when back online
-        flushQueue().then(({ flushed }) => {
+        flushQueue(tenant.id).then(({ flushed }) => {
           if (flushed > 0) {
             setLastSynced(new Date().toISOString());
           }
