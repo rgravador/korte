@@ -45,8 +45,8 @@ export default function LandingPage() {
             <div className="font-display text-base">5 minutes</div>
           </div>
           <div className="bg-cream py-4 px-3">
-            <div className="font-mono text-[8px] tracking-wider uppercase text-ink-3 mb-1">Starting at</div>
-            <div className="font-display text-base">₱799/mo</div>
+            <div className="font-mono text-[8px] tracking-wider uppercase text-ink-3 mb-1">Trial</div>
+            <div className="font-display text-base">7 days free</div>
           </div>
         </div>
 
@@ -58,7 +58,7 @@ export default function LandingPage() {
           >
             <div>
               <div>Join as Court Owner</div>
-              <div className="font-mono text-[9px] text-ink-4 tracking-wider mt-0.5">Set up your facility in minutes</div>
+              <div className="font-mono text-[9px] text-ink-4 tracking-wider mt-0.5">Start with a 7-day free trial</div>
             </div>
             <span className="font-mono text-lg">→</span>
           </Link>
