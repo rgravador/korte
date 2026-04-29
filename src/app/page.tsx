@@ -4,7 +4,8 @@ import { Header } from '@/components/header';
 import { BottomNav } from '@/components/bottom-nav';
 import { StatusTag } from '@/components/status-tag';
 import { useStore } from '@/store';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Booking, BookingStatus } from '@/lib/types';
 
 function formatHour(hour: number): string {
@@ -115,8 +116,15 @@ function BookingDetailSheet({
 }
 
 export default function DashboardPage() {
-  const { bookings, courts, tenant, updateBookingStatus } = useStore();
+  const { bookings, courts, tenant, updateBookingStatus, isOnboarded } = useStore();
+  const router = useRouter();
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+
+  useEffect(() => {
+    if (!isOnboarded) {
+      router.replace('/onboarding');
+    }
+  }, [isOnboarded, router]);
 
   const today = new Date().toISOString().split('T')[0];
   const dayName = new Date().toLocaleDateString('en-US', { weekday: 'short' });

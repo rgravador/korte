@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Tenant, Court, Item, Member, Booking, BookingStatus } from '@/lib/types';
+import { Tenant, Court, Item, Member, Booking, BookingStatus, ItemType } from '@/lib/types';
 import {
   seedTenant,
   seedCourts,
@@ -10,6 +10,7 @@ import {
 } from '@/lib/mock-data';
 
 interface AppState {
+  isOnboarded: boolean;
   tenant: Tenant;
   courts: Court[];
   items: Item[];
@@ -38,9 +39,20 @@ interface AppState {
 
   // Tenant actions
   updateTenant: (updates: Partial<Tenant>) => void;
+  setupTenant: (data: {
+    name: string;
+    ownerName: string;
+    ownerEmail: string;
+    subdomain: string;
+    operatingHoursStart: number;
+    operatingHoursEnd: number;
+    courts: { name: string; hourlyRate: number }[];
+    items: { name: string; price: number; type: ItemType }[];
+  }) => void;
 
   // Utility
   resetData: () => void;
+  resetToFresh: () => void;
 }
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -48,6 +60,7 @@ const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
+      isOnboarded: false,
       tenant: seedTenant,
       courts: seedCourts,
       items: seedItems,
@@ -183,13 +196,61 @@ export const useStore = create<AppState>()(
         set((state) => ({ tenant: { ...state.tenant, ...updates } }));
       },
 
+      setupTenant: (data) => {
+        const tenantId = `tenant-${generateId()}`;
+        const tenant: Tenant = {
+          id: tenantId,
+          name: data.name,
+          subdomain: data.subdomain,
+          courtCount: data.courts.length,
+          operatingHoursStart: data.operatingHoursStart,
+          operatingHoursEnd: data.operatingHoursEnd,
+          createdAt: new Date().toISOString(),
+        };
+        const courts: Court[] = data.courts.map((c, i) => ({
+          id: `court-${generateId()}-${i}`,
+          tenantId,
+          name: c.name,
+          hourlyRate: c.hourlyRate,
+          isActive: true,
+        }));
+        const items: Item[] = data.items.map((item, i) => ({
+          id: `item-${generateId()}-${i}`,
+          tenantId,
+          name: item.name,
+          price: item.price,
+          type: item.type,
+          isActive: true,
+        }));
+        set({
+          isOnboarded: true,
+          tenant,
+          courts,
+          items,
+          members: [],
+          bookings: [],
+        });
+      },
+
       resetData: () => {
         set({
+          isOnboarded: true,
           tenant: seedTenant,
           courts: seedCourts,
           items: seedItems,
           members: seedMembers,
           bookings: seedBookings,
+        });
+      },
+
+      resetToFresh: () => {
+        set({
+          isOnboarded: false,
+          tenant: seedTenant,
+          courts: [],
+          items: [],
+          members: [],
+          bookings: [],
         });
       },
     }),

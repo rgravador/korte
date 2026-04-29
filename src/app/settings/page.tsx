@@ -4,6 +4,7 @@ import { Header } from '@/components/header';
 import { BottomNav } from '@/components/bottom-nav';
 import { useStore } from '@/store';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ItemType } from '@/lib/types';
 import Link from 'next/link';
 
@@ -17,7 +18,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function SettingsPage() {
-  const { tenant, courts, items, updateTenant, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem, resetData } = useStore();
+  const { tenant, courts, items, updateTenant, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem, resetData, resetToFresh } = useStore();
+  const router = useRouter();
 
   const [editingFacility, setEditingFacility] = useState(false);
   const [facilityName, setFacilityName] = useState(tenant.name);
@@ -242,6 +244,14 @@ export default function SettingsPage() {
               <div className="font-mono text-[9px] text-ink-3 tracking-wide">Restore all data to initial seed values</div>
             </button>
           )}
+
+          <button
+            onClick={() => { resetToFresh(); router.push('/onboarding'); }}
+            className="w-full bg-paper rounded-card p-3 text-left mt-2"
+          >
+            <div className="font-medium text-sm text-ink-2">Start Fresh</div>
+            <div className="font-mono text-[9px] text-ink-3 tracking-wide">Clear everything and re-run onboarding</div>
+          </button>
         </Section>
       </div>
 
