@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Fraunces } from "next/font/google";
 import "./globals.css";
+import { SyncProvider } from "@/components/sync-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -51,7 +52,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased`}
       >
-        {children}
+        <SyncProvider>{children}</SyncProvider>
       </body>
     </html>
   );

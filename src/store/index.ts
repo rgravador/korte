@@ -9,11 +9,17 @@ import {
   seedMembers,
   seedBookings,
 } from '@/lib/mock-data';
+import { enqueue } from '@/lib/sync';
 
 interface AppState {
   // Auth
   currentUser: User | null;
   users: User[];
+
+  // Sync
+  isOnline: boolean;
+  pendingSync: number;
+  lastSyncedAt: string | null;
 
   isOnboarded: boolean;
   tenant: Tenant;
@@ -60,6 +66,19 @@ interface AppState {
     items: { name: string; price: number; type: ItemType }[];
   }) => void;
 
+  // Sync actions
+  setOnline: (online: boolean) => void;
+  setPendingSync: (count: number) => void;
+  setLastSynced: (ts: string) => void;
+  hydrateFromRemote: (data: {
+    tenant: Tenant;
+    users: User[];
+    courts: Court[];
+    items: Item[];
+    members: Member[];
+    bookings: Booking[];
+  }) => void;
+
   // Utility
   resetData: () => void;
   resetToFresh: () => void;
@@ -72,6 +91,10 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       currentUser: null,
       users: seedUsers,
+
+      isOnline: true,
+      pendingSync: 0,
+      lastSyncedAt: null,
 
       isOnboarded: false,
       tenant: seedTenant,
@@ -110,6 +133,12 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ users: [...state.users, user] }));
+
+        enqueue({
+          kind: 'createUser',
+          payload: { tenantId, ...data },
+        });
+
         return id;
       },
 
@@ -122,7 +151,6 @@ export const useStore = create<AppState>()(
         };
         set((state) => ({ bookings: [...state.bookings, booking] }));
 
-        // Update member stats if not walk-in
         if (bookingData.memberId) {
           const member = get().members.find((m) => m.id === bookingData.memberId);
           if (member) {
@@ -132,6 +160,11 @@ export const useStore = create<AppState>()(
             });
           }
         }
+
+        enqueue({
+          kind: 'createBooking',
+          payload: bookingData as unknown as Record<string, unknown>,
+        });
 
         return id;
       },
@@ -144,7 +177,6 @@ export const useStore = create<AppState>()(
           }),
         }));
 
-        // If marking as no-show, update member stats
         if (status === 'no_show') {
           const booking = get().bookings.find((b) => b.id === bookingId);
           if (booking?.memberId) {
@@ -156,6 +188,11 @@ export const useStore = create<AppState>()(
             }
           }
         }
+
+        enqueue({
+          kind: 'updateBookingStatus',
+          payload: { bookingId, status },
+        });
       },
 
       cancelBooking: (bookingId) => {
@@ -168,6 +205,11 @@ export const useStore = create<AppState>()(
             b.id === bookingId ? { ...b, date, startHour } : b
           ),
         }));
+
+        enqueue({
+          kind: 'rescheduleBooking',
+          payload: { bookingId, date, startHour },
+        });
       },
 
       addMember: (memberData) => {
@@ -181,6 +223,19 @@ export const useStore = create<AppState>()(
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ members: [...state.members, member] }));
+
+        enqueue({
+          kind: 'addMember',
+          payload: {
+            tenantId: memberData.tenantId,
+            firstName: memberData.firstName,
+            lastName: memberData.lastName,
+            phone: memberData.phone,
+            email: memberData.email,
+            tier: memberData.tier,
+          },
+        });
+
         return id;
       },
 
@@ -190,6 +245,11 @@ export const useStore = create<AppState>()(
             m.id === memberId ? { ...m, ...updates } : m
           ),
         }));
+
+        enqueue({
+          kind: 'updateMember',
+          payload: { memberId, updates: updates as Record<string, unknown> },
+        });
       },
 
       addCourt: (courtData) => {
@@ -199,6 +259,12 @@ export const useStore = create<AppState>()(
           courts: [...state.courts, court],
           tenant: { ...state.tenant, courtCount: state.courts.length + 1 },
         }));
+
+        enqueue({
+          kind: 'addCourt',
+          payload: { tenantId: courtData.tenantId, name: courtData.name, hourlyRate: courtData.hourlyRate },
+        });
+
         return id;
       },
 
@@ -208,6 +274,11 @@ export const useStore = create<AppState>()(
             c.id === courtId ? { ...c, ...updates } : c
           ),
         }));
+
+        enqueue({
+          kind: 'updateCourt',
+          payload: { courtId, updates: updates as Record<string, unknown> },
+        });
       },
 
       removeCourt: (courtId) => {
@@ -215,12 +286,20 @@ export const useStore = create<AppState>()(
           courts: state.courts.filter((c) => c.id !== courtId),
           tenant: { ...state.tenant, courtCount: state.courts.length - 1 },
         }));
+
+        enqueue({ kind: 'removeCourt', payload: { courtId } });
       },
 
       addItem: (itemData) => {
         const id = `item-${generateId()}`;
         const item: Item = { ...itemData, id };
         set((state) => ({ items: [...state.items, item] }));
+
+        enqueue({
+          kind: 'addItem',
+          payload: { tenantId: itemData.tenantId, name: itemData.name, price: itemData.price, type: itemData.type },
+        });
+
         return id;
       },
 
@@ -230,16 +309,29 @@ export const useStore = create<AppState>()(
             i.id === itemId ? { ...i, ...updates } : i
           ),
         }));
+
+        enqueue({
+          kind: 'updateItem',
+          payload: { itemId, updates: updates as Record<string, unknown> },
+        });
       },
 
       removeItem: (itemId) => {
         set((state) => ({
           items: state.items.filter((i) => i.id !== itemId),
         }));
+
+        enqueue({ kind: 'removeItem', payload: { itemId } });
       },
 
       updateTenant: (updates) => {
+        const tenantId = get().tenant.id;
         set((state) => ({ tenant: { ...state.tenant, ...updates } }));
+
+        enqueue({
+          kind: 'updateTenant',
+          payload: { tenantId, updates: updates as Record<string, unknown> },
+        });
       },
 
       setupTenant: (data) => {
@@ -289,6 +381,25 @@ export const useStore = create<AppState>()(
           members: [],
           bookings: [],
         });
+        // Supabase setup is handled by setupTenantOnline() in the onboarding page
+      },
+
+      // Sync actions
+      setOnline: (online) => set({ isOnline: online }),
+      setPendingSync: (count) => set({ pendingSync: count }),
+      setLastSynced: (ts) => set({ lastSyncedAt: ts }),
+
+      hydrateFromRemote: (data) => {
+        set({
+          isOnboarded: true,
+          tenant: data.tenant,
+          users: data.users,
+          courts: data.courts,
+          items: data.items,
+          members: data.members,
+          bookings: data.bookings,
+          lastSyncedAt: new Date().toISOString(),
+        });
       },
 
       resetData: () => {
@@ -319,6 +430,18 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'court-books-store',
+      partialize: (state) => ({
+        // Persist everything except transient sync state
+        currentUser: state.currentUser,
+        users: state.users,
+        isOnboarded: state.isOnboarded,
+        tenant: state.tenant,
+        courts: state.courts,
+        items: state.items,
+        members: state.members,
+        bookings: state.bookings,
+        lastSyncedAt: state.lastSyncedAt,
+      }),
     }
   )
 );
