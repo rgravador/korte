@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { loginOnline, isSupabaseConfigured } from '@/lib/sync';
 
 export default function LoginPage() {
-  const { login, currentUser, isOnline, hydrateFromRemote } = useStore();
+  const { login, currentUser, isOnline, hydrateFromRemote, tenant } = useStore();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -102,25 +102,28 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <div className="mt-8 border-t border-line pt-4">
-        <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-2">Demo accounts</p>
-        <div className="space-y-1.5">
-          <button
-            onClick={() => { setUsername('marco'); setPassword('admin123'); }}
-            className="w-full bg-paper rounded-card p-3 text-left"
-          >
-            <div className="font-medium text-sm">Marco Reyes</div>
-            <div className="font-mono text-[9px] text-ink-3">tenant_admin · marco / admin123</div>
-          </button>
-          <button
-            onClick={() => { setUsername('lia'); setPassword('staff123'); }}
-            className="w-full bg-paper rounded-card p-3 text-left"
-          >
-            <div className="font-medium text-sm">Lia Santos</div>
-            <div className="font-mono text-[9px] text-ink-3">tenant_staff · lia / staff123</div>
-          </button>
+      {/* Demo accounts — only shown for the seed tenant */}
+      {tenant.id === 'tenant-001' && (
+        <div className="mt-8 border-t border-line pt-4">
+          <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-2">Demo accounts</p>
+          <div className="space-y-1.5">
+            <button
+              onClick={() => { setUsername('marco'); setPassword('admin123'); }}
+              className="w-full bg-paper rounded-card p-3 text-left"
+            >
+              <div className="font-medium text-sm">Marco Reyes</div>
+              <div className="font-mono text-[9px] text-ink-3">tenant_admin · marco / admin123</div>
+            </button>
+            <button
+              onClick={() => { setUsername('lia'); setPassword('staff123'); }}
+              className="w-full bg-paper rounded-card p-3 text-left"
+            >
+              <div className="font-medium text-sm">Lia Santos</div>
+              <div className="font-mono text-[9px] text-ink-3">tenant_staff · lia / staff123</div>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

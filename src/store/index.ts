@@ -106,9 +106,22 @@ export const useStore = create<AppState>()(
       bookings: seedBookings,
 
       login: (username, password) => {
-        const user = get().users.find(
+        // First try matching stored users (passwords may be empty after rehydration)
+        let user = get().users.find(
           (u) => u.username === username && u.password === password && u.isActive
         );
+
+        // Fallback: check seed data passwords (demo mode — passwords are stripped from localStorage)
+        if (!user) {
+          const seedUser = seedUsers.find(
+            (u) => u.username === username && u.password === password && u.isActive
+          );
+          if (seedUser) {
+            // Verify this seed user exists in the store (by username)
+            user = get().users.find((u) => u.username === seedUser.username && u.isActive);
+          }
+        }
+
         if (user) {
           set({ currentUser: user });
           return user;
@@ -405,6 +418,10 @@ export const useStore = create<AppState>()(
       },
 
       resetData: () => {
+        // Clear sync queue — demo data is local-only
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem('court-books-sync-queue');
+        }
         set({
           isOnboarded: true,
           currentUser: seedUsers[0],
@@ -414,10 +431,16 @@ export const useStore = create<AppState>()(
           items: seedItems,
           members: seedMembers,
           bookings: seedBookings,
+          lastSyncedAt: null,
+          pendingSync: 0,
         });
       },
 
       resetToFresh: () => {
+        // Clear sync queue so stale mutations don't replay
+        if (typeof localStorage !== 'undefined') {
+          localStorage.removeItem('court-books-sync-queue');
+        }
         set({
           isOnboarded: false,
           currentUser: null,
@@ -427,6 +450,8 @@ export const useStore = create<AppState>()(
           items: [],
           members: [],
           bookings: [],
+          lastSyncedAt: null,
+          pendingSync: 0,
         });
       },
     }),
