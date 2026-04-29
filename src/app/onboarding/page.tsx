@@ -19,7 +19,7 @@ const SUGGESTED_ITEMS = [
 
 function StepIndicator({ current, total }: { current: number; total: number }) {
   return (
-    <div className="flex gap-1.5 mb-6">
+    <div className="flex gap-1.5 mb-6" role="progressbar" aria-valuenow={current} aria-valuemin={0} aria-valuemax={total} aria-label={`Step ${current + 1} of ${total}`}>
       {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
@@ -355,7 +355,8 @@ export default function OnboardingPage() {
                   {courts.length > 1 && (
                     <button
                       onClick={() => removeCourt(index)}
-                      className="text-warn font-mono text-[9px] tracking-wider uppercase pb-2.5"
+                      className="w-8 h-8 flex items-center justify-center text-warn font-mono text-sm"
+                      aria-label="Remove court"
                     >
                       ×
                     </button>

@@ -132,7 +132,7 @@ export default function SettingsPage() {
                   <button
                     onClick={() => updateCourt(court.id, { isActive: !court.isActive })}
                     className={`font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded ${
-                      court.isActive ? 'bg-[#D8E5DD] text-signal' : 'bg-paper-2 text-ink-3'
+                      court.isActive ? 'bg-status-checked-bg text-signal' : 'bg-paper-2 text-ink-3'
                     }`}
                   >
                     {court.isActive ? 'Active' : 'Inactive'}
@@ -181,7 +181,7 @@ export default function SettingsPage() {
                   <button
                     onClick={() => updateItem(item.id, { isActive: !item.isActive })}
                     className={`font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded ${
-                      item.isActive ? 'bg-[#D8E5DD] text-signal' : 'bg-paper-2 text-ink-3'
+                      item.isActive ? 'bg-status-checked-bg text-signal' : 'bg-paper-2 text-ink-3'
                     }`}
                   >
                     {item.isActive ? 'Active' : 'Off'}
@@ -238,7 +238,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <span className={`font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded ${
-                  user.role === 'tenant_admin' ? 'bg-accent-soft text-accent-deep' : 'bg-[#D8E5DD] text-signal'
+                  user.role === 'tenant_admin' ? 'bg-accent-soft text-accent-deep' : 'bg-status-checked-bg text-signal'
                 }`}>
                   {user.role === 'tenant_admin' ? 'Admin' : 'Staff'}
                 </span>

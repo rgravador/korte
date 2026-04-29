@@ -92,6 +92,7 @@ export function BottomNav() {
 
   return (
     <nav
+      aria-label="Main navigation"
       className="fixed bottom-0 left-0 right-0 h-16 bg-paper border-t border-line items-center z-50 max-w-lg mx-auto grid"
       style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
     >
@@ -102,7 +103,7 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-0.5 relative ${
+            className={`flex flex-col items-center gap-0.5 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
               isActive ? 'text-ink' : 'text-ink-3'
             }`}
           >

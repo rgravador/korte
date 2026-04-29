@@ -157,7 +157,7 @@ export default function CheckinPage() {
       </div>
 
       {/* Staff bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 h-16 bg-paper border-t border-line grid grid-cols-4 items-center z-50 max-w-lg mx-auto">
+      <nav aria-label="Staff navigation" className="fixed bottom-0 left-0 right-0 h-16 bg-paper border-t border-line grid grid-cols-4 items-center z-50 max-w-lg mx-auto">
         <div className="flex flex-col items-center gap-0.5 text-ink relative">
           <span className="absolute top-0 w-7 h-0.5 bg-accent" />
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">

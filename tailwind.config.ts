@@ -24,6 +24,13 @@ const config: Config = {
         'accent-soft': '#FBEBB0',
         signal: '#2D5A3F',
         warn: '#A33A2A',
+        'status-pending-bg': '#F4E1D8',
+        'status-pending-text': '#6B3D23',
+        'status-checked-bg': '#D8E5DD',
+        'status-noshow-bg': '#F4D8D8',
+        'status-confirmed-text': '#5A4815',
+        'heatmap-1': '#E8E1D0',
+        'heatmap-2': '#DBC79C',
       },
       fontFamily: {
         display: ['var(--font-display)', 'Georgia', 'serif'],

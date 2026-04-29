@@ -169,6 +169,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Time-by-court grid */}
+        <div className="overflow-x-auto">
         <div className="bg-paper rounded-card overflow-hidden border border-line-2">
           {/* Grid header */}
           <div
@@ -247,6 +248,8 @@ export default function SchedulePage() {
           ))}
         </div>
 
+        </div>
+
         {/* Legend */}
         <div className="flex items-center gap-4 mt-3">
           <div className="flex items-center gap-1.5">
@@ -273,6 +276,7 @@ export default function SchedulePage() {
       {/* FAB */}
       <Link
         href="/booking/new"
+        aria-label="Create new booking"
         className="fixed bottom-20 right-4 z-50 w-12 h-12 bg-ink text-paper rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform max-w-lg"
       >
         <svg

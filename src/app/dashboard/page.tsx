@@ -126,7 +126,7 @@ export default function DashboardPage() {
     }
   }, [isOnboarded, currentUser, router]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
   const dayName = new Date().toLocaleDateString('en-US', { weekday: 'short' });
   const dayDate = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 
@@ -197,6 +197,7 @@ export default function DashboardPage() {
               <button
                 key={booking.id}
                 onClick={() => setSelectedBooking(booking)}
+                aria-label={`${booking.memberName} at ${booking.startHour}:00, ${booking.status.replace('_', ' ')}`}
                 className="w-full grid grid-cols-[44px_1fr_auto] gap-2.5 items-center py-2.5 border-b border-line-2 text-left"
               >
                 <div>

@@ -1,10 +1,10 @@
 import { BookingStatus } from '@/lib/types';
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; className: string }> = {
-  confirmed: { label: 'Confirmed', className: 'bg-accent-soft text-[#6F5A1A]' },
-  pending: { label: 'Pending', className: 'bg-[#F4E1D8] text-[#8A4A2D]' },
-  checked_in: { label: 'In', className: 'bg-[#D8E5DD] text-signal' },
-  no_show: { label: 'No-show', className: 'bg-[#F4D8D8] text-warn' },
+  confirmed: { label: 'Confirmed', className: 'bg-accent-soft text-status-confirmed-text' },
+  pending: { label: 'Pending', className: 'bg-status-pending-bg text-status-pending-text' },
+  checked_in: { label: 'In', className: 'bg-status-checked-bg text-signal' },
+  no_show: { label: 'No-show', className: 'bg-status-noshow-bg text-warn' },
   cancelled: { label: 'Cancelled', className: 'bg-paper-2 text-ink-3' },
 };
 

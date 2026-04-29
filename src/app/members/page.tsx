@@ -351,6 +351,7 @@ export default function MembersPage() {
             placeholder="Name, phone, email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search members"
             className="w-full bg-paper-2 rounded-lg pl-9 pr-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
@@ -408,6 +409,7 @@ export default function MembersPage() {
       {/* FAB */}
       <button
         onClick={() => setShowAddSheet(true)}
+        aria-label="Add new member"
         className="fixed bottom-20 right-4 max-w-lg w-12 h-12 bg-ink text-paper rounded-full flex items-center justify-center shadow-lg z-40"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">

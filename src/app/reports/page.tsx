@@ -16,8 +16,8 @@ const DAYS_OF_WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const HOUR_LABELS = ['8', '10', '12', '14', '16', '18', '20'];
 const HEAT_COLORS = [
   'bg-paper-2',
-  'bg-[#E8E1D0]',
-  'bg-[#DBC79C]',
+  'bg-heatmap-1',
+  'bg-heatmap-2',
   'bg-accent',
   'bg-accent-deep',
 ];
@@ -127,7 +127,7 @@ export default function ReportsPage() {
 
         {/* Headline metric */}
         <div className="font-display text-[44px] font-light leading-none tracking-tight">
-          <em className="italic text-accent-deep">{totalBookings}</em>
+          <span className="text-ink">{totalBookings}</span>
         </div>
         <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mt-1">
           Bookings · {periodConfig.label}

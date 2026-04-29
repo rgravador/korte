@@ -344,7 +344,7 @@ function NewBookingForm() {
         {/* D) Add Items */}
         <div className="mb-5">
           <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-2">Add items</div>
-          <div className="bg-paper rounded-card border border-line-2 overflow-hidden">
+          <div>
             {activeItems.map((item, idx) => {
               const qty = itemQuantities[item.id] ?? 0;
               return (
