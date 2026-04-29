@@ -106,6 +106,33 @@ function toBooking(r: Record<string, unknown>, items: BookingItem[]): Booking {
   };
 }
 
+// ── RLS tenant context ───────────────────────────────────────
+
+/**
+ * Sets the tenant context for RLS policies before executing queries.
+ * Must be called before any tenant-scoped query.
+ */
+async function setTenantContext(sb: SupabaseClient, tenantId: string) {
+  // Use raw SQL via rpc to SET LOCAL the session variable
+  await sb.rpc('set_config', {
+    setting: 'app.current_tenant_id',
+    value: tenantId,
+    is_local: true,
+  });
+}
+
+/**
+ * Wraps a query with tenant context for RLS isolation.
+ */
+async function withTenant<T>(
+  sb: SupabaseClient,
+  tenantId: string,
+  fn: () => Promise<T>
+): Promise<T> {
+  await setTenantContext(sb, tenantId);
+  return fn();
+}
+
 // ── Auth ─────────────────────────────────────────────────────
 
 export async function dbLogin(
@@ -442,16 +469,18 @@ export interface TenantData {
 }
 
 export async function dbHydrateTenant(sb: SupabaseClient, tenantId: string): Promise<TenantData | null> {
-  const tenant = await dbGetTenant(sb, tenantId);
-  if (!tenant) return null;
+  return withTenant(sb, tenantId, async () => {
+    const tenant = await dbGetTenant(sb, tenantId);
+    if (!tenant) return null;
 
-  const [users, courts, items, members, bookings] = await Promise.all([
-    dbGetUsers(sb, tenantId),
-    dbGetCourts(sb, tenantId),
-    dbGetItems(sb, tenantId),
-    dbGetMembers(sb, tenantId),
-    dbGetBookings(sb, tenantId),
-  ]);
+    const [users, courts, items, members, bookings] = await Promise.all([
+      dbGetUsers(sb, tenantId),
+      dbGetCourts(sb, tenantId),
+      dbGetItems(sb, tenantId),
+      dbGetMembers(sb, tenantId),
+      dbGetBookings(sb, tenantId),
+    ]);
 
-  return { tenant, users, courts, items, members, bookings };
+    return { tenant, users, courts, items, members, bookings };
+  });
 }

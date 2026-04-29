@@ -431,9 +431,9 @@ export const useStore = create<AppState>()(
     {
       name: 'court-books-store',
       partialize: (state) => ({
-        // Persist everything except transient sync state
-        currentUser: state.currentUser,
-        users: state.users,
+        // Persist everything except transient sync state and passwords
+        currentUser: state.currentUser ? { ...state.currentUser, password: '' } : null,
+        users: state.users.map((u) => ({ ...u, password: '' })),
         isOnboarded: state.isOnboarded,
         tenant: state.tenant,
         courts: state.courts,

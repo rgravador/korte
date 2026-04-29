@@ -3,13 +3,15 @@
 import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { loginOnline, isSupabaseConfigured } from '@/lib/sync';
 
 export default function LoginPage() {
-  const { login, currentUser } = useStore();
+  const { login, currentUser, isOnline, hydrateFromRemote } = useStore();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -17,11 +19,31 @@ export default function LoginPage() {
     }
   }, [currentUser, router]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
+    // Try Supabase first when online + configured
+    if (isSupabaseConfigured && isOnline) {
+      const onlineUser = await loginOnline(username, password);
+      if (onlineUser) {
+        // Set user in store and hydrate tenant data
+        useStore.setState({ currentUser: onlineUser });
+        const { hydrateFromSupabase } = await import('@/lib/sync');
+        const data = await hydrateFromSupabase(onlineUser.tenantId);
+        if (data) {
+          hydrateFromRemote(data);
+        }
+        setLoading(false);
+        router.push('/dashboard');
+        return;
+      }
+    }
+
+    // Fall back to local login (offline or Supabase not configured)
     const user = login(username, password);
+    setLoading(false);
     if (user) {
       router.push('/dashboard');
     } else {
@@ -73,10 +95,10 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          disabled={!username || !password}
+          disabled={!username || !password || loading}
           className="w-full bg-ink text-paper py-4 rounded-lg font-sans text-sm font-medium disabled:opacity-40"
         >
-          Sign In
+          {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
 

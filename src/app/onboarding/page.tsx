@@ -4,6 +4,7 @@ import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ItemType } from '@/lib/types';
+import { setupTenantOnline, isSupabaseConfigured } from '@/lib/sync';
 
 type Step = 'welcome' | 'facility' | 'courts' | 'items' | 'review';
 
@@ -111,7 +112,8 @@ export default function OnboardingPage() {
     ...customItems,
   ];
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    // Save locally first (instant, works offline)
     setupTenant({
       name: facilityName,
       ownerName,
@@ -122,6 +124,22 @@ export default function OnboardingPage() {
       courts,
       items: allItems,
     });
+
+    // Persist to Supabase if online + configured
+    if (isSupabaseConfigured) {
+      await setupTenantOnline({
+        name: facilityName,
+        subdomain,
+        operatingHoursStart: hoursStart,
+        operatingHoursEnd: hoursEnd,
+        ownerName,
+        ownerEmail,
+        ownerPassword: 'admin123', // default password for new tenants
+        courts,
+        items: allItems,
+      });
+    }
+
     router.push('/dashboard');
   };
 

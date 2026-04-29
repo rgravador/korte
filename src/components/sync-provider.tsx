@@ -53,9 +53,23 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     if (!isSupabaseConfigured || !isOnboarded || !currentUser) return;
     if (!getOnlineStatus()) return;
 
+    // Validate tenant ownership: user must belong to the tenant being hydrated
+    const hydrateTenantId = currentUser.tenantId || tenant.id;
+    if (currentUser.tenantId && currentUser.tenantId !== tenant.id) {
+      // User belongs to a different tenant — hydrate their tenant instead
+      didHydrate.current = true;
+      hydrateFromSupabase(currentUser.tenantId).then((data) => {
+        if (data) {
+          hydrateFromRemote(data);
+          setPendingSync(0);
+        }
+      });
+      return;
+    }
+
     didHydrate.current = true;
 
-    hydrateFromSupabase(tenant.id).then((data) => {
+    hydrateFromSupabase(hydrateTenantId).then((data) => {
       if (data) {
         hydrateFromRemote(data);
         setPendingSync(0);

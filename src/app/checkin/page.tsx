@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
 export default function CheckinPage() {
-  const { bookings, courts, updateBookingStatus } = useStore();
+  const { bookings, courts, updateBookingStatus, currentUser } = useStore();
   const [filter, setFilter] = useState<'now' | 'earlier' | 'all'>('now');
   const [scanActive, setScanActive] = useState(false);
 
@@ -57,7 +57,7 @@ export default function CheckinPage() {
             Court<span className="text-accent-deep not-italic">.</span>
           </div>
           <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase">
-            Staff · Lia
+            Staff · {currentUser?.displayName.split(' ')[0] ?? 'Staff'}
           </div>
         </div>
 
