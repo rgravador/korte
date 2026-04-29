@@ -66,7 +66,7 @@ Existing solutions (CourtReserve, Skedda, Playtomic) are built for North America
 | Hosting | AWS Amplify Hosting | Auto CI/CD from GitHub, SSR, custom domains |
 | Domain & DNS | AWS Route 53 | Apex + wildcard subdomains |
 | Database | Supabase (managed Postgres) | Row-level security, REST + realtime APIs |
-| Auth | Supabase Auth | Email/password, magic links, OAuth, MFA |
+| Auth | Custom `users` table + bcrypt | Username/password, hashed with bcrypt, JWT sessions |
 | File Storage | Supabase Storage | Tenant logos, court photos |
 | Email | Amazon SES | ~$0.10 per 1,000 emails |
 | SMS (PH) | Semaphore SMS | Local PH gateway, ~₱0.50/SMS |
@@ -81,8 +81,20 @@ Existing solutions (CourtReserve, Skedda, Playtomic) are built for North America
 - Single shared Supabase Postgres database
 - Every table includes a `tenant_id` column
 - Supabase Row-Level Security (RLS) policies enforce tenant isolation at the database layer
-- JWT carries tenant context automatically via Supabase Auth
 - Custom domains as a Pro tier feature (e.g., `bookings.smashhub.com`) via Amplify custom domain + Route 53 ALIAS records
+
+## Auth Approach
+
+Custom `users` table in Supabase Postgres — **not** Supabase Auth.
+
+- **`users` table**: `id`, `tenant_id`, `username`, `password_hash`, `role`, `display_name`, `email`, `is_active`, `created_at`, `updated_at`
+- **Roles**: `system_admin` (platform operator), `tenant_admin` (facility owner), `tenant_staff` (floor staff)
+- **Password hashing**: bcrypt via a Next.js API route (never hash client-side)
+- **Sessions**: JWT stored in httpOnly cookie, signed server-side. JWT payload includes `userId`, `tenantId`, `role`
+- **Login flow**: username + password → API route validates against `users` table → issues JWT → sets cookie
+- **Route protection**: Next.js middleware reads JWT from cookie, verifies signature, attaches user context. Unauthorized requests redirect to `/login`
+- **Role-based access**: `tenant_admin` sees all screens. `tenant_staff` sees check-in, schedule, and booking only (no reports, settings, or member management). `system_admin` sees a platform dashboard (future)
+- **RLS integration**: Supabase RLS policies use `tenant_id` from a custom `app.current_tenant_id` setting, set per-request via `SET LOCAL` before queries
 
 ## Implementation Strategy
 
@@ -96,7 +108,7 @@ The build is split into two phases:
 
 - Use **Zustand** for global state management (lightweight, no boilerplate)
 - All mock data lives in a `/src/lib/mock-data.ts` file with typed seed data
-- Store shape mirrors the future database schema: `tenants`, `courts`, `bookings`, `members`, `items`, `booking_items`
+- Store shape mirrors the future database schema: `users`, `tenants`, `courts`, `bookings`, `members`, `items`, `booking_items`
 - All CRUD operations work against the Zustand store (create booking, add member, cancel, reschedule, mark no-show)
 - Data persists in `localStorage` so the app survives page refresh during demos
 - A "Reset Demo Data" button in settings reloads the seed data
@@ -203,16 +215,19 @@ The build is split into two phases:
 
 ### Unit 9: Infrastructure & Auth (Week 7-8)
 
-**Goal:** Production infrastructure with real auth replacing mock login.
+**Goal:** Production infrastructure with custom auth replacing mock login.
 
 - Register domain via Route 53
 - Create AWS account, enable MFA, set billing alarms ($20, $50, $100)
 - Create Supabase organization on Pro plan, set spend cap, enable PITR
 - Connect Next.js app to Amplify, deploy to apex domain
 - Configure wildcard subdomain DNS
-- Design and apply database schema: `tenants`, `courts`, `bookings`, `members`, `items`, `booking_items`
-- Apply RLS policies on all tables scoped to `tenant_id`
-- Wire Supabase Auth (email/password, magic links)
+- Design and apply database schema: `users`, `tenants`, `courts`, `bookings`, `members`, `items`, `booking_items`
+- `users` table: `id`, `tenant_id`, `username`, `password_hash`, `role` (system_admin / tenant_admin / tenant_staff), `display_name`, `email`, `is_active`, `created_at`, `updated_at`
+- API route for login: validate username/password against bcrypt hash, issue JWT, set httpOnly cookie
+- API route for registration: create tenant + first tenant_admin user with hashed password
+- Next.js middleware: read JWT from cookie, verify, attach user context, redirect unauthorized
+- Apply RLS policies on all tables scoped to `tenant_id` (set via `SET LOCAL app.current_tenant_id` per-request)
 - Implement tenant resolution from subdomain middleware
 - Test tenant-scoped queries against RLS (including cross-tenant boundary tests)
 
@@ -251,9 +266,10 @@ The build is split into two phases:
 
 **Goal:** Owner can invite staff with limited permissions.
 
-- Staff role with limited permissions (owner controls what staff can see)
-- Staff invitation flow (owner invites via email)
-- Role-based UI: staff see check-in and booking screens, not reports or settings
+- Tenant admin creates staff users via Settings (username, password, display name)
+- New user row inserted into `users` table with role `tenant_staff` and same `tenant_id`
+- Role-based UI: `tenant_staff` sees check-in, schedule, and booking screens only (no reports, settings, or member management)
+- Role-based API protection: API routes check `role` from JWT before executing mutations
 
 ### Unit 14: Subscription Billing (Week 12-13)
 

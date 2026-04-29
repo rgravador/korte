@@ -116,15 +116,17 @@ function BookingDetailSheet({
 }
 
 export default function DashboardPage() {
-  const { bookings, courts, tenant, updateBookingStatus, isOnboarded } = useStore();
+  const { bookings, courts, tenant, updateBookingStatus, isOnboarded, currentUser } = useStore();
   const router = useRouter();
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     if (!isOnboarded) {
       router.replace('/onboarding');
+    } else if (!currentUser) {
+      router.replace('/login');
     }
-  }, [isOnboarded, router]);
+  }, [isOnboarded, currentUser, router]);
 
   const today = new Date().toISOString().split('T')[0];
   const dayName = new Date().toLocaleDateString('en-US', { weekday: 'short' });

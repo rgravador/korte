@@ -1,4 +1,4 @@
-import { Tenant, Court, Item, Member, Booking } from './types';
+import { User, Tenant, Court, Item, Member, Booking } from './types';
 
 const today = new Date();
 const todayStr = today.toISOString().split('T')[0];
@@ -13,6 +13,23 @@ dayAfter.setDate(today.getDate() + 2);
 const dayAfterStr = dayAfter.toISOString().split('T')[0];
 
 const TENANT_ID = 'tenant-001';
+
+export const seedUsers: User[] = [
+  {
+    id: 'user-1', tenantId: TENANT_ID,
+    username: 'marco', password: 'admin123',
+    role: 'tenant_admin', displayName: 'Marco Reyes',
+    email: 'marco@qcpicklehub.com', isActive: true,
+    createdAt: '2026-03-01T00:00:00Z',
+  },
+  {
+    id: 'user-2', tenantId: TENANT_ID,
+    username: 'lia', password: 'staff123',
+    role: 'tenant_staff', displayName: 'Lia Santos',
+    email: 'lia@qcpicklehub.com', isActive: true,
+    createdAt: '2026-03-05T00:00:00Z',
+  },
+];
 
 export const seedTenant: Tenant = {
   id: TENANT_ID,

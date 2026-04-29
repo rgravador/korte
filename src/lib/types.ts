@@ -1,8 +1,22 @@
+export type UserRole = 'system_admin' | 'tenant_admin' | 'tenant_staff';
+
 export type BookingStatus = 'confirmed' | 'pending' | 'checked_in' | 'no_show' | 'cancelled';
 
 export type ItemType = 'rental' | 'sale';
 
 export type MemberTier = 'regular' | 'vip';
+
+export interface User {
+  id: string;
+  tenantId: string;
+  username: string;
+  password: string; // plain text in mock, bcrypt hash in production
+  role: UserRole;
+  displayName: string;
+  email: string;
+  isActive: boolean;
+  createdAt: string;
+}
 
 export interface Tenant {
   id: string;

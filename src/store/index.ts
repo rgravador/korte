@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Tenant, Court, Item, Member, Booking, BookingStatus, ItemType } from '@/lib/types';
+import { User, Tenant, Court, Item, Member, Booking, BookingStatus, ItemType, UserRole } from '@/lib/types';
 import {
+  seedUsers,
   seedTenant,
   seedCourts,
   seedItems,
@@ -10,12 +11,21 @@ import {
 } from '@/lib/mock-data';
 
 interface AppState {
+  // Auth
+  currentUser: User | null;
+  users: User[];
+
   isOnboarded: boolean;
   tenant: Tenant;
   courts: Court[];
   items: Item[];
   members: Member[];
   bookings: Booking[];
+
+  // Auth actions
+  login: (username: string, password: string) => User | null;
+  logout: () => void;
+  createUser: (data: { username: string; password: string; role: UserRole; displayName: string; email: string }) => string;
 
   // Booking actions
   createBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => string;
@@ -60,12 +70,48 @@ const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
+      currentUser: null,
+      users: seedUsers,
+
       isOnboarded: false,
       tenant: seedTenant,
       courts: seedCourts,
       items: seedItems,
       members: seedMembers,
       bookings: seedBookings,
+
+      login: (username, password) => {
+        const user = get().users.find(
+          (u) => u.username === username && u.password === password && u.isActive
+        );
+        if (user) {
+          set({ currentUser: user });
+          return user;
+        }
+        return null;
+      },
+
+      logout: () => {
+        set({ currentUser: null });
+      },
+
+      createUser: (data) => {
+        const id = `user-${generateId()}`;
+        const tenantId = get().tenant.id;
+        const user: User = {
+          id,
+          tenantId,
+          username: data.username,
+          password: data.password,
+          role: data.role,
+          displayName: data.displayName,
+          email: data.email,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => ({ users: [...state.users, user] }));
+        return id;
+      },
 
       createBooking: (bookingData) => {
         const id = `booking-${generateId()}`;
@@ -222,8 +268,21 @@ export const useStore = create<AppState>()(
           type: item.type,
           isActive: true,
         }));
+        const adminUser: User = {
+          id: `user-${generateId()}`,
+          tenantId,
+          username: data.ownerEmail.split('@')[0],
+          password: 'admin123',
+          role: 'tenant_admin',
+          displayName: data.ownerName,
+          email: data.ownerEmail,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+        };
         set({
           isOnboarded: true,
+          currentUser: adminUser,
+          users: [adminUser],
           tenant,
           courts,
           items,
@@ -235,6 +294,8 @@ export const useStore = create<AppState>()(
       resetData: () => {
         set({
           isOnboarded: true,
+          currentUser: seedUsers[0],
+          users: seedUsers,
           tenant: seedTenant,
           courts: seedCourts,
           items: seedItems,
@@ -246,6 +307,8 @@ export const useStore = create<AppState>()(
       resetToFresh: () => {
         set({
           isOnboarded: false,
+          currentUser: null,
+          users: [],
           tenant: seedTenant,
           courts: [],
           items: [],
