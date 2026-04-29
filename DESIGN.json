@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-30T00:00:00Z",
+  "title": "Design System: Court Books",
+  "extensions": {
+    "colorMeta": {
+      "court-line-gold":      { "role": "primary",   "displayName": "Court Line Gold",      "canonical": "oklch(84% 0.16 85)",   "tonalRamp": ["#3D2E0A", "#5C4510", "#7A5C17", "#9B7520", "#C4952C", "#F2C94C", "#F7DB7A", "#FBEBB0", "#FDF5D9", "#FEFBF0"] },
+      "court-line-gold-deep": { "role": "primary",   "displayName": "Court Line Gold Deep", "canonical": "oklch(78% 0.15 85)",   "tonalRamp": ["#382A09", "#53400E", "#6E5614", "#8A6D1C", "#AE8A27", "#E2B43E", "#EAC966", "#F2DC90", "#F8EEC2", "#FCF7E5"] },
+      "warm-charcoal":        { "role": "neutral",   "displayName": "Warm Charcoal",        "canonical": "oklch(20% 0.01 70)",   "tonalRamp": ["#0D0C0A", "#1A1715", "#2E2A26", "#433E38", "#5A544D", "#736C64", "#8A847D", "#A49E96", "#BDB6AB", "#D6D0C6"] },
+      "manila-paper":         { "role": "neutral",   "displayName": "Manila Paper",          "canonical": "oklch(98% 0.008 85)",  "tonalRamp": ["#3D3A34", "#5C5850", "#7A756C", "#99938A", "#B3ADA4", "#CCC6BC", "#E0DAD0", "#F0EBDF", "#F8F5ED", "#FCFAF5"] },
+      "warm-cream":           { "role": "neutral",   "displayName": "Warm Cream",            "canonical": "oklch(96% 0.01 85)",   "tonalRamp": ["#3A3730", "#575349", "#746F63", "#928C7F", "#AEA898", "#C9C2B4", "#DDD7C9", "#EFE9DB", "#F6F2E9", "#FAF8F2"] },
+      "court-surface-green":  { "role": "semantic",  "displayName": "Court Surface Green",   "canonical": "oklch(40% 0.08 160)",  "tonalRamp": ["#0E1E15", "#162D20", "#1E3C2B", "#264B36", "#2D5A3F", "#3D7554", "#529069", "#6DAB82", "#92C6A0", "#BEE0C4"] },
+      "clay-red":             { "role": "semantic",  "displayName": "Clay Red",              "canonical": "oklch(45% 0.14 25)",   "tonalRamp": ["#1F0D08", "#3D1A10", "#5C2718", "#7A3420", "#A33A2A", "#BD5340", "#D06E5A", "#E08C78", "#EEAC9A", "#F8CFC2"] }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "Landing hero, onboarding headlines. Italic variants carry gold accent." },
+      "headline": { "displayName": "Headline", "purpose": "In-app page titles. Light weight signals calm authority." },
+      "body":     { "displayName": "Body",     "purpose": "Descriptions, detail text, form hints. Max 65ch." },
+      "label":    { "displayName": "Label",    "purpose": "Section headers, KPI labels, filter chips, nav items. Always uppercase, tracked." }
+    },
+    "shadows": [
+      { "name": "menu", "value": "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)", "purpose": "Header dropdown menu only. Temporary surfaces." }
+    ],
+    "motion": [
+      { "name": "color-transition", "value": "color 150ms ease, background-color 150ms ease", "purpose": "Default for hover/active state changes on buttons, chips, nav items." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "425px", "purpose": "Max-width constraint for all app screens (max-w-lg)." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default action button. Warm Charcoal fill, rounded corners.",
+      "html": "<button class=\"ds-btn-primary\">Confirm Booking</button>",
+      "css": ".ds-btn-primary { background: #1A1715; color: #FCFAF5; padding: 12px 20px; border-radius: 8px; font-family: Geist, -apple-system, sans-serif; font-size: 12px; font-weight: 500; border: none; cursor: pointer; transition: background 150ms ease; } .ds-btn-primary:hover { background: #4A4540; } .ds-btn-primary:focus-visible { outline: 2px solid #F2C94C; outline-offset: 2px; }"
+    },
+    {
+      "name": "Signal Button",
+      "kind": "button",
+      "refersTo": "button-signal",
+      "description": "Positive confirmation: Check In, Confirm. Court Surface Green.",
+      "html": "<button class=\"ds-btn-signal\">Check In</button>",
+      "css": ".ds-btn-signal { background: #2D5A3F; color: #FCFAF5; padding: 12px 20px; border-radius: 8px; font-family: Geist, -apple-system, sans-serif; font-size: 12px; font-weight: 500; border: none; cursor: pointer; transition: background 150ms ease; } .ds-btn-signal:hover { background: #3D7554; } .ds-btn-signal:focus-visible { outline: 2px solid #2D5A3F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive action: No-show, Cancel. Clay Red outline.",
+      "html": "<button class=\"ds-btn-danger\">No-show</button>",
+      "css": ".ds-btn-danger { background: transparent; color: #A33A2A; padding: 12px 20px; border-radius: 8px; font-family: Geist, -apple-system, sans-serif; font-size: 12px; font-weight: 500; border: 1px solid #A33A2A; cursor: pointer; transition: background 150ms ease, color 150ms ease; } .ds-btn-danger:hover { background: #A33A2A; color: #FCFAF5; } .ds-btn-danger:focus-visible { outline: 2px solid #A33A2A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-active",
+      "description": "Court/period/member filter. Pill-shaped, monospace uppercase.",
+      "html": "<span class=\"ds-chip ds-chip-active\">All</span><span class=\"ds-chip\">C1</span><span class=\"ds-chip\">C2</span>",
+      "css": ".ds-chip { display: inline-block; padding: 4px 10px; border-radius: 999px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; background: #F0EBDF; color: #8A847D; cursor: pointer; transition: background 150ms ease, color 150ms ease; margin-right: 6px; } .ds-chip-active, .ds-chip:hover { background: #1A1715; color: #FCFAF5; }"
+    },
+    {
+      "name": "Status Tag (Confirmed)",
+      "kind": "chip",
+      "refersTo": "status-tag-confirmed",
+      "description": "Booking status indicator. Always pairs color with text label.",
+      "html": "<span class=\"ds-status ds-status-confirmed\">Confirmed</span><span class=\"ds-status ds-status-pending\">Pending</span><span class=\"ds-status ds-status-in\">In</span><span class=\"ds-status ds-status-noshow\">No-show</span>",
+      "css": ".ds-status { display: inline-block; padding: 2px 6px; border-radius: 4px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 8px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; } .ds-status-confirmed { background: #FBEBB0; color: #6F5A1A; } .ds-status-pending { background: #F4E1D8; color: #8A4A2D; } .ds-status-in { background: #D8E5DD; color: #2D5A3F; } .ds-status-noshow { background: #F4D8D8; color: #A33A2A; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Search bar with inline icon, monospace placeholder.",
+      "html": "<div class=\"ds-search\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><circle cx=\"7\" cy=\"7\" r=\"5\"/><path d=\"m11 11 4 4\"/></svg><span class=\"ds-search-text\">Name, phone, email\u2026</span></div>",
+      "css": ".ds-search { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #F0EBDF; border-radius: 10px; } .ds-search svg { color: #8A847D; flex-shrink: 0; } .ds-search-text { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; color: #8A847D; }"
+    },
+    {
+      "name": "Bottom Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Fixed bottom navigation with icon + label. Gold accent bar on active.",
+      "html": "<div class=\"ds-nav\"><div class=\"ds-nav-item ds-nav-active\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" width=\"20\" height=\"20\"><path d=\"M3 12h18M3 6h18M3 18h18\"/></svg><span>Today</span></div><div class=\"ds-nav-item\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" width=\"20\" height=\"20\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"17\" rx=\"2\"/><path d=\"M3 10h18M8 2v4M16 2v4\"/></svg><span>Schedule</span></div></div>",
+      "css": ".ds-nav { display: flex; gap: 0; background: #FCFAF5; border-top: 1px solid #D9D2C2; padding: 8px 0; } .ds-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; color: #8A847D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; position: relative; cursor: pointer; } .ds-nav-active { color: #1A1715; } .ds-nav-active::before { content: ''; position: absolute; top: -8px; width: 28px; height: 2px; background: #F2C94C; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Brass Clipboard",
+    "overview": "The facility manager's most trusted tool is the clipboard hanging by the front desk: battered, brass-clipped, holding today's schedule on cream-colored paper. Court Books is the digital version of that object. Not a \"platform.\" Not a \"dashboard.\" A clipboard that knows what's happening on every court, right now, and gets out of the way.\n\nThe system projects competence through restraint. Warm paper tones replace clinical whites. A high-contrast serif (Fraunces) carries headlines with the confidence of a well-set ledger, while monospace labels handle the data-dense work of times, prices, and status codes. Gold accents appear sparingly, like brass hardware on wood: functional, not decorative.\n\nThis system explicitly rejects the North American SaaS booking template (CourtReserve, Skedda), generic Bootstrap admin panels, and overly playful sports app aesthetics. No neon. No mascots. No gamification badges. No identical card grids with icon-heading-text repeated six times.",
+    "keyCharacteristics": [
+      "Warm neutrals dominate; gold accent at less than 10% of any screen",
+      "Serif for authority, monospace for data, sans-serif for body",
+      "Mobile-first (max 425px), designed for one-handed standing use",
+      "Bottom sheets over modals; inline actions over popups",
+      "Every screen answers its question in under three seconds"
+    ],
+    "rules": [
+      { "name": "The Brass Hardware Rule", "body": "Court Line Gold appears on no more than 10% of any screen. It marks what matters: the active tab, the key number, the action that earns the tap. When everything is gold, nothing is.", "section": "colors" },
+      { "name": "The Flat Desk Rule", "body": "Surfaces sit flat on the desk. No floating cards, no lifted elements, no ambient glow. Tonal steps (Paper → Paper 2 → Cream) create hierarchy. A shadow means \"this is temporary and will go away\" (dropdown menus, bottom sheets). Permanent UI never casts a shadow.", "section": "elevation" },
+      { "name": "The Mono Is Structure Rule", "body": "Monospace text carries structural information: times, counts, prices, labels, statuses. If the content answers \"when,\" \"how many,\" or \"what state,\" it is monospace. Body text is never monospace.", "section": "typography" }
+    ],
+    "dos": [
+      "Do use Manila Paper (#FCFAF5) as the default content surface, never pure white.",
+      "Do keep Court Line Gold under 10% of any screen. It marks active states and key figures.",
+      "Do use monospace for all structural data: times, prices, counts, labels, statuses.",
+      "Do use bottom sheets for contextual detail.",
+      "Do maintain 44px minimum touch targets for all interactive elements.",
+      "Do show a text label alongside every color-coded status.",
+      "Do use tonal layering (Paper → Paper 2 → Cream) for depth instead of shadows."
+    ],
+    "donts": [
+      "Don't use pure black (#000000) or pure white (#ffffff).",
+      "Don't build layouts that look like CourtReserve, Skedda, or Playtomic.",
+      "Don't use generic Bootstrap or Material admin patterns.",
+      "Don't add neon gradients, mascot illustrations, or gamification badges.",
+      "Don't use side-stripe borders (border-left/right > 1px as accent).",
+      "Don't use gradient text (background-clip: text).",
+      "Don't reach for modals. Bottom sheets for mobile; inline expansion for settings.",
+      "Don't add shadows to permanent UI elements.",
+      "Don't use Fraunces for body text or long passages.",
+      "Don't set monospace text in sentence case for labels."
+    ]
+  }
+}
