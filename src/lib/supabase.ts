@@ -1,15 +1,32 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+// Singleton client — reuses the same connection across all calls
+let _client: SupabaseClient | null = null;
+
+function getEnv() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+  return { url, key };
+}
 
 /**
- * Returns a Supabase client if env vars are configured, otherwise null.
+ * Returns a singleton Supabase client if env vars are configured, otherwise null.
  * When null, the app runs in offline/mock-only mode.
  */
 export function getSupabase(): SupabaseClient | null {
-  if (!supabaseUrl || !supabaseAnonKey) return null;
-  return createClient(supabaseUrl, supabaseAnonKey);
+  if (_client) return _client;
+
+  const { url, key } = getEnv();
+  if (!url || !key) return null;
+
+  _client = createClient(url, key);
+  return _client;
 }
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+/**
+ * Check if Supabase is configured — evaluated lazily, not at module load.
+ */
+export function isSupabaseConfigured(): boolean {
+  const { url, key } = getEnv();
+  return Boolean(url && key);
+}

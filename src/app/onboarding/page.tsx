@@ -130,7 +130,7 @@ export default function OnboardingPage() {
     });
 
     // Persist to Supabase if online + configured
-    if (isSupabaseConfigured) {
+    if (isSupabaseConfigured()) {
       await setupTenantOnline({
         name: facilityName,
         subdomain,

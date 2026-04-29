@@ -175,7 +175,7 @@ async function executeMutation(sb: ReturnType<typeof getSupabase>, mutation: Mut
 // ── Hydration ────────────────────────────────────────────────
 
 export async function hydrateFromSupabase(tenantId: string): Promise<TenantData | null> {
-  if (!isSupabaseConfigured || !getOnlineStatus()) return null;
+  if (!isSupabaseConfigured() || !getOnlineStatus()) return null;
   const sb = getSupabase();
   if (!sb) return null;
 
@@ -189,7 +189,7 @@ export async function hydrateFromSupabase(tenantId: string): Promise<TenantData 
 // ── Auth (online) ────────────────────────────────────────────
 
 export async function loginOnline(username: string, password: string) {
-  if (!isSupabaseConfigured || !getOnlineStatus()) return null;
+  if (!isSupabaseConfigured() || !getOnlineStatus()) return null;
   const sb = getSupabase();
   if (!sb) return null;
   return dbLogin(sb, username, password);
@@ -207,20 +207,37 @@ export async function setupTenantOnline(data: {
   courts: { name: string; hourlyRate: number }[];
   items: { name: string; price: number; type: ItemType }[];
 }) {
-  if (!isSupabaseConfigured || !getOnlineStatus()) return null;
+  const configured = isSupabaseConfigured();
+  const online = getOnlineStatus();
+  console.log('[sync] setupTenantOnline: configured=%s, online=%s', configured, online);
+
+  if (!configured || !online) {
+    console.warn('[sync] setupTenantOnline skipped: configured=%s, online=%s', configured, online);
+    return null;
+  }
+
   const sb = getSupabase();
-  if (!sb) return null;
+  if (!sb) {
+    console.error('[sync] setupTenantOnline: getSupabase() returned null');
+    return null;
+  }
 
   // 1. Create tenant
+  console.log('[sync] Creating tenant:', data.name, data.subdomain);
   const tenant = await dbCreateTenant(sb, {
     name: data.name,
     subdomain: data.subdomain,
     operatingHoursStart: data.operatingHoursStart,
     operatingHoursEnd: data.operatingHoursEnd,
   });
-  if (!tenant) return null;
+  if (!tenant) {
+    console.error('[sync] setupTenantOnline: tenant creation failed');
+    return null;
+  }
+  console.log('[sync] Tenant created:', tenant.id);
 
   // 2. Create admin user
+  console.log('[sync] Creating admin user:', data.ownerUsername);
   const user = await dbCreateUser(sb, tenant.id, {
     username: data.ownerUsername,
     password: data.ownerPassword,
@@ -228,17 +245,25 @@ export async function setupTenantOnline(data: {
     displayName: data.ownerName,
     email: data.ownerEmail,
   });
+  if (!user) {
+    console.error('[sync] setupTenantOnline: admin user creation failed (tenant was created)');
+  } else {
+    console.log('[sync] Admin user created:', user.id);
+  }
 
   // 3. Create courts
   for (const c of data.courts) {
-    await dbAddCourt(sb, { tenantId: tenant.id, name: c.name, hourlyRate: c.hourlyRate });
+    const court = await dbAddCourt(sb, { tenantId: tenant.id, name: c.name, hourlyRate: c.hourlyRate });
+    if (!court) console.error('[sync] Failed to create court:', c.name);
   }
 
   // 4. Create items
   for (const item of data.items) {
-    await dbAddItem(sb, { tenantId: tenant.id, ...item });
+    const created = await dbAddItem(sb, { tenantId: tenant.id, ...item });
+    if (!created) console.error('[sync] Failed to create item:', item.name);
   }
 
+  console.log('[sync] setupTenantOnline complete for tenant:', tenant.id);
   return { tenant, user };
 }
 

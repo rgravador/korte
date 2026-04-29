@@ -50,7 +50,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
   // Hydrate from Supabase on mount (once) if online + configured + logged in
   useEffect(() => {
     if (didHydrate.current) return;
-    if (!isSupabaseConfigured || !isOnboarded || !currentUser) return;
+    if (!isSupabaseConfigured() || !isOnboarded || !currentUser) return;
     if (!getOnlineStatus()) return;
 
     // Validate tenant ownership: user must belong to the tenant being hydrated

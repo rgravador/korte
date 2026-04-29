@@ -25,7 +25,7 @@ export default function LoginPage() {
     setLoading(true);
 
     // Try Supabase first when online + configured
-    if (isSupabaseConfigured && isOnline) {
+    if (isSupabaseConfigured() && isOnline) {
       const onlineUser = await loginOnline(username, password);
       if (onlineUser) {
         // Set user in store and hydrate tenant data

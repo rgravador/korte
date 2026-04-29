@@ -6,6 +6,7 @@ import { useStore } from '@/store';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ItemType } from '@/lib/types';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import Link from 'next/link';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -18,7 +19,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function SettingsPage() {
-  const { tenant, courts, items, users, updateTenant, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem, createUser, resetData, resetToFresh } = useStore();
+  const { tenant, courts, items, users, isOnline, pendingSync, lastSyncedAt, updateTenant, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem, createUser, resetData, resetToFresh } = useStore();
   const router = useRouter();
 
   const [editingFacility, setEditingFacility] = useState(false);
@@ -279,6 +280,41 @@ export default function SettingsPage() {
             </div>
             <span className="font-mono text-ink-3">→</span>
           </Link>
+        </Section>
+
+        {/* Connection */}
+        <Section title="Connection">
+          <div className="bg-paper rounded-card p-3 space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Supabase</span>
+              <span className={`font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded ${
+                isSupabaseConfigured() ? 'bg-status-checked-bg text-signal' : 'bg-status-pending-bg text-status-pending-text'
+              }`}>
+                {isSupabaseConfigured() ? 'Configured' : 'Not configured'}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Network</span>
+              <span className={`font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded ${
+                isOnline ? 'bg-status-checked-bg text-signal' : 'bg-status-pending-bg text-status-pending-text'
+              }`}>
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            {pendingSync > 0 && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Pending sync</span>
+                <span className="font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded bg-accent-soft text-status-confirmed-text">
+                  {pendingSync} queued
+                </span>
+              </div>
+            )}
+            {lastSyncedAt && (
+              <div className="font-mono text-[9px] text-ink-3">
+                Last synced: {new Date(lastSyncedAt).toLocaleString()}
+              </div>
+            )}
+          </div>
         </Section>
 
         {/* Reset */}

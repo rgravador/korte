@@ -161,8 +161,15 @@ export async function dbCreateUser(
   data: { username: string; password: string; role: UserRole; displayName: string; email: string }
 ): Promise<User | null> {
   // Hash password via rpc
-  const { data: hash } = await sb.rpc('hash_password', { plain: data.password });
-  if (!hash) return null;
+  const { data: hash, error: hashError } = await sb.rpc('hash_password', { plain: data.password });
+  if (hashError) {
+    console.error('[db] hash_password RPC failed:', hashError.message, hashError.details, hashError.hint);
+    return null;
+  }
+  if (!hash) {
+    console.error('[db] hash_password returned empty');
+    return null;
+  }
 
   const { data: row, error } = await sb
     .from('users')
@@ -177,7 +184,11 @@ export async function dbCreateUser(
     .select()
     .single();
 
-  if (error || !row) return null;
+  if (error) {
+    console.error('[db] createUser failed:', error.message, error.details, error.hint);
+    return null;
+  }
+  if (!row) return null;
   return toUser(row);
 }
 
@@ -203,7 +214,11 @@ export async function dbCreateTenant(
     .select()
     .single();
 
-  if (error || !row) return null;
+  if (error) {
+    console.error('[db] createTenant failed:', error.message, error.details, error.hint);
+    return null;
+  }
+  if (!row) return null;
   return toTenant(row);
 }
 
