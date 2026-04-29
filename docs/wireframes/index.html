@@ -1,0 +1,2544 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Court Books — Wireframes v0.1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300..700&family=JetBrains+Mono:wght@300..600&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ============ DESIGN TOKENS ============ */
+        :root {
+            --bg: #F6F2E9;
+            /* warm cream paper */
+            --bg-2: #EFE9DB;
+            /* slightly deeper cream */
+            --bg-frame: #1A1715;
+            /* phone bezel */
+            --paper: #FCFAF5;
+            /* phone screen */
+            --paper-2: #F0EBDF;
+            /* in-screen secondary surface */
+            --ink: #1A1715;
+            /* warm black */
+            --ink-2: #4A4540;
+            /* warm dark gray */
+            --ink-3: #8A847D;
+            /* warm mid gray */
+            --ink-4: #BDB6AB;
+            /* warm light gray */
+            --line: #D9D2C2;
+            /* hairline */
+            --line-2: #E8E1D0;
+            /* faintest hairline */
+            --accent: #F2C94C;
+            /* court line yellow */
+            --accent-deep: #E2B43E;
+            --accent-soft: #FBEBB0;
+            --signal: #2D5A3F;
+            /* court green for available */
+            --warn: #A33A2A;
+            /* danger / no-show */
+
+            --radius-frame: 38px;
+            --radius-card: 14px;
+            --radius-pill: 999px;
+
+            --display: "Fraunces", Georgia, serif;
+            --mono: "JetBrains Mono", ui-monospace, monospace;
+            --sans: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* ============ RESET & BASE ============ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--sans);
+            font-size: 15px;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            background-image:
+                radial-gradient(circle at 8% 12%, rgba(242, 201, 76, 0.12), transparent 35%),
+                radial-gradient(circle at 92% 78%, rgba(26, 23, 21, 0.04), transparent 40%);
+            background-attachment: fixed;
+        }
+
+        img,
+        svg {
+            display: block;
+            max-width: 100%;
+        }
+
+        button {
+            font: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: inherit;
+        }
+
+        /* Subtle paper grain */
+        body::before {
+            content: “”;
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.4;
+            background-image: url(“data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMDAnIGhlaWdodD0nMjAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC44NScgbnVtT2N0YXZlcz0nMicgc3RpdGNoVGlsZXM9J3N0aXRjaCcvPjxmZUNvbG9yTWF0cml4IHZhbHVlcz0nMCAwIDAgMCAwLjEsIDAgMCAwIDAgMC4wOSwgMCAwIDAgMCAwLjA4LCAwIDAgMCAwLjA0IDAnLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMTAwJScgaGVpZ2h0PScxMDAlJyBmaWx0ZXI9J3VybCgjbiknLz48L3N2Zz4=”);
+
+        }
+
+        /* ============ LAYOUT ============ */
+        .wrap {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 28px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 640px) {
+            .wrap {
+                padding: 0 18px;
+            }
+        }
+
+        /* ============ COVER ============ */
+        .cover {
+            padding: 96px 0 80px;
+            border-bottom: 1px solid var(--line);
+            position: relative;
+        }
+
+        .cover::after {
+            content: “”;
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--ink), transparent);
+            opacity: 0.15;
+        }
+
+        .cover-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 64px;
+        }
+
+        .cover-meta-row {
+            display: flex;
+            gap: 24px;
+        }
+
+        .cover-eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--ink-2);
+            margin-bottom: 28px;
+        }
+
+        .cover-eyebrow::before {
+            content: “”;
+            display: inline-block;
+            width: 36px;
+            height: 1px;
+            background: var(--ink);
+        }
+
+        .cover h1 {
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: clamp(64px, 13vw, 168px);
+            line-height: 0.92;
+            letter-spacing: -0.04em;
+            margin-bottom: 12px;
+        }
+
+        .cover h1 em {
+            font-style: italic;
+            font-weight: 400;
+            color: var(--accent-deep);
+        }
+
+        .cover-subtitle {
+            font-family: var(--display);
+            font-style: italic;
+            font-weight: 300;
+            font-size: clamp(22px, 3vw, 32px);
+            color: var(--ink-2);
+            max-width: 720px;
+            margin-bottom: 48px;
+            line-height: 1.3;
+        }
+
+        .cover-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: var(--line);
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+        }
+
+        @media (max-width: 720px) {
+            .cover-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .cover-cell {
+            background: var(--bg);
+            padding: 20px 16px;
+        }
+
+        .cover-cell-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 6px;
+        }
+
+        .cover-cell-value {
+            font-family: var(--display);
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--ink);
+        }
+
+        /* ============ INTRO ============ */
+        .intro {
+            padding: 72px 0;
+            border-bottom: 1px solid var(--line);
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 72px;
+        }
+
+        @media (max-width: 880px) {
+            .intro {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+        }
+
+        .intro h2 {
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: 36px;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .intro h2 em {
+            font-style: italic;
+            color: var(--accent-deep);
+        }
+
+        .intro-body p {
+            font-size: 16px;
+            color: var(--ink-2);
+            margin-bottom: 16px;
+            max-width: 60ch;
+        }
+
+        .intro-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 28px;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-pill);
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ink-2);
+            background: var(--bg);
+        }
+
+        .chip-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--ink);
+        }
+
+        .chip[data-role=“owner”] .chip-dot {
+            background: var(--ink);
+        }
+
+        .chip[data-role=“player”] .chip-dot {
+            background: var(--accent-deep);
+        }
+
+        .chip[data-role=“staff”] .chip-dot {
+            background: var(--signal);
+        }
+
+        /* ============ SECTION HEADERS ============ */
+        .section {
+            padding: 96px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .section-header {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 32px;
+            align-items: baseline;
+            margin-bottom: 64px;
+        }
+
+        @media (max-width: 640px) {
+            .section-header {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
+
+        .section-num {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            padding-top: 14px;
+        }
+
+        .section-title {
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: clamp(40px, 6vw, 72px);
+            line-height: 1;
+            letter-spacing: -0.03em;
+        }
+
+        .section-title em {
+            font-style: italic;
+            color: var(--accent-deep);
+        }
+
+        .section-desc {
+            font-family: var(--display);
+            font-style: italic;
+            font-weight: 300;
+            font-size: 20px;
+            color: var(--ink-2);
+            max-width: 56ch;
+            margin-top: 14px;
+            line-height: 1.4;
+        }
+
+        /* ============ SCREEN CARD ============ */
+        .screens-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 88px;
+        }
+
+        .screen-card {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 64px;
+            align-items: start;
+        }
+
+        @media (max-width: 880px) {
+            .screen-card {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+        }
+
+        .screen-card:nth-child(even) {
+            grid-template-columns: 1fr 360px;
+        }
+
+        .screen-card:nth-child(even) .screen-notes {
+            order: -1;
+        }
+
+        @media (max-width: 880px) {
+            .screen-card:nth-child(even) {
+                grid-template-columns: 1fr;
+            }
+
+            .screen-card:nth-child(even) .screen-notes {
+                order: 0;
+            }
+        }
+
+        .screen-frame-wrap {
+            position: relative;
+        }
+
+        .screen-frame-num {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            color: var(--ink-3);
+            margin-bottom: 16px;
+        }
+
+        .phone {
+            width: 100%;
+            max-width: 340px;
+            aspect-ratio: 9 / 19.5;
+            background: var(--bg-frame);
+            border-radius: var(--radius-frame);
+            padding: 12px;
+            box-shadow:
+                0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+                0 0 0 1px rgba(0, 0, 0, 0.04),
+                0 30px 60px -20px rgba(26, 23, 21, 0.25),
+                0 10px 20px -10px rgba(26, 23, 21, 0.15);
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .phone::before {
+            content: “”;
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 88px;
+            height: 22px;
+            background: var(--bg-frame);
+            border-radius: 12px;
+            z-index: 3;
+        }
+
+        .phone::after {
+            content: “”;
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 2px;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: var(--paper);
+            border-radius: 28px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* status bar */
+        .sbar {
+            height: 32px;
+            padding: 8px 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--ink);
+            flex-shrink: 0;
+        }
+
+        .sbar-icons {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .sbar-icons svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* ============ PHONE CONTENT - SHARED ============ */
+        .ps {
+            padding: 16px 18px 84px;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .ps-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .brand {
+            font-family: var(--display);
+            font-weight: 400;
+            font-style: italic;
+            font-size: 18px;
+            letter-spacing: -0.02em;
+        }
+
+        .brand em {
+            color: var(--accent-deep);
+            font-style: normal;
+        }
+
+        .avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--ink);
+            color: var(--paper);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .h-page {
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: 24px;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .h-page em {
+            font-style: italic;
+            color: var(--accent-deep);
+        }
+
+        .sub {
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 14px;
+        }
+
+        .label-mono {
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--line);
+            margin: 12px 0;
+        }
+
+        .stack>*+* {
+            margin-top: 10px;
+        }
+
+        /* bottom nav */
+        .nav {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 64px;
+            background: var(--paper);
+            border-top: 1px solid var(--line);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: var(--ink-3);
+            font-family: var(--mono);
+            font-size: 8px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .nav-item.active {
+            color: var(--ink);
+        }
+
+        .nav-item.active::before {
+            content: “”;
+            position: absolute;
+            top: 0;
+            width: 28px;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* KPI cards */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .kpi {
+            background: var(--paper-2);
+            border-radius: 10px;
+            padding: 10px 8px;
+        }
+
+        .kpi-label {
+            font-family: var(--mono);
+            font-size: 8px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 4px;
+        }
+
+        .kpi-value {
+            font-family: var(--display);
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .kpi-delta {
+            font-family: var(--mono);
+            font-size: 8px;
+            color: var(--signal);
+            margin-top: 2px;
+        }
+
+        /* booking row */
+        .b-row {
+            display: grid;
+            grid-template-columns: 44px 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line-2);
+        }
+
+        .b-row:last-child {
+            border-bottom: 0;
+        }
+
+        .b-time {
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.1;
+        }
+
+        .b-time-small {
+            font-family: var(--mono);
+            font-size: 8px;
+            color: var(--ink-3);
+        }
+
+        .b-detail-name {
+            font-weight: 500;
+            font-size: 12px;
+            color: var(--ink);
+            margin-bottom: 1px;
+        }
+
+        .b-detail-meta {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--ink-3);
+            letter-spacing: 0.04em;
+        }
+
+        .b-tag {
+            font-family: var(--mono);
+            font-size: 8px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 3px 6px;
+            border-radius: 4px;
+            background: var(--paper-2);
+            color: var(--ink-2);
+        }
+
+        .b-tag.paid {
+            background: var(--accent-soft);
+            color: #6F5A1A;
+        }
+
+        .b-tag.pending {
+            background: #F4E1D8;
+            color: #8A4A2D;
+        }
+
+        .b-tag.checked {
+            background: #D8E5DD;
+            color: #2D5A3F;
+        }
+
+        /* schedule grid */
+        .sched-head {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+        }
+
+        .sched-day {
+            flex-shrink: 0;
+            width: 36px;
+            padding: 6px 0;
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: var(--paper);
+        }
+
+        .sched-day.active {
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+        }
+
+        .sched-day-d {
+            font-family: var(--mono);
+            font-size: 8px;
+            text-transform: uppercase;
+            color: inherit;
+            opacity: 0.6;
+        }
+
+        .sched-day-n {
+            font-family: var(--display);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .sched-grid {
+            display: grid;
+            grid-template-columns: 36px repeat(3, 1fr);
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: var(--mono);
+            font-size: 8px;
+        }
+
+        .sched-grid>div {
+            background: var(--paper);
+            padding: 6px 4px;
+            min-height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sched-grid .head {
+            background: var(--paper-2);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--ink-3);
+            font-size: 7px;
+        }
+
+        .sched-grid .time {
+            background: var(--paper-2);
+            color: var(--ink-3);
+        }
+
+        .sched-grid .booked {
+            background: var(--ink);
+            color: var(--paper);
+            font-size: 7px;
+        }
+
+        .sched-grid .open {
+            color: var(--ink-3);
+        }
+
+        .sched-grid .accent {
+            background: var(--accent);
+            color: var(--ink);
+        }
+
+        /* search */
+        .search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            background: var(--paper-2);
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .search-text {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--ink-3);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .f-chip {
+            padding: 4px 10px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-pill);
+            font-family: var(--mono);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--ink-2);
+        }
+
+        .f-chip.on {
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+        }
+
+        /* member row */
+        .m-row {
+            display: grid;
+            grid-template-columns: 32px 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line-2);
+        }
+
+        .m-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--paper-2);
+            border: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--ink-2);
+        }
+
+        .m-stat {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--ink-3);
+            text-align: right;
+        }
+
+        /* fab */
+        .fab {
+            position: absolute;
+            right: 18px;
+            bottom: 80px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--ink);
+            color: var(--paper);
+            box-shadow: 0 8px 20px -6px rgba(26, 23, 21, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 300;
+        }
+
+        /* report chart */
+        .big-num {
+            font-family: var(--display);
+            font-size: 44px;
+            font-weight: 300;
+            line-height: 1;
+            letter-spacing: -0.03em;
+        }
+
+        .big-num em {
+            font-style: italic;
+            color: var(--accent-deep);
+        }
+
+        .big-num-sub {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: var(--ink-3);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .heatmap {
+            display: grid;
+            grid-template-columns: 22px repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 8px;
+        }
+
+        .heatmap .hm-label {
+            font-family: var(--mono);
+            font-size: 7px;
+            color: var(--ink-3);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 2px;
+        }
+
+        .heatmap .hm-cell {
+            aspect-ratio: 1;
+            border-radius: 2px;
+            background: var(--paper-2);
+        }
+
+        .hm-1 {
+            background: var(--paper-2);
+        }
+
+        .hm-2 {
+            background: #E8E1D0;
+        }
+
+        .hm-3 {
+            background: #DBC79C;
+        }
+
+        .hm-4 {
+            background: var(--accent);
+        }
+
+        .hm-5 {
+            background: var(--accent-deep);
+        }
+
+        /* player view */
+        .player-hero {
+            background: var(--ink);
+            color: var(--paper);
+            margin: -16px -18px 14px;
+            padding: 28px 18px 18px;
+            position: relative;
+        }
+
+        .player-hero::after {
+            content: “”;
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba(242, 201, 76, 0.15));
+            pointer-events: none;
+        }
+
+        .player-hero .brand {
+            color: var(--paper);
+        }
+
+        .player-hero .brand em {
+            color: var(--accent);
+        }
+
+        .player-hero h2 {
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: 22px;
+            line-height: 1.05;
+            margin-top: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .player-hero h2 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .player-hero .sub {
+            color: rgba(252, 250, 245, 0.6);
+            margin: 6px 0 0;
+        }
+
+        .court-card {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .court-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 10px;
+        }
+
+        .court-name {
+            font-family: var(--display);
+            font-weight: 400;
+            font-size: 14px;
+        }
+
+        .court-sport {
+            font-family: var(--mono);
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--ink-3);
+        }
+
+        .slot-row {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .slot {
+            flex: 1 1 calc(25% - 4px);
+            text-align: center;
+            padding: 6px 4px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            font-family: var(--mono);
+            font-size: 9px;
+            background: var(--paper);
+        }
+
+        .slot.taken {
+            background: var(--paper-2);
+            color: var(--ink-4);
+            text-decoration: line-through;
+            border-color: transparent;
+        }
+
+        .slot.selected {
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+        }
+
+        .slot.available {
+            background: var(--paper);
+            color: var(--ink);
+        }
+
+        /* booking summary card */
+        .summary-card {
+            background: var(--paper-2);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-family: var(--mono);
+            font-size: 10px;
+        }
+
+        .summary-row.total {
+            border-top: 1px solid var(--line);
+            padding-top: 10px;
+            margin-top: 6px;
+            font-family: var(--display);
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .summary-row.total span:last-child em {
+            font-style: italic;
+            color: var(--accent-deep);
+        }
+
+        .pay-method {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            margin-bottom: 6px;
+        }
+
+        .pay-method.on {
+            border-color: var(--ink);
+            background: var(--paper);
+        }
+
+        .pay-method.on::before {
+            content: “”;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--ink);
+            margin-left: auto;
+        }
+
+        .pay-icon {
+            width: 28px;
+            height: 20px;
+            border-radius: 4px;
+            background: var(--paper-2);
+            border: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 8px;
+            color: var(--ink-2);
+        }
+
+        .pay-text {
+            font-size: 11px;
+        }
+
+        .pay-sub {
+            font-family: var(--mono);
+            font-size: 8px;
+            color: var(--ink-3);
+        }
+
+        /* CTA */
+        .cta {
+            width: 100%;
+            background: var(--ink);
+            color: var(--paper);
+            padding: 14px;
+            border-radius: 10px;
+            font-family: var(--sans);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cta-arrow {
+            font-family: var(--mono);
+        }
+
+        /* QR for staff */
+        .qr-frame {
+            aspect-ratio: 1;
+            border: 2px dashed var(--ink);
+            border-radius: 16px;
+            margin: 8px 0 12px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                linear-gradient(135deg, transparent 49.5%, var(--line) 49.5% 50.5%, transparent 50.5%),
+                var(--paper-2);
+        }
+
+        .qr-corners::before,
+        .qr-corners::after,
+        .qr-corners>span::before,
+        .qr-corners>span::after {
+            content: “”;
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--ink);
+        }
+
+        .qr-corners::before {
+            top: 8px;
+            left: 8px;
+            border-right: 0;
+            border-bottom: 0;
+        }
+
+        .qr-corners::after {
+            top: 8px;
+            right: 8px;
+            border-left: 0;
+            border-bottom: 0;
+        }
+
+        .qr-corners>span::before {
+            bottom: 8px;
+            left: 8px;
+            border-right: 0;
+            border-top: 0;
+        }
+
+        .qr-corners>span::after {
+            bottom: 8px;
+            right: 8px;
+            border-left: 0;
+            border-top: 0;
+        }
+
+        .qr-text {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--ink-2);
+            text-align: center;
+        }
+
+        /* ============ SCREEN NOTES ============ */
+        .screen-notes {
+            padding-top: 28px;
+        }
+
+        .screen-notes-eyebrow {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--ink-3);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .screen-notes-eyebrow::before {
+            content: “”;
+            width: 24px;
+            height: 1px;
+            background: var(--ink);
+        }
+
+        .screen-notes h3 {
+            font-family: var(--display);
+            font-weight: 300;
+            font-size: clamp(28px, 4vw, 44px);
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 18px;
+        }
+
+        .screen-notes h3 em {
+            font-style: italic;
+            color: var(--accent-deep);
+        }
+
+        .screen-notes p {
+            color: var(--ink-2);
+            margin-bottom: 16px;
+            max-width: 52ch;
+        }
+
+        .notes-list {
+            list-style: none;
+            margin-top: 24px;
+            border-top: 1px solid var(--line);
+        }
+
+        .notes-list li {
+            display: grid;
+            grid-template-columns: 36px 1fr;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 14px;
+            color: var(--ink-2);
+        }
+
+        .notes-list li::before {
+            content: attr(data-num);
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--ink-3);
+            letter-spacing: 0.08em;
+            padding-top: 3px;
+        }
+
+        .notes-list strong {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        /* ============ FOOTER ============ */
+        footer.foot {
+            padding: 64px 0 80px;
+            text-align: center;
+        }
+
+        .foot-mark {
+            font-family: var(--display);
+            font-style: italic;
+            font-weight: 300;
+            font-size: 32px;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .foot-mark em {
+            color: var(--accent-deep);
+            font-style: normal;
+        }
+
+        .foot-text {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--ink-3);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <!-- ============ COVER ============ -->
+
+    <header class="cover wrap">
+        <div class="cover-meta">
+            <div class="cover-meta-row">
+                <span>Wireframes / v0.1</span>
+                <span>Mid-fidelity</span>
+            </div>
+            <div class="cover-meta-row">
+                <span>April 2026</span>
+            </div>
+        </div>
+
+        <div class="cover-eyebrow">A multi-tenant booking PWA</div>
+
+        <h1>Court<br><em>Books.</em></h1>
+
+        <p class="cover-subtitle">Interaction blueprints for the seven screens that carry the product — owner
+            and staff flows, designed mobile-first.</p>
+
+        <div class="cover-grid">
+            <div class="cover-cell">
+                <div class="cover-cell-label">Platform</div>
+                <div class="cover-cell-value">Progressive Web App</div>
+            </div>
+            <div class="cover-cell">
+                <div class="cover-cell-label">Roles</div>
+                <div class="cover-cell-value">Owner · Staff</div>
+            </div>
+            <div class="cover-cell">
+                <div class="cover-cell-label">Frame</div>
+                <div class="cover-cell-value">Mobile-first, 9:19.5</div>
+            </div>
+            <div class="cover-cell">
+                <div class="cover-cell-label">Region</div>
+                <div class="cover-cell-value">Philippines · PHP</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ INTRO ============ -->
+
+    <section class="intro wrap">
+        <div>
+            <h2>Seven screens, two <em>jobs to do.</em></h2>
+        </div>
+        <div class="intro-body">
+            <p>These wireframes prioritize structure and information hierarchy over visual polish. Type, spacing, and
+                motion are deliberate — color and brand application are intentionally muted so that layout decisions can
+                be reviewed on their own merits.</p>
+            <p>Every screen assumes a single tenant context resolved by subdomain. The owner manages their pickleball
+                facility; staff creates bookings, adds equipment rentals, and handles check-in. Court fee collection
+                stays outside the app. Each wireframe is annotated with the data it reads, the actions it produces,
+                and the design notes that should not be lost.</p>
+            <div class="legend">
+                <div class="chip" data-role="owner"><span class="chip-dot"></span>Owner / Admin</div>
+                <div class="chip" data-role="staff"><span class="chip-dot"></span>Staff / Floor</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ OWNER SECTION ============ -->
+
+    <section class="section wrap">
+        <div class="section-header">
+            <div class="section-num">§ 01 — Owner</div>
+            <div>
+                <h1 class="section-title">The <em>operator's</em> dashboard.</h1>
+                <p class="section-desc">Daily run-of-show, weekly schedule, member relationships, and the numbers that
+                    tell the truth about utilization.</p>
+            </div>
+        </div>
+
+        <div class="screens-grid">
+
+            ```
+            <!-- SCREEN 01: OWNER DASHBOARD -->
+            <article class="screen-card">
+                <div class="screen-frame-wrap">
+                    <div class="screen-frame-num">01 / Owner — Today</div>
+                    <div class="phone">
+                        <div class="phone-screen">
+                            <div class="sbar">
+                                <span>9:24</span>
+                                <span class="sbar-icons">
+                                    <svg viewBox="0 0 16 16">
+                                        <path d="M2 13h2v-3H2zm4 0h2V8H6zm4 0h2V5h-2zm4 0h2V2h-2z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    <svg viewBox="0 0 16 16">
+                                        <path
+                                            d="M8 12.5c-2 0-3.7.7-5 1.8 1 1 3 1.7 5 1.7s4-.7 5-1.7c-1.3-1.1-3-1.8-5-1.8M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8m0 14a6 6 0 1 1 0-12 6 6 0 0 1 0 12"
+                                            fill="currentColor" />
+                                    </svg>
+                                    <svg viewBox="0 0 16 16">
+                                        <rect x="1" y="5" width="11" height="6" rx="1.5" fill="none"
+                                            stroke="currentColor" stroke-width="1" />
+                                        <rect x="2" y="6" width="9" height="4" fill="currentColor" />
+                                        <rect x="13" y="7" width="2" height="2" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="ps">
+                                <div class="ps-header">
+                                    <div class="brand">Court<em>.</em></div>
+                                    <div class="avatar">MR</div>
+                                </div>
+
+                                <h1 class="h-page">Good morning,<br><em>Marco.</em></h1>
+                                <div class="sub">Tue 30 Apr · QC Pickle Hub</div>
+
+                                <div class="kpi-row" style="margin-bottom:14px">
+                                    <div class="kpi">
+                                        <div class="kpi-label">Today</div>
+                                        <div class="kpi-value">14</div>
+                                        <div class="kpi-delta">+3 vs avg</div>
+                                    </div>
+                                    <div class="kpi">
+                                        <div class="kpi-label">No-shows</div>
+                                        <div class="kpi-value">2</div>
+                                        <div class="kpi-delta">-1 vs avg</div>
+                                    </div>
+                                    <div class="kpi">
+                                        <div class="kpi-label">Utiliz.</div>
+                                        <div class="kpi-value">68%</div>
+                                        <div class="kpi-delta">+4 pts</div>
+                                    </div>
+                                </div>
+
+                                <div class="label-mono" style="margin-bottom:6px">Next up</div>
+
+                                <div class="b-row">
+                                    <div>
+                                        <div class="b-time">10:00</div>
+                                        <div class="b-time-small">60 min</div>
+                                    </div>
+                                    <div>
+                                        <div class="b-detail-name">A. Reyes + 3</div>
+                                        <div class="b-detail-meta">Court 2 · Pickleball</div>
+                                    </div>
+                                    <div class="b-tag checked">Confirmed</div>
+                                </div>
+                                <div class="b-row">
+                                    <div>
+                                        <div class="b-time">10:00</div>
+                                        <div class="b-time-small">90 min</div>
+                                    </div>
+                                    <div>
+                                        <div class="b-detail-name">League — Tue Open</div>
+                                        <div class="b-detail-meta">Court 3 · Recurring</div>
+                                    </div>
+                                    <div class="b-tag checked">In</div>
+                                </div>
+                                <div class="b-row">
+                                    <div>
+                                        <div class="b-time">11:30</div>
+                                        <div class="b-time-small">60 min</div>
+                                    </div>
+                                    <div>
+                                        <div class="b-detail-name">J. Cruz</div>
+                                        <div class="b-detail-meta">Court 1 · Pickleball</div>
+                                    </div>
+                                    <div class="b-tag pending">Pending</div>
+                                </div>
+                                <div class="b-row">
+                                    <div>
+                                        <div class="b-time">13:00</div>
+                                        <div class="b-time-small">60 min</div>
+                                    </div>
+                                    <div>
+                                        <div class="b-detail-name">M. Santos</div>
+                                        <div class="b-detail-meta">Court 2 · Pickleball</div>
+                                    </div>
+                                    <div class="b-tag checked">Confirmed</div>
+                                </div>
+                            </div>
+
+                            <div class="nav">
+                                <div class="nav-item active">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M3 12h18M3 6h18M3 18h18" />
+                                    </svg>
+                                    Today
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <rect x="3" y="4" width="18" height="17" rx="2" />
+                                        <path d="M3 10h18M8 2v4M16 2v4" />
+                                    </svg>
+                                    Schedule
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="12" cy="8" r="4" />
+                                        <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
+                                    </svg>
+                                    Members
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M3 20V8M9 20V4M15 20v-9M21 20v-5" />
+                                    </svg>
+                                    Reports
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="5" cy="12" r="1" />
+                                        <circle cx="12" cy="12" r="1" />
+                                        <circle cx="19" cy="12" r="1" />
+                                    </svg>
+                                    More
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="screen-notes">
+                    <div class="screen-notes-eyebrow">Screen 01 · Owner</div>
+                    <h3>Today, in <em>one screen.</em></h3>
+                    <p>The dashboard is the owner's morning ritual — opened with coffee, scanned for surprises, closed
+                        in under thirty seconds. Three KPIs, one sorted list, and a clear bottom navigation. Nothing
+                        fancy, nothing extra.</p>
+                    <ul class="notes-list">
+                        <li data-num="01">
+                            <div><strong>Three KPIs only.</strong> Today's bookings, no-shows, utilization. More numbers
+                                dilute the morning glance.</div>
+                        </li>
+                        <li data-num="02">
+                            <div><strong>Status tags carry signal.</strong> Confirmed / Pending / In — three states the owner
+                                needs at a glance, color-coded but type-readable.</div>
+                        </li>
+                        <li data-num="03">
+                            <div><strong>"Next up" sorts by time, not by court.</strong> The owner thinks in clock-time
+                                first, court-allocation second.</div>
+                        </li>
+                        <li data-num="04">
+                            <div><strong>Bottom nav stays honest.</strong> Five items maximum. The fifth, "More," holds
+                                settings and account.</div>
+                        </li>
+                    </ul>
+                </aside>
+            </article>
+
+            <!-- SCREEN 02: OWNER SCHEDULE -->
+            <article class="screen-card">
+                <div class="screen-frame-wrap">
+                    <div class="screen-frame-num">02 / Owner — Schedule</div>
+                    <div class="phone">
+                        <div class="phone-screen">
+                            <div class="sbar">
+                                <span>9:24</span>
+                                <span class="sbar-icons">
+                                    <svg viewBox="0 0 16 16">
+                                        <path d="M2 13h2v-3H2zm4 0h2V8H6zm4 0h2V5h-2zm4 0h2V2h-2z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    <svg viewBox="0 0 16 16">
+                                        <rect x="1" y="5" width="11" height="6" rx="1.5" fill="none"
+                                            stroke="currentColor" stroke-width="1" />
+                                        <rect x="2" y="6" width="9" height="4" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="ps">
+                                <div class="ps-header">
+                                    <div class="brand">Court<em>.</em></div>
+                                    <div class="avatar">MR</div>
+                                </div>
+
+                                <h1 class="h-page">Schedule</h1>
+                                <div class="sub">Week of 28 Apr · 4 courts</div>
+
+                                <div class="sched-head">
+                                    <div class="sched-day">
+                                        <div class="sched-day-d">Mon</div>
+                                        <div class="sched-day-n">28</div>
+                                    </div>
+                                    <div class="sched-day active">
+                                        <div class="sched-day-d">Tue</div>
+                                        <div class="sched-day-n">30</div>
+                                    </div>
+                                    <div class="sched-day">
+                                        <div class="sched-day-d">Wed</div>
+                                        <div class="sched-day-n">01</div>
+                                    </div>
+                                    <div class="sched-day">
+                                        <div class="sched-day-d">Thu</div>
+                                        <div class="sched-day-n">02</div>
+                                    </div>
+                                    <div class="sched-day">
+                                        <div class="sched-day-d">Fri</div>
+                                        <div class="sched-day-n">03</div>
+                                    </div>
+                                    <div class="sched-day">
+                                        <div class="sched-day-d">Sat</div>
+                                        <div class="sched-day-n">04</div>
+                                    </div>
+                                </div>
+
+                                <div class="filter-row">
+                                    <div class="f-chip on">All</div>
+                                    <div class="f-chip">C1</div>
+                                    <div class="f-chip">C2</div>
+                                    <div class="f-chip">C3</div>
+                                </div>
+
+                                <div class="sched-grid">
+                                    <div class="head"></div>
+                                    <div class="head">C1</div>
+                                    <div class="head">C2</div>
+                                    <div class="head">C3</div>
+
+                                    <div class="time">9</div>
+                                    <div class="open">—</div>
+                                    <div class="booked">A.R</div>
+                                    <div class="open">—</div>
+
+                                    <div class="time">10</div>
+                                    <div class="booked">A.R</div>
+                                    <div class="booked">A.R</div>
+                                    <div class="accent">Lge</div>
+
+                                    <div class="time">11</div>
+                                    <div class="open">—</div>
+                                    <div class="open">—</div>
+                                    <div class="accent">Lge</div>
+
+                                    <div class="time">12</div>
+                                    <div class="booked">J.C</div>
+                                    <div class="open">—</div>
+                                    <div class="open">—</div>
+
+                                    <div class="time">13</div>
+                                    <div class="open">—</div>
+                                    <div class="booked">M.S</div>
+                                    <div class="open">—</div>
+
+                                    <div class="time">14</div>
+                                    <div class="open">—</div>
+                                    <div class="booked">M.S</div>
+                                    <div class="booked">P.D</div>
+
+                                    <div class="time">15</div>
+                                    <div class="booked">R.K</div>
+                                    <div class="open">—</div>
+                                    <div class="booked">P.D</div>
+                                </div>
+
+                                <div class="divider"></div>
+
+                                <div
+                                    style="display:flex; gap:10px; font-family:var(--mono); font-size:9px; color:var(--ink-3); letter-spacing:0.06em; text-transform:uppercase;">
+                                    <span style="display:flex; align-items:center; gap:4px;"><span
+                                            style="width:8px;height:8px;background:var(--ink);"></span>Booked</span>
+                                    <span style="display:flex; align-items:center; gap:4px;"><span
+                                            style="width:8px;height:8px;background:var(--accent);"></span>League</span>
+                                    <span style="display:flex; align-items:center; gap:4px;"><span
+                                            style="width:8px;height:8px;border:1px solid var(--line);"></span>Open</span>
+                                </div>
+                            </div>
+
+                            <div class="fab">+</div>
+
+                            <div class="nav">
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M3 12h18M3 6h18M3 18h18" />
+                                    </svg>
+                                    Today
+                                </div>
+                                <div class="nav-item active">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <rect x="3" y="4" width="18" height="17" rx="2" />
+                                        <path d="M3 10h18M8 2v4M16 2v4" />
+                                    </svg>
+                                    Schedule
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="12" cy="8" r="4" />
+                                        <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
+                                    </svg>
+                                    Members
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M3 20V8M9 20V4M15 20v-9M21 20v-5" />
+                                    </svg>
+                                    Reports
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="5" cy="12" r="1" />
+                                        <circle cx="12" cy="12" r="1" />
+                                        <circle cx="19" cy="12" r="1" />
+                                    </svg>
+                                    More
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="screen-notes">
+                    <div class="screen-notes-eyebrow">Screen 02 · Owner</div>
+                    <h3>The grid that <em>never lies.</em></h3>
+                    <p>A time-by-court grid is the universal language of facility management. The owner already thinks
+                        this way on whiteboards and spreadsheets — Court Books just makes it touchable, syncable, and
+                        impossible to double-book.</p>
+                    <ul class="notes-list">
+                        <li data-num="01">
+                            <div><strong>Tap-to-create on any open cell.</strong> The plus button is for batch
+                                operations (block off the day, recurring lessons, league setup).</div>
+                        </li>
+                        <li data-num="02">
+                            <div><strong>League slots use the accent color.</strong> Recurring bookings should read
+                                differently from one-offs — the owner needs to know what's locked.</div>
+                        </li>
+                        <li data-num="03">
+                            <div><strong>Initials, not full names.</strong> Two letters per cell is enough; tapping
+                                reveals full booking detail in a sheet.</div>
+                        </li>
+                        <li data-num="04">
+                            <div><strong>Day strip stays sticky on scroll.</strong> Owners switch days frequently when
+                                answering player DMs in parallel.</div>
+                        </li>
+                    </ul>
+                </aside>
+            </article>
+
+            <!-- SCREEN 03: OWNER MEMBERS -->
+            <article class="screen-card">
+                <div class="screen-frame-wrap">
+                    <div class="screen-frame-num">03 / Owner — Members</div>
+                    <div class="phone">
+                        <div class="phone-screen">
+                            <div class="sbar">
+                                <span>9:24</span>
+                                <span class="sbar-icons">
+                                    <svg viewBox="0 0 16 16">
+                                        <path d="M2 13h2v-3H2zm4 0h2V8H6zm4 0h2V5h-2zm4 0h2V2h-2z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    <svg viewBox="0 0 16 16">
+                                        <rect x="1" y="5" width="11" height="6" rx="1.5" fill="none"
+                                            stroke="currentColor" stroke-width="1" />
+                                        <rect x="2" y="6" width="9" height="4" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="ps">
+                                <div class="ps-header">
+                                    <div class="brand">Court<em>.</em></div>
+                                    <div class="avatar">MR</div>
+                                </div>
+
+                                <h1 class="h-page">Members</h1>
+                                <div class="sub">218 active · 12 lapsed</div>
+
+                                <div class="search">
+                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                        stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="m11 11 4 4" />
+                                    </svg>
+                                    <span class="search-text">Name, phone, email…</span>
+                                </div>
+
+                                <div class="filter-row">
+                                    <div class="f-chip on">All</div>
+                                    <div class="f-chip">Regular</div>
+                                    <div class="f-chip">VIP</div>
+                                    <div class="f-chip">Lapsed</div>
+                                </div>
+
+                                <div class="m-row">
+                                    <div class="m-avatar">AR</div>
+                                    <div>
+                                        <div class="b-detail-name">Andrea Reyes</div>
+                                        <div class="b-detail-meta">14 visits · last Tue</div>
+                                    </div>
+                                    <div class="m-stat">14<br><span style="color:var(--ink-4)">bookings</span></div>
+                                </div>
+                                <div class="m-row">
+                                    <div class="m-avatar">JC</div>
+                                    <div>
+                                        <div class="b-detail-name">Joaquin Cruz</div>
+                                        <div class="b-detail-meta">9 visits · last Mon</div>
+                                    </div>
+                                    <div class="m-stat">9<br><span style="color:var(--ink-4)">bookings</span></div>
+                                </div>
+                                <div class="m-row">
+                                    <div class="m-avatar">MS</div>
+                                    <div>
+                                        <div class="b-detail-name">Marisol Santos</div>
+                                        <div class="b-detail-meta">22 visits · today</div>
+                                    </div>
+                                    <div class="m-stat">22<br><span style="color:var(--ink-4)">bookings</span></div>
+                                </div>
+                                <div class="m-row">
+                                    <div class="m-avatar">PD</div>
+                                    <div>
+                                        <div class="b-detail-name">Paolo Delgado</div>
+                                        <div class="b-detail-meta">5 visits · 3 wks ago</div>
+                                    </div>
+                                    <div class="m-stat">5<br><span style="color:var(--ink-4)">bookings</span></div>
+                                </div>
+                                <div class="m-row">
+                                    <div class="m-avatar">RK</div>
+                                    <div>
+                                        <div class="b-detail-name">Rina Katigbak</div>
+                                        <div class="b-detail-meta">31 visits · last Thu</div>
+                                    </div>
+                                    <div class="m-stat">31<br><span style="color:var(--ink-4)">bookings</span></div>
+                                </div>
+                                <div class="m-row">
+                                    <div class="m-avatar">EV</div>
+                                    <div>
+                                        <div class="b-detail-name">Enrico Velasco</div>
+                                        <div class="b-detail-meta">2 visits · 2 mo ago</div>
+                                    </div>
+                                    <div class="m-stat">2<br><span style="color:var(--ink-4)">bookings</span></div>
+                                </div>
+                            </div>
+
+                            <div class="fab">+</div>
+
+                            <div class="nav">
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M3 12h18M3 6h18M3 18h18" />
+                                    </svg>
+                                    Today
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <rect x="3" y="4" width="18" height="17" rx="2" />
+                                        <path d="M3 10h18M8 2v4M16 2v4" />
+                                    </svg>
+                                    Schedule
+                                </div>
+                                <div class="nav-item active">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="12" cy="8" r="4" />
+                                        <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
+                                    </svg>
+                                    Members
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M3 20V8M9 20V4M15 20v-9M21 20v-5" />
+                                    </svg>
+                                    Reports
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="5" cy="12" r="1" />
+                                        <circle cx="12" cy="12" r="1" />
+                                        <circle cx="19" cy="12" r="1" />
+                                    </svg>
+                                    More
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="screen-notes">
+                    <div class="screen-notes-eyebrow">Screen 03 · Owner</div>
+                    <h3>Members are <em>relationships</em>, not rows.</h3>
+                    <p>Every name in this list is a person who chose to come back. The list shows visit cadence and
+                        booking count on every row — small numbers that turn the contact list into a relationship
+                        tracker without feeling like one.</p>
+                    <ul class="notes-list">
+                        <li data-num="01">
+                            <div><strong>"Last visit" is the relationship metric.</strong> Lapsed members surface
+                                naturally — anyone with a 3+ week gap reads as quietly urgent.</div>
+                        </li>
+                        <li data-num="02">
+                            <div><strong>Booking count lives on the row.</strong> Owners see at a glance who their most
+                                active members are without opening five clicks of CRM.</div>
+                        </li>
+                        <li data-num="03">
+                            <div><strong>FAB adds members fast.</strong> Single phone-number entry; full profile
+                                completes itself when they next book.</div>
+                        </li>
+                        <li data-num="04">
+                            <div><strong>Filters are conversational.</strong> "Lapsed" is a feeling, not a database
+                                query — the filter chip earns its place.</div>
+                        </li>
+                    </ul>
+                </aside>
+            </article>
+
+            <!-- SCREEN 04: OWNER REPORTS -->
+            <article class="screen-card">
+                <div class="screen-frame-wrap">
+                    <div class="screen-frame-num">04 / Owner — Reports</div>
+                    <div class="phone">
+                        <div class="phone-screen">
+                            <div class="sbar">
+                                <span>9:24</span>
+                                <span class="sbar-icons">
+                                    <svg viewBox="0 0 16 16">
+                                        <path d="M2 13h2v-3H2zm4 0h2V8H6zm4 0h2V5h-2zm4 0h2V2h-2z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    <svg viewBox="0 0 16 16">
+                                        <rect x="1" y="5" width="11" height="6" rx="1.5" fill="none"
+                                            stroke="currentColor" stroke-width="1" />
+                                        <rect x="2" y="6" width="9" height="4" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="ps">
+                                <div class="ps-header">
+                                    <div class="brand">Court<em>.</em></div>
+                                    <div class="avatar">MR</div>
+                                </div>
+
+                                <h1 class="h-page">Reports</h1>
+
+                                <div class="filter-row">
+                                    <div class="f-chip">7d</div>
+                                    <div class="f-chip on">30d</div>
+                                    <div class="f-chip">90d</div>
+                                    <div class="f-chip">YTD</div>
+                                </div>
+
+                                <div class="big-num"><em>312</em></div>
+                                <div class="big-num-sub">Bookings · 30 days · ▲ 14%</div>
+
+                                <svg viewBox="0 0 280 70" style="width:100%; margin:14px 0 10px; overflow:visible;">
+                                    <defs>
+                                        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#F2C94C" stop-opacity="0.3" />
+                                            <stop offset="100%" stop-color="#F2C94C" stop-opacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path
+                                        d="M0 50 L20 45 L40 48 L60 38 L80 42 L100 30 L120 32 L140 25 L160 28 L180 18 L200 22 L220 14 L240 18 L260 8 L280 12 L280 70 L0 70 Z"
+                                        fill="url(#g1)" />
+                                    <path
+                                        d="M0 50 L20 45 L40 48 L60 38 L80 42 L100 30 L120 32 L140 25 L160 28 L180 18 L200 22 L220 14 L240 18 L260 8 L280 12"
+                                        fill="none" stroke="#1A1715" stroke-width="1.4" stroke-linejoin="round"
+                                        stroke-linecap="round" />
+                                    <circle cx="280" cy="12" r="3" fill="#F2C94C" stroke="#1A1715" stroke-width="1.2" />
+                                </svg>
+
+                                <div class="divider"></div>
+
+                                <div class="label-mono" style="margin:8px 0 6px">Utilization · by hour</div>
+
+                                <div class="heatmap">
+                                    <div class="hm-label">8</div>
+                                    <div class="hm-cell hm-1"></div>
+                                    <div class="hm-cell hm-1"></div>
+                                    <div class="hm-cell hm-2"></div>
+                                    <div class="hm-cell hm-2"></div>
+                                    <div class="hm-cell hm-1"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-label">10</div>
+                                    <div class="hm-cell hm-2"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-label">12</div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-2"></div>
+                                    <div class="hm-cell hm-2"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-label">14</div>
+                                    <div class="hm-cell hm-2"></div>
+                                    <div class="hm-cell hm-2"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-label">16</div>
+                                    <div class="hm-cell hm-3"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-label">18</div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-label">20</div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-4"></div>
+                                    <div class="hm-cell hm-5"></div>
+                                    <div class="hm-cell hm-3"></div>
+                                </div>
+
+                                <div
+                                    style="display:flex; justify-content:space-between; font-family:var(--mono); font-size:8px; color:var(--ink-3); margin-top:6px; padding-left:24px;">
+                                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                                </div>
+                            </div>
+
+                            <div class="nav">
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M3 12h18M3 6h18M3 18h18" />
+                                    </svg>
+                                    Today
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <rect x="3" y="4" width="18" height="17" rx="2" />
+                                        <path d="M3 10h18M8 2v4M16 2v4" />
+                                    </svg>
+                                    Schedule
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="12" cy="8" r="4" />
+                                        <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
+                                    </svg>
+                                    Members
+                                </div>
+                                <div class="nav-item active">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M3 20V8M9 20V4M15 20v-9M21 20v-5" />
+                                    </svg>
+                                    Reports
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="5" cy="12" r="1" />
+                                        <circle cx="12" cy="12" r="1" />
+                                        <circle cx="19" cy="12" r="1" />
+                                    </svg>
+                                    More
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="screen-notes">
+                    <div class="screen-notes-eyebrow">Screen 04 · Owner</div>
+                    <h3>Numbers that <em>argue</em> for themselves.</h3>
+                    <p>One headline number, one sparkline, one heatmap. The owner shouldn't need to read columns of data
+                        to answer "are we busier than last month?" or "which hours are dead?" The visual answers them in
+                        seconds.</p>
+                    <ul class="notes-list">
+                        <li data-num="01">
+                            <div><strong>One headline metric.</strong> Total bookings, period selector, delta. The big number
+                                is the conversation starter.</div>
+                        </li>
+                        <li data-num="02">
+                            <div><strong>Heatmap reveals the dead hours.</strong> 8--10am weekdays are visibly soft —
+                                that's the optimization opportunity, surfaced without analytics training.</div>
+                        </li>
+                        <li data-num="03">
+                            <div><strong>Sparkline ends with a dot.</strong> The accent dot anchors the present moment
+                                in the trend; the eye lands there first.</div>
+                        </li>
+                        <li data-num="04">
+                            <div><strong>Export and deeper drill-downs live one tap deeper.</strong> The default view
+                                answers 80% of questions; the rest is opt-in.</div>
+                        </li>
+                    </ul>
+                </aside>
+            </article>
+            ```
+
+        </div>
+    </section>
+
+    <!-- ============ STAFF SECTION ============ -->
+
+    <section class="section wrap">
+        <div class="section-header">
+            <div class="section-num">§ 02 — Staff</div>
+            <div>
+                <h1 class="section-title">The <em>floor view.</em></h1>
+                <p class="section-desc">Staff create bookings, add equipment rentals, and handle check-in. They don't
+                    see revenue or change pricing — they need to know who's coming, who's here, and what gear to
+                    prepare.</p>
+            </div>
+        </div>
+
+        <div class="screens-grid">
+
+            ```
+            <!-- SCREEN 05: STAFF CREATE BOOKING -->
+            <article class="screen-card">
+                <div class="screen-frame-wrap">
+                    <div class="screen-frame-num">05 / Staff — New Booking</div>
+                    <div class="phone">
+                        <div class="phone-screen">
+                            <div class="sbar">
+                                <span>9:24</span>
+                                <span class="sbar-icons">
+                                    <svg viewBox="0 0 16 16">
+                                        <path d="M2 13h2v-3H2zm4 0h2V8H6zm4 0h2V5h-2zm4 0h2V2h-2z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    <svg viewBox="0 0 16 16">
+                                        <rect x="1" y="5" width="11" height="6" rx="1.5" fill="none"
+                                            stroke="currentColor" stroke-width="1" />
+                                        <rect x="2" y="6" width="9" height="4" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="ps">
+                                <div class="ps-header">
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <span style="font-family:var(--mono); font-size:14px;">&#8592;</span>
+                                        <span class="label-mono">Back</span>
+                                    </div>
+                                    <div class="label-mono">1 of 2</div>
+                                </div>
+
+                                <h1 class="h-page">New <em>Booking.</em></h1>
+                                <div class="sub" style="margin-bottom:14px">Staff · Lia</div>
+
+                                <div class="label-mono" style="margin-bottom:6px">Court</div>
+                                <div class="filter-row">
+                                    <div class="f-chip on">Court 1</div>
+                                    <div class="f-chip">Court 2</div>
+                                    <div class="f-chip">Court 3</div>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+                                    <div>
+                                        <div class="label-mono" style="margin-bottom:4px">Date</div>
+                                        <div style="padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-family:var(--mono); font-size:10px;">Wed 1 May</div>
+                                    </div>
+                                    <div>
+                                        <div class="label-mono" style="margin-bottom:4px">Time</div>
+                                        <div style="padding:8px 10px; border:1px solid var(--line); border-radius:8px; font-family:var(--mono); font-size:10px;">19:00 — 20:00</div>
+                                    </div>
+                                </div>
+
+                                <div class="label-mono" style="margin-bottom:4px">Member</div>
+                                <div class="search" style="margin-bottom:14px">
+                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                                        stroke-width="1.5">
+                                        <circle cx="7" cy="7" r="5" />
+                                        <path d="m11 11 4 4" />
+                                    </svg>
+                                    <span class="search-text" style="color:var(--ink);">A. Reyes</span>
+                                </div>
+
+                                <div class="divider"></div>
+
+                                <div class="label-mono" style="margin:8px 0 8px">Add items</div>
+
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line-2);">
+                                    <div>
+                                        <div style="font-size:11px; font-weight:500; color:var(--ink);">Paddle Rental</div>
+                                        <div style="font-family:var(--mono); font-size:9px; color:var(--ink-3);">&#8369;100/hr</div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <div style="width:24px; height:24px; border:1px solid var(--line); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:12px; color:var(--ink-2);">&#8722;</div>
+                                        <div style="font-family:var(--mono); font-size:12px; font-weight:500; min-width:16px; text-align:center;">2</div>
+                                        <div style="width:24px; height:24px; border:1px solid var(--line); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:12px; color:var(--ink-2);">+</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line-2);">
+                                    <div>
+                                        <div style="font-size:11px; font-weight:500; color:var(--ink);">Ball Purchase</div>
+                                        <div style="font-family:var(--mono); font-size:9px; color:var(--ink-3);">&#8369;250 each</div>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <div style="width:24px; height:24px; border:1px solid var(--line); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:12px; color:var(--ink-2);">&#8722;</div>
+                                        <div style="font-family:var(--mono); font-size:12px; font-weight:500; min-width:16px; text-align:center;">1</div>
+                                        <div style="width:24px; height:24px; border:1px solid var(--line); border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:12px; color:var(--ink-2);">+</div>
+                                    </div>
+                                </div>
+
+                                <div class="summary-card" style="margin-top:14px">
+                                    <div class="summary-row"><span>Court fee</span><span style="color:var(--ink); font-weight:500;">&#8369;400</span></div>
+                                    <div class="summary-row"><span>Paddle Rental x2</span><span style="color:var(--ink); font-weight:500;">&#8369;200</span></div>
+                                    <div class="summary-row"><span>Balls x1</span><span style="color:var(--ink); font-weight:500;">&#8369;250</span></div>
+                                    <div class="summary-row total"><span>Total</span><span><em>&#8369;850</em></span></div>
+                                </div>
+                            </div>
+
+                            <div style="position:absolute; left:18px; right:18px; bottom:18px;">
+                                <button class="cta">
+                                    <span>Confirm Booking</span>
+                                    <span class="cta-arrow">&#8594;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="screen-notes">
+                    <div class="screen-notes-eyebrow">Screen 05 · Staff</div>
+                    <h3>One form, <em>everything attached.</em></h3>
+                    <p>Staff create bookings on behalf of players — whether a phone call, a walk-in, or a DM. Court,
+                        time, member, and optional equipment all live on one screen. The summary card keeps the running
+                        total visible so nothing is missed.</p>
+                    <ul class="notes-list">
+                        <li data-num="01">
+                            <div><strong>Court chips are single-select.</strong> All courts are pickleball — no sport
+                                filter needed. Tap to pick.</div>
+                        </li>
+                        <li data-num="02">
+                            <div><strong>Member search doubles as walk-in.</strong> Type a name to find a member, or
+                                leave blank and mark as "Walk-in" for unregistered players.</div>
+                        </li>
+                        <li data-num="03">
+                            <div><strong>Add-items section handles rentals and purchases.</strong> Paddle rentals and
+                                ball purchases attach to the booking with quantity controls.</div>
+                        </li>
+                        <li data-num="04">
+                            <div><strong>Summary card shows the full breakdown.</strong> Court fee plus items — staff
+                                sees exactly what to collect at the counter.</div>
+                        </li>
+                    </ul>
+                </aside>
+            </article>
+
+            <!-- SCREEN 06: STAFF BOOKING CONFIRMATION -->
+            <article class="screen-card">
+                <div class="screen-frame-wrap">
+                    <div class="screen-frame-num">06 / Staff — Booking Confirmed</div>
+                    <div class="phone">
+                        <div class="phone-screen">
+                            <div class="sbar">
+                                <span>9:24</span>
+                                <span class="sbar-icons">
+                                    <svg viewBox="0 0 16 16">
+                                        <path d="M2 13h2v-3H2zm4 0h2V8H6zm4 0h2V5h-2zm4 0h2V2h-2z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    <svg viewBox="0 0 16 16">
+                                        <rect x="1" y="5" width="11" height="6" rx="1.5" fill="none"
+                                            stroke="currentColor" stroke-width="1" />
+                                        <rect x="2" y="6" width="9" height="4" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="ps" style="display:flex; flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; padding-top:32px;">
+
+                                <div style="width:48px; height:48px; border-radius:50%; background:var(--signal); color:var(--paper); display:flex; align-items:center; justify-content:center; margin-bottom:16px;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m9 12 2 2 4-4" />
+                                    </svg>
+                                </div>
+
+                                <h1 class="h-page" style="text-align:center;">Booking<br><em>Confirmed.</em></h1>
+                                <div class="sub" style="margin-bottom:20px; text-align:center;">Wed 1 May · QC Pickle Hub</div>
+
+                                <div class="summary-card" style="width:100%; text-align:left;">
+                                    <div class="summary-row"><span>Court</span><span style="color:var(--ink); font-weight:500;">Court 1</span></div>
+                                    <div class="summary-row"><span>Date</span><span style="color:var(--ink); font-weight:500;">Wed 1 May</span></div>
+                                    <div class="summary-row"><span>Time</span><span style="color:var(--ink); font-weight:500;">19:00 &#8212; 20:00</span></div>
+                                    <div class="summary-row"><span>Member</span><span style="color:var(--ink); font-weight:500;">A. Reyes</span></div>
+                                    <div class="divider"></div>
+                                    <div class="label-mono" style="margin:4px 0 6px">Items</div>
+                                    <div class="summary-row"><span>Paddle Rental x2</span><span style="color:var(--ink); font-weight:500;">&#8369;200</span></div>
+                                    <div class="summary-row"><span>Balls x1</span><span style="color:var(--ink); font-weight:500;">&#8369;250</span></div>
+                                    <div class="summary-row total"><span>Total</span><span><em>&#8369;850</em></span></div>
+                                </div>
+
+                                <div style="font-family:var(--mono); font-size:9px; color:var(--ink-3); letter-spacing:0.04em; margin-top:12px; text-align:center; line-height:1.5;">
+                                    Collect &#8369;850 at counter.<br>Payment collected outside the system.</div>
+
+                                <div style="display:flex; gap:8px; margin-top:18px; width:100%;">
+                                    <button class="cta" style="flex:1; background:var(--paper-2); color:var(--ink); justify-content:center;">
+                                        <span>View Schedule</span>
+                                    </button>
+                                    <button class="cta" style="flex:1; justify-content:center;">
+                                        <span>New Booking</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="screen-notes">
+                    <div class="screen-notes-eyebrow">Screen 06 · Staff</div>
+                    <h3>Done. <em>Next.</em></h3>
+                    <p>The confirmation screen is a receipt and a launchpad. Staff see the full booking details, the
+                        items attached, and the amount to collect — then immediately jump to the schedule or create
+                        another booking. No dead ends.</p>
+                    <ul class="notes-list">
+                        <li data-num="01">
+                            <div><strong>Green checkmark anchors success.</strong> The visual confirmation is
+                                unmistakable — staff knows the booking is saved.</div>
+                        </li>
+                        <li data-num="02">
+                            <div><strong>Payment note is explicit.</strong> "Collect at counter" reminds staff that
+                                payment happens outside the system — no ambiguity.</div>
+                        </li>
+                        <li data-num="03">
+                            <div><strong>Two clear next actions.</strong> View Schedule to see the board, or New Booking
+                                to keep the queue moving. No navigation maze.</div>
+                        </li>
+                        <li data-num="04">
+                            <div><strong>Items listed on the receipt.</strong> Equipment rentals and purchases are
+                                visible so staff can prepare the gear before the player arrives.</div>
+                        </li>
+                    </ul>
+                </aside>
+            </article>
+
+            <!-- SCREEN 07: STAFF CHECK-IN -->
+            <article class="screen-card">
+                <div class="screen-frame-wrap">
+                    <div class="screen-frame-num">07 / Staff — Check-in</div>
+                    <div class="phone">
+                        <div class="phone-screen">
+                            <div class="sbar">
+                                <span>9:24</span>
+                                <span class="sbar-icons">
+                                    <svg viewBox="0 0 16 16">
+                                        <path d="M2 13h2v-3H2zm4 0h2V8H6zm4 0h2V5h-2zm4 0h2V2h-2z"
+                                            fill="currentColor" />
+                                    </svg>
+                                    <svg viewBox="0 0 16 16">
+                                        <rect x="1" y="5" width="11" height="6" rx="1.5" fill="none"
+                                            stroke="currentColor" stroke-width="1" />
+                                        <rect x="2" y="6" width="9" height="4" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="ps">
+                                <div class="ps-header">
+                                    <div class="brand">Court<em>.</em></div>
+                                    <div
+                                        style="font-family:var(--mono); font-size:9px; color:var(--ink-3); letter-spacing:0.06em; text-transform:uppercase;">
+                                        Staff · Lia</div>
+                                </div>
+
+                                <h1 class="h-page">Check-<em>in.</em></h1>
+                                <div class="sub">Tue 30 Apr · 14 expected today</div>
+
+                                <div class="qr-frame">
+                                    <div class="qr-corners"><span></span></div>
+                                    <div class="qr-text">Tap to scan QR<br>or pick from list below</div>
+                                </div>
+
+                                <div class="filter-row">
+                                    <div class="f-chip on">Now</div>
+                                    <div class="f-chip">Earlier</div>
+                                    <div class="f-chip">All today</div>
+                                </div>
+
+                                <div class="b-row">
+                                    <div>
+                                        <div class="b-time">10:00</div>
+                                        <div class="b-time-small">C2</div>
+                                    </div>
+                                    <div>
+                                        <div class="b-detail-name">A. Reyes + 3</div>
+                                        <div class="b-detail-meta">Pickleball · 60 min · 2 paddles</div>
+                                    </div>
+                                    <div class="b-tag checked">In</div>
+                                </div>
+                                <div class="b-row">
+                                    <div>
+                                        <div class="b-time">10:00</div>
+                                        <div class="b-time-small">C3</div>
+                                    </div>
+                                    <div>
+                                        <div class="b-detail-name">Tue Open League</div>
+                                        <div class="b-detail-meta">8 players · 90 min</div>
+                                    </div>
+                                    <div class="b-tag pending">5/8</div>
+                                </div>
+                                <div class="b-row">
+                                    <div>
+                                        <div class="b-time">11:30</div>
+                                        <div class="b-time-small">C1</div>
+                                    </div>
+                                    <div>
+                                        <div class="b-detail-name">J. Cruz</div>
+                                        <div class="b-detail-meta">Pickleball · 60 min</div>
+                                    </div>
+                                    <div class="b-tag checked">Confirmed</div>
+                                </div>
+                                <div class="b-row">
+                                    <div>
+                                        <div class="b-time">13:00</div>
+                                        <div class="b-time-small">C2</div>
+                                    </div>
+                                    <div>
+                                        <div class="b-detail-name">M. Santos</div>
+                                        <div class="b-detail-meta">Pickleball · 60 min · 1 paddle</div>
+                                    </div>
+                                    <div class="b-tag checked">Confirmed</div>
+                                </div>
+                            </div>
+
+                            <div class="nav">
+                                <div class="nav-item active">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path d="m9 12 2 2 4-4" />
+                                    </svg>
+                                    Check-in
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <rect x="3" y="4" width="18" height="17" rx="2" />
+                                        <path d="M3 10h18M8 2v4M16 2v4" />
+                                    </svg>
+                                    Today
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <path d="M5 12h14M12 5v14" />
+                                    </svg>
+                                    Walk-in
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="12" cy="12" r="3" />
+                                        <path d="M19 12a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+                                    </svg>
+                                    Help
+                                </div>
+                                <div class="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                                        <circle cx="12" cy="8" r="4" />
+                                        <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
+                                    </svg>
+                                    Account
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="screen-notes">
+                    <div class="screen-notes-eyebrow">Screen 07 · Staff</div>
+                    <h3>Big buttons, <em>thick fingers.</em></h3>
+                    <p>This is the only screen used while standing, holding a phone in one hand, talking to someone
+                        else. Every interaction is one tap or one scan. No revenue, no pricing controls, no surprises.
+                    </p>
+                    <ul class="notes-list">
+                        <li data-num="01">
+                            <div><strong>QR scanner is the headline action.</strong> The dashed frame says "scan here"
+                                without copy; the corners reinforce it.</div>
+                        </li>
+                        <li data-num="02">
+                            <div><strong>Manual list is the fallback.</strong> When QR fails — bad lighting, dead phone
+                                — the list of expected arrivals is tappable in two seconds.</div>
+                        </li>
+                        <li data-num="03">
+                            <div><strong>Equipment indicators in meta.</strong> Bookings with paddle rentals show the
+                                count inline — staff knows what gear to prepare before the player arrives.</div>
+                        </li>
+                        <li data-num="04">
+                            <div><strong>Walk-in is one tap away.</strong> A player without a booking is a normal
+                                occurrence, not an error case.</div>
+                        </li>
+                    </ul>
+                </aside>
+            </article>
+            ```
+
+        </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+
+    <footer class="foot wrap">
+        <div class="foot-mark">Court <em>Books.</em></div>
+        <div class="foot-text">Wireframes v0.1 · 7 screens · Apr 2026</div>
+    </footer>
+
+</body>
+
+</html>
