@@ -40,6 +40,19 @@ export default function SchedulePage() {
 
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
   const [selectedDate, setSelectedDate] = useState(todayStr);
+
+  const thisWeekDays = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      return {
+        date: d.toISOString().split('T')[0],
+        dayAbbr: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
+        dayNum: d.getDate(),
+      };
+    });
+  }, []);
   const [courtFilter, setCourtFilter] = useState<string>('all');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
@@ -121,18 +134,37 @@ export default function SchedulePage() {
           Schedule
         </h1>
 
-        {/* Date picker */}
+        {/* This week quick-select */}
+        <div className="flex gap-1 mb-2">
+          {thisWeekDays.map((day) => {
+            const isActive = day.date === selectedDate;
+            return (
+              <button
+                key={day.date}
+                onClick={() => setSelectedDate(day.date)}
+                className={`flex-1 flex flex-col items-center py-1.5 rounded-lg transition-colors ${
+                  isActive
+                    ? 'bg-ink text-paper'
+                    : 'bg-paper-2 text-ink-2'
+                }`}
+              >
+                <span className="font-mono text-[7px] tracking-wider">{day.dayAbbr}</span>
+                <span className="font-display text-base leading-none mt-0.5">{day.dayNum}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Date picker for future dates */}
         <div className="flex items-center gap-3 mb-3">
-          <div className="relative flex-1">
-            <input
-              type="date"
-              value={selectedDate}
-              min={todayStr}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              aria-label="Select date"
-              className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink appearance-none"
-            />
-          </div>
+          <input
+            type="date"
+            value={selectedDate}
+            min={todayStr}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            aria-label="Select date"
+            className="flex-1 bg-paper rounded-lg px-3 py-2 text-sm font-mono border border-line focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink"
+          />
           <span className="font-display text-sm text-ink-2 shrink-0">
             {formatSelectedDate(selectedDate)}
           </span>
