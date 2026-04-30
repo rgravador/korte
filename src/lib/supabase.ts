@@ -5,19 +5,28 @@ let _client: SupabaseClient | null = null;
 
 function getEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
-  return { url, key };
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+  const serviceRoleKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY ?? '';
+  return { url, anonKey, serviceRoleKey };
 }
 
 /**
- * Returns a singleton Supabase client if env vars are configured, otherwise null.
- * When null, the app runs in offline/mock-only mode.
+ * Returns a singleton Supabase client.
+ * Uses service_role key if available (dev mode — bypasses RLS).
+ * Falls back to anon key.
+ * Returns null if no keys are configured.
  */
 export function getSupabase(): SupabaseClient | null {
   if (_client) return _client;
 
-  const { url, key } = getEnv();
-  if (!url || !key) return null;
+  const { url, anonKey, serviceRoleKey } = getEnv();
+  if (!url) return null;
+
+  // Prefer service_role in dev (bypasses RLS)
+  const key = serviceRoleKey || anonKey;
+  if (!key) return null;
+
+  console.debug('[supabase] init client:', serviceRoleKey ? 'service_role' : 'anon');
 
   _client = createClient(url, key);
   return _client;
@@ -27,6 +36,6 @@ export function getSupabase(): SupabaseClient | null {
  * Check if Supabase is configured — evaluated lazily, not at module load.
  */
 export function isSupabaseConfigured(): boolean {
-  const { url, key } = getEnv();
-  return Boolean(url && key);
+  const { url, anonKey, serviceRoleKey } = getEnv();
+  return Boolean(url && (anonKey || serviceRoleKey));
 }
