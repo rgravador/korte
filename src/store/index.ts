@@ -9,7 +9,21 @@ import {
   seedMembers,
   seedBookings,
 } from '@/lib/mock-data';
-import { enqueue } from '@/lib/sync';
+import { getSupabase } from '@/lib/supabase';
+import {
+  dbCreateBooking, dbUpdateBookingStatus, dbRescheduleBooking,
+  dbAddMember, dbUpdateMember,
+  dbAddCourt, dbUpdateCourt, dbRemoveCourt,
+  dbAddItem, dbUpdateItem, dbRemoveItem,
+  dbUpdateTenant, dbCreateUser,
+} from '@/lib/db';
+
+/** Fire a Supabase call if configured. Log errors but never block the UI. */
+function fireAndForget(fn: () => Promise<unknown>) {
+  const sb = getSupabase();
+  if (!sb) return;
+  fn().catch((err) => console.error('[store] Supabase sync error:', err));
+}
 
 interface AppState {
   // Auth
@@ -106,18 +120,15 @@ export const useStore = create<AppState>()(
       bookings: seedBookings,
 
       login: (username, password) => {
-        // First try matching stored users (passwords may be empty after rehydration)
         let user = get().users.find(
           (u) => u.username === username && u.password === password && u.isActive
         );
 
-        // Fallback: check seed data passwords (demo mode — passwords are stripped from localStorage)
         if (!user) {
           const seedUser = seedUsers.find(
             (u) => u.username === username && u.password === password && u.isActive
           );
           if (seedUser) {
-            // Verify this seed user exists in the store (by username)
             user = get().users.find((u) => u.username === seedUser.username && u.isActive);
           }
         }
@@ -137,21 +148,17 @@ export const useStore = create<AppState>()(
         const id = `user-${generateId()}`;
         const tenantId = get().tenant.id;
         const user: User = {
-          id,
-          tenantId,
-          username: data.username,
-          password: data.password,
-          role: data.role,
-          displayName: data.displayName,
-          email: data.email,
-          isActive: true,
+          id, tenantId,
+          username: data.username, password: data.password,
+          role: data.role, displayName: data.displayName,
+          email: data.email, isActive: true,
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ users: [...state.users, user] }));
 
-        enqueue({
-          kind: 'createUser',
-          payload: { tenantId, ...data },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbCreateUser(sb, tenantId, data);
         });
 
         return id;
@@ -160,8 +167,7 @@ export const useStore = create<AppState>()(
       createBooking: (bookingData) => {
         const id = `booking-${generateId()}`;
         const booking: Booking = {
-          ...bookingData,
-          id,
+          ...bookingData, id,
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ bookings: [...state.bookings, booking] }));
@@ -176,9 +182,9 @@ export const useStore = create<AppState>()(
           }
         }
 
-        enqueue({
-          kind: 'createBooking',
-          payload: bookingData as unknown as Record<string, unknown>,
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbCreateBooking(sb, bookingData);
         });
 
         return id;
@@ -186,10 +192,9 @@ export const useStore = create<AppState>()(
 
       updateBookingStatus: (bookingId, status) => {
         set((state) => ({
-          bookings: state.bookings.map((b) => {
-            if (b.id !== bookingId) return b;
-            return { ...b, status };
-          }),
+          bookings: state.bookings.map((b) =>
+            b.id !== bookingId ? b : { ...b, status }
+          ),
         }));
 
         if (status === 'no_show') {
@@ -204,9 +209,9 @@ export const useStore = create<AppState>()(
           }
         }
 
-        enqueue({
-          kind: 'updateBookingStatus',
-          payload: { bookingId, status },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbUpdateBookingStatus(sb, bookingId, status);
         });
       },
 
@@ -221,34 +226,32 @@ export const useStore = create<AppState>()(
           ),
         }));
 
-        enqueue({
-          kind: 'rescheduleBooking',
-          payload: { bookingId, date, startHour },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbRescheduleBooking(sb, bookingId, date, startHour);
         });
       },
 
       addMember: (memberData) => {
         const id = `member-${generateId()}`;
         const member: Member = {
-          ...memberData,
-          id,
-          totalBookings: 0,
-          totalNoShows: 0,
+          ...memberData, id,
+          totalBookings: 0, totalNoShows: 0,
           lastVisit: null,
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ members: [...state.members, member] }));
 
-        enqueue({
-          kind: 'addMember',
-          payload: {
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbAddMember(sb, {
             tenantId: memberData.tenantId,
             firstName: memberData.firstName,
             lastName: memberData.lastName,
             phone: memberData.phone,
             email: memberData.email,
             tier: memberData.tier,
-          },
+          });
         });
 
         return id;
@@ -261,9 +264,9 @@ export const useStore = create<AppState>()(
           ),
         }));
 
-        enqueue({
-          kind: 'updateMember',
-          payload: { memberId, updates: updates as Record<string, unknown> },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbUpdateMember(sb, memberId, updates);
         });
       },
 
@@ -275,9 +278,9 @@ export const useStore = create<AppState>()(
           tenant: { ...state.tenant, courtCount: state.courts.length + 1 },
         }));
 
-        enqueue({
-          kind: 'addCourt',
-          payload: { tenantId: courtData.tenantId, name: courtData.name, hourlyRate: courtData.hourlyRate },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbAddCourt(sb, { tenantId: courtData.tenantId, name: courtData.name, hourlyRate: courtData.hourlyRate });
         });
 
         return id;
@@ -290,9 +293,9 @@ export const useStore = create<AppState>()(
           ),
         }));
 
-        enqueue({
-          kind: 'updateCourt',
-          payload: { courtId, updates: updates as Record<string, unknown> },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbUpdateCourt(sb, courtId, updates);
         });
       },
 
@@ -302,7 +305,10 @@ export const useStore = create<AppState>()(
           tenant: { ...state.tenant, courtCount: state.courts.length - 1 },
         }));
 
-        enqueue({ kind: 'removeCourt', payload: { courtId } });
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbRemoveCourt(sb, courtId);
+        });
       },
 
       addItem: (itemData) => {
@@ -310,9 +316,9 @@ export const useStore = create<AppState>()(
         const item: Item = { ...itemData, id };
         set((state) => ({ items: [...state.items, item] }));
 
-        enqueue({
-          kind: 'addItem',
-          payload: { tenantId: itemData.tenantId, name: itemData.name, price: itemData.price, type: itemData.type },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbAddItem(sb, { tenantId: itemData.tenantId, name: itemData.name, price: itemData.price, type: itemData.type });
         });
 
         return id;
@@ -325,9 +331,9 @@ export const useStore = create<AppState>()(
           ),
         }));
 
-        enqueue({
-          kind: 'updateItem',
-          payload: { itemId, updates: updates as Record<string, unknown> },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbUpdateItem(sb, itemId, updates);
         });
       },
 
@@ -336,67 +342,52 @@ export const useStore = create<AppState>()(
           items: state.items.filter((i) => i.id !== itemId),
         }));
 
-        enqueue({ kind: 'removeItem', payload: { itemId } });
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbRemoveItem(sb, itemId);
+        });
       },
 
       updateTenant: (updates) => {
         const tenantId = get().tenant.id;
         set((state) => ({ tenant: { ...state.tenant, ...updates } }));
 
-        enqueue({
-          kind: 'updateTenant',
-          payload: { tenantId, updates: updates as Record<string, unknown> },
+        fireAndForget(async () => {
+          const sb = getSupabase()!;
+          await dbUpdateTenant(sb, tenantId, updates);
         });
       },
 
       setupTenant: (data) => {
         const tenantId = `tenant-${generateId()}`;
         const tenant: Tenant = {
-          id: tenantId,
-          name: data.name,
-          subdomain: data.subdomain,
+          id: tenantId, name: data.name, subdomain: data.subdomain,
           courtCount: data.courts.length,
           operatingHoursStart: data.operatingHoursStart,
           operatingHoursEnd: data.operatingHoursEnd,
           createdAt: new Date().toISOString(),
         };
         const courts: Court[] = data.courts.map((c, i) => ({
-          id: `court-${generateId()}-${i}`,
-          tenantId,
-          name: c.name,
-          hourlyRate: c.hourlyRate,
-          isActive: true,
+          id: `court-${generateId()}-${i}`, tenantId,
+          name: c.name, hourlyRate: c.hourlyRate, isActive: true,
         }));
         const items: Item[] = data.items.map((item, i) => ({
-          id: `item-${generateId()}-${i}`,
-          tenantId,
-          name: item.name,
-          price: item.price,
-          type: item.type,
-          isActive: true,
+          id: `item-${generateId()}-${i}`, tenantId,
+          name: item.name, price: item.price, type: item.type, isActive: true,
         }));
         const adminUser: User = {
-          id: `user-${generateId()}`,
-          tenantId,
-          username: data.ownerUsername,
-          password: data.ownerPassword,
-          role: 'tenant_admin',
-          displayName: data.ownerName,
-          email: data.ownerEmail,
-          isActive: true,
+          id: `user-${generateId()}`, tenantId,
+          username: data.ownerUsername, password: data.ownerPassword,
+          role: 'tenant_admin', displayName: data.ownerName,
+          email: data.ownerEmail, isActive: true,
           createdAt: new Date().toISOString(),
         };
         set({
-          isOnboarded: true,
-          currentUser: adminUser,
-          users: [adminUser],
-          tenant,
-          courts,
-          items,
-          members: [],
-          bookings: [],
+          isOnboarded: true, currentUser: adminUser,
+          users: [adminUser], tenant, courts, items,
+          members: [], bookings: [],
         });
-        // Supabase setup is handled by setupTenantOnline() in the onboarding page
+        // Supabase setup handled by setupTenantOnline() in onboarding page
       },
 
       // Sync actions
@@ -407,58 +398,42 @@ export const useStore = create<AppState>()(
       hydrateFromRemote: (data) => {
         set({
           isOnboarded: true,
-          tenant: data.tenant,
-          users: data.users,
-          courts: data.courts,
-          items: data.items,
-          members: data.members,
-          bookings: data.bookings,
+          tenant: data.tenant, users: data.users,
+          courts: data.courts, items: data.items,
+          members: data.members, bookings: data.bookings,
           lastSyncedAt: new Date().toISOString(),
         });
       },
 
       resetData: () => {
-        // Clear sync queue — demo data is local-only
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem('court-books-sync-queue');
         }
         set({
-          isOnboarded: true,
-          currentUser: seedUsers[0],
-          users: seedUsers,
-          tenant: seedTenant,
-          courts: seedCourts,
-          items: seedItems,
-          members: seedMembers,
-          bookings: seedBookings,
-          lastSyncedAt: null,
-          pendingSync: 0,
+          isOnboarded: true, currentUser: seedUsers[0],
+          users: seedUsers, tenant: seedTenant,
+          courts: seedCourts, items: seedItems,
+          members: seedMembers, bookings: seedBookings,
+          lastSyncedAt: null, pendingSync: 0,
         });
       },
 
       resetToFresh: () => {
-        // Clear sync queue so stale mutations don't replay
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem('court-books-sync-queue');
         }
         set({
-          isOnboarded: false,
-          currentUser: null,
-          users: [],
-          tenant: seedTenant,
-          courts: [],
-          items: [],
-          members: [],
-          bookings: [],
-          lastSyncedAt: null,
-          pendingSync: 0,
+          isOnboarded: false, currentUser: null,
+          users: [], tenant: seedTenant,
+          courts: [], items: [],
+          members: [], bookings: [],
+          lastSyncedAt: null, pendingSync: 0,
         });
       },
     }),
     {
       name: 'court-books-store',
       partialize: (state) => ({
-        // Persist everything except transient sync state and passwords
         currentUser: state.currentUser ? { ...state.currentUser, password: '' } : null,
         users: state.users.map((u) => ({ ...u, password: '' })),
         isOnboarded: state.isOnboarded,
