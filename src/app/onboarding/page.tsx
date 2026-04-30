@@ -33,7 +33,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 }
 
 export default function OnboardingPage() {
-  const { setupTenant, isOnboarded, currentUser } = useStore();
+  const { setupTenant, isOnboarded, currentUser, hydrateFromRemote } = useStore();
   const router = useRouter();
 
   const [step, setStep] = useState<Step>('welcome');
@@ -115,7 +115,38 @@ export default function OnboardingPage() {
   ];
 
   const handleFinish = async () => {
-    // Save locally first (instant, works offline)
+    // Try Supabase first to get real UUIDs
+    if (isSupabaseConfigured()) {
+      console.debug('[onboarding] Creating tenant in Supabase...');
+      const result = await setupTenantOnline({
+        name: facilityName,
+        subdomain,
+        operatingHoursStart: hoursStart,
+        operatingHoursEnd: hoursEnd,
+        ownerName,
+        ownerEmail,
+        ownerUsername,
+        ownerPassword,
+        courts,
+        items: allItems,
+      });
+
+      if (result?.tenant && result?.user) {
+        // Hydrate store from Supabase with real UUIDs
+        console.debug('[onboarding] Supabase OK, hydrating from remote...');
+        const { hydrateFromSupabase } = await import('@/lib/sync');
+        const data = await hydrateFromSupabase(result.tenant.id);
+        if (data) {
+          hydrateFromRemote(data);
+          useStore.setState({ currentUser: result.user, isOnboarded: true });
+          router.push('/dashboard');
+          return;
+        }
+      }
+      console.warn('[onboarding] Supabase setup failed, falling back to local');
+    }
+
+    // Fallback: local-only setup
     setupTenant({
       name: facilityName,
       ownerName,
@@ -128,22 +159,6 @@ export default function OnboardingPage() {
       courts,
       items: allItems,
     });
-
-    // Persist to Supabase if online + configured
-    if (isSupabaseConfigured()) {
-      await setupTenantOnline({
-        name: facilityName,
-        subdomain,
-        operatingHoursStart: hoursStart,
-        operatingHoursEnd: hoursEnd,
-        ownerName,
-        ownerEmail,
-        ownerUsername,
-        ownerPassword,
-        courts,
-        items: allItems,
-      });
-    }
 
     router.push('/dashboard');
   };

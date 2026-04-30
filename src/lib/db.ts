@@ -106,27 +106,8 @@ function toBooking(r: Record<string, unknown>, items: BookingItem[]): Booking {
   };
 }
 
-// ── RLS tenant context ───────────────────────────────────────
-
-/**
- * Sets the tenant context for RLS policies before executing queries.
- * Must be called before any tenant-scoped query.
- */
-async function setTenantContext(sb: SupabaseClient, tenantId: string) {
-  await sb.rpc('set_tenant_context', { p_tenant_id: tenantId });
-}
-
-/**
- * Wraps a query with tenant context for RLS isolation.
- */
-async function withTenant<T>(
-  sb: SupabaseClient,
-  tenantId: string,
-  fn: () => Promise<T>
-): Promise<T> {
-  await setTenantContext(sb, tenantId);
-  return fn();
-}
+// ── RLS tenant context (disabled for prototype) ─────────────
+// Re-enable withTenant() wrapper when RLS is turned on in production.
 
 // ── Auth ─────────────────────────────────────────────────────
 
@@ -591,22 +572,20 @@ export interface TenantData {
 
 export async function dbHydrateTenant(sb: SupabaseClient, tenantId: string): Promise<TenantData | null> {
   console.debug('[db] dbHydrateTenant', { tenantId });
-  return withTenant(sb, tenantId, async () => {
-    const tenant = await dbGetTenant(sb, tenantId);
-    if (!tenant) {
-      console.debug('[db] dbHydrateTenant tenant not found', { tenantId });
-      return null;
-    }
+  const tenant = await dbGetTenant(sb, tenantId);
+  if (!tenant) {
+    console.debug('[db] dbHydrateTenant tenant not found', { tenantId });
+    return null;
+  }
 
-    const [users, courts, items, members, bookings] = await Promise.all([
-      dbGetUsers(sb, tenantId),
-      dbGetCourts(sb, tenantId),
-      dbGetItems(sb, tenantId),
-      dbGetMembers(sb, tenantId),
-      dbGetBookings(sb, tenantId),
-    ]);
+  const [users, courts, items, members, bookings] = await Promise.all([
+    dbGetUsers(sb, tenantId),
+    dbGetCourts(sb, tenantId),
+    dbGetItems(sb, tenantId),
+    dbGetMembers(sb, tenantId),
+    dbGetBookings(sb, tenantId),
+  ]);
 
-    console.debug('[db] dbHydrateTenant OK', { users: users.length, courts: courts.length, items: items.length, members: members.length, bookings: bookings.length });
-    return { tenant, users, courts, items, members, bookings };
-  });
+  console.debug('[db] dbHydrateTenant OK', { users: users.length, courts: courts.length, items: items.length, members: members.length, bookings: bookings.length });
+  return { tenant, users, courts, items, members, bookings };
 }

@@ -159,10 +159,12 @@ GRANT ALL ON bookings      TO anon, authenticated;
 GRANT ALL ON booking_items TO anon, authenticated;
 
 -- ============================================================
--- Row-Level Security
+-- Row-Level Security — DISABLED for prototype
+-- Re-enable for production by uncommenting the ALTER TABLE and
+-- CREATE POLICY statements below.
 -- ============================================================
 
--- Helper: read tenant_id from a session variable set per-request
+-- Helper functions (kept for future RLS)
 CREATE OR REPLACE FUNCTION current_tenant_id() RETURNS UUID AS $$
   SELECT COALESCE(
     NULLIF(current_setting('app.current_tenant_id', true), ''),
@@ -170,7 +172,6 @@ CREATE OR REPLACE FUNCTION current_tenant_id() RETURNS UUID AS $$
   )::UUID;
 $$ LANGUAGE sql STABLE;
 
--- RPC function to set tenant context (callable from Supabase JS client)
 CREATE OR REPLACE FUNCTION set_tenant_context(p_tenant_id UUID)
 RETURNS void AS $$
 BEGIN
@@ -180,117 +181,18 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION set_tenant_context(UUID) TO anon, authenticated;
 
--- Enable RLS on all tenant-scoped tables
-ALTER TABLE tenants       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE users         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE courts        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE items         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE members       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bookings      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE booking_items ENABLE ROW LEVEL SECURITY;
+-- RLS DISABLED — all tables are open to anon/authenticated roles via GRANT ALL above.
+-- Tenant isolation is enforced by the app layer (WHERE tenant_id = X) for now.
+ALTER TABLE tenants       DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users         DISABLE ROW LEVEL SECURITY;
+ALTER TABLE courts        DISABLE ROW LEVEL SECURITY;
+ALTER TABLE items         DISABLE ROW LEVEL SECURITY;
+ALTER TABLE members       DISABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings      DISABLE ROW LEVEL SECURITY;
+ALTER TABLE booking_items DISABLE ROW LEVEL SECURITY;
 
--- ── Tenants ──────────────────────────────────────────────────
--- SELECT/UPDATE/DELETE: only own tenant
-DROP POLICY IF EXISTS tenants_select ON tenants;
-CREATE POLICY tenants_select ON tenants
-  FOR SELECT USING (id = current_tenant_id());
-
-DROP POLICY IF EXISTS tenants_update ON tenants;
-CREATE POLICY tenants_update ON tenants
-  FOR UPDATE USING (id = current_tenant_id());
-
--- INSERT: allow creating new tenants (no tenant context yet)
-DROP POLICY IF EXISTS tenants_insert ON tenants;
-CREATE POLICY tenants_insert ON tenants
-  FOR INSERT WITH CHECK (true);
-
--- ── Users ────────────────────────────────────────────────────
--- SELECT: allow without tenant context for login (match by username)
-DROP POLICY IF EXISTS users_select ON users;
-CREATE POLICY users_select ON users
-  FOR SELECT USING (
-    tenant_id = current_tenant_id()
-    OR current_tenant_id() = '00000000-0000-0000-0000-000000000000'::UUID
-  );
-
-DROP POLICY IF EXISTS users_insert ON users;
-CREATE POLICY users_insert ON users
-  FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS users_update ON users;
-CREATE POLICY users_update ON users
-  FOR UPDATE USING (tenant_id = current_tenant_id());
-
--- ── Courts ───────────────────────────────────────────────────
-DROP POLICY IF EXISTS courts_select ON courts;
-CREATE POLICY courts_select ON courts
-  FOR SELECT USING (tenant_id = current_tenant_id());
-
-DROP POLICY IF EXISTS courts_insert ON courts;
-CREATE POLICY courts_insert ON courts
-  FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS courts_update ON courts;
-CREATE POLICY courts_update ON courts
-  FOR UPDATE USING (tenant_id = current_tenant_id());
-
-DROP POLICY IF EXISTS courts_delete ON courts;
-CREATE POLICY courts_delete ON courts
-  FOR DELETE USING (tenant_id = current_tenant_id());
-
--- ── Items ────────────────────────────────────────────────────
-DROP POLICY IF EXISTS items_select ON items;
-CREATE POLICY items_select ON items
-  FOR SELECT USING (tenant_id = current_tenant_id());
-
-DROP POLICY IF EXISTS items_insert ON items;
-CREATE POLICY items_insert ON items
-  FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS items_update ON items;
-CREATE POLICY items_update ON items
-  FOR UPDATE USING (tenant_id = current_tenant_id());
-
-DROP POLICY IF EXISTS items_delete ON items;
-CREATE POLICY items_delete ON items
-  FOR DELETE USING (tenant_id = current_tenant_id());
-
--- ── Members ──────────────────────────────────────────────────
-DROP POLICY IF EXISTS members_select ON members;
-CREATE POLICY members_select ON members
-  FOR SELECT USING (tenant_id = current_tenant_id());
-
-DROP POLICY IF EXISTS members_insert ON members;
-CREATE POLICY members_insert ON members
-  FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS members_update ON members;
-CREATE POLICY members_update ON members
-  FOR UPDATE USING (tenant_id = current_tenant_id());
-
--- ── Bookings ─────────────────────────────────────────────────
-DROP POLICY IF EXISTS bookings_select ON bookings;
-CREATE POLICY bookings_select ON bookings
-  FOR SELECT USING (tenant_id = current_tenant_id());
-
-DROP POLICY IF EXISTS bookings_insert ON bookings;
-CREATE POLICY bookings_insert ON bookings
-  FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS bookings_update ON bookings;
-CREATE POLICY bookings_update ON bookings
-  FOR UPDATE USING (tenant_id = current_tenant_id());
-
--- ── Booking Items ────────────────────────────────────────────
-DROP POLICY IF EXISTS booking_items_select ON booking_items;
-CREATE POLICY booking_items_select ON booking_items
-  FOR SELECT USING (
-    booking_id IN (SELECT id FROM bookings WHERE tenant_id = current_tenant_id())
-  );
-
-DROP POLICY IF EXISTS booking_items_insert ON booking_items;
-CREATE POLICY booking_items_insert ON booking_items
-  FOR INSERT WITH CHECK (true);
+-- RLS policies removed for prototype. Re-add when enabling RLS for production.
+-- See git history for the full policy definitions.
 
 -- ============================================================
 -- Helper functions: password hashing
