@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #F6F2E9;
-  --foreground: #1A1715;
+  --background: #F8FAFC;
+  --foreground: #0F172A;
 }
 
 body {
@@ -14,7 +14,6 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Hide scrollbar for cleaner mobile look */
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

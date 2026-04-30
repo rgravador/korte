@@ -31,14 +31,14 @@ function BookingDetailSheet({
     <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-ink/30" />
       <div
-        className="relative bg-paper rounded-t-2xl w-full max-w-lg p-5 pb-8"
+        className="relative bg-white shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-line rounded-full mx-auto mb-4" />
         <div className="flex justify-between items-start mb-3">
           <div>
-            <h3 className="font-display text-xl font-light">{booking.memberName}</h3>
-            <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mt-1">
+            <h3 className="font-sans text-xl font-semibold">{booking.memberName}</h3>
+            <p className="font-sans text-xs text-ink-3 mt-1">
               {court?.name} · {formatHour(booking.startHour)} · {booking.durationMinutes} min
             </p>
           </div>
@@ -46,41 +46,41 @@ function BookingDetailSheet({
         </div>
 
         {booking.items.length > 0 && (
-          <div className="bg-paper-2 rounded-card p-3 mb-3">
-            <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-2">Add-on Items</div>
+          <div className="bg-surface-3 rounded-[16px] p-3 mb-3">
+            <div className="font-sans text-xs font-semibold text-ink-3 mb-2">Add-on items</div>
             {booking.items.map((item, i) => (
-              <div key={i} className="flex justify-between font-mono text-[10px] py-1">
+              <div key={i} className="flex justify-between font-sans text-xs py-1">
                 <span>{item.itemName} x{item.quantity}</span>
                 <span>₱{(item.unitPrice * item.quantity).toLocaleString()}</span>
               </div>
             ))}
-            <div className="flex justify-between font-mono text-[10px] pt-2 mt-1 border-t border-line">
+            <div className="flex justify-between font-sans text-xs pt-2 mt-1 border-t border-line">
               <span>Court fee</span>
               <span>₱{booking.courtFee.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between font-display text-base mt-1 pt-1 border-t border-line">
+            <div className="flex justify-between font-sans text-base font-semibold mt-1 pt-1 border-t border-line">
               <span>Total</span>
-              <span className="italic text-accent-deep">₱{booking.total.toLocaleString()}</span>
+              <span className="text-primary">₱{booking.total.toLocaleString()}</span>
             </div>
           </div>
         )}
 
         {booking.items.length === 0 && (
-          <div className="bg-paper-2 rounded-card p-3 mb-3">
-            <div className="flex justify-between font-display text-base">
+          <div className="bg-surface-3 rounded-[16px] p-3 mb-3">
+            <div className="flex justify-between font-sans text-base font-semibold">
               <span>Court fee</span>
-              <span className="italic text-accent-deep">₱{booking.courtFee.toLocaleString()}</span>
+              <span className="text-primary">₱{booking.courtFee.toLocaleString()}</span>
             </div>
           </div>
         )}
 
-        <p className="font-mono text-[8px] text-ink-3 tracking-wider mb-3">Collect payment at counter</p>
+        <p className="font-sans text-xs text-ink-3 mb-3">Collect payment at counter</p>
 
         <div className="flex gap-2">
           {booking.status === 'pending' && (
             <button
               onClick={() => onStatusChange(booking.id, 'confirmed')}
-              className="flex-1 bg-ink text-paper py-3 rounded-lg font-sans text-xs font-medium"
+              className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium"
             >
               Confirm
             </button>
@@ -88,7 +88,7 @@ function BookingDetailSheet({
           {['confirmed', 'pending'].includes(booking.status) && (
             <button
               onClick={() => onStatusChange(booking.id, 'checked_in')}
-              className="flex-1 bg-signal text-paper py-3 rounded-lg font-sans text-xs font-medium"
+              className="flex-1 bg-signal text-white py-3 rounded-xl font-sans text-xs font-medium"
             >
               Check In
             </button>
@@ -97,13 +97,13 @@ function BookingDetailSheet({
             <>
               <button
                 onClick={() => onStatusChange(booking.id, 'no_show')}
-                className="flex-1 border border-warn text-warn py-3 rounded-lg font-sans text-xs font-medium"
+                className="flex-1 bg-warn-soft text-warn py-3 rounded-xl font-sans text-xs font-medium"
               >
                 No-show
               </button>
               <button
                 onClick={() => onStatusChange(booking.id, 'cancelled')}
-                className="flex-1 border border-line text-ink-3 py-3 rounded-lg font-sans text-xs font-medium"
+                className="flex-1 border border-line text-ink-3 py-3 rounded-xl font-sans text-xs font-medium"
               >
                 Cancel
               </button>
@@ -157,36 +157,36 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream max-w-lg mx-auto">
+    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
       <div className="px-5 pt-4 pb-20">
         <Header />
 
-        <h1 className="font-display font-light text-2xl leading-tight tracking-tight mb-1">
+        <h1 className="font-sans font-bold text-2xl leading-tight tracking-tight mb-1">
           Good morning,<br />
-          <em className="text-accent-deep">{firstName}.</em>
+          <span className="text-primary">{firstName}.</span>
         </h1>
-        <p className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-4">
+        <p className="font-sans text-xs text-ink-3 mb-4">
           {dayName} {dayDate} · {tenant.name}
         </p>
 
         {/* KPIs */}
         <div className="grid grid-cols-3 gap-1.5 mb-4">
-          <div className="bg-paper-2 rounded-[10px] p-2.5">
-            <div className="font-mono text-[8px] tracking-wider uppercase text-ink-3 mb-1">Today</div>
-            <div className="font-display text-xl leading-none">{todayCount}</div>
+          <div className="bg-white shadow-card rounded-[16px] p-2.5">
+            <div className="font-sans text-xs font-medium text-ink-3 mb-1">Today</div>
+            <div className="font-sans text-xl font-bold leading-none">{todayCount}</div>
           </div>
-          <div className="bg-paper-2 rounded-[10px] p-2.5">
-            <div className="font-mono text-[8px] tracking-wider uppercase text-ink-3 mb-1">No-shows</div>
-            <div className="font-display text-xl leading-none">{noShowCount}</div>
+          <div className="bg-white shadow-card rounded-[16px] p-2.5">
+            <div className="font-sans text-xs font-medium text-ink-3 mb-1">No-shows</div>
+            <div className="font-sans text-xl font-bold leading-none">{noShowCount}</div>
           </div>
-          <div className="bg-paper-2 rounded-[10px] p-2.5">
-            <div className="font-mono text-[8px] tracking-wider uppercase text-ink-3 mb-1">Utiliz.</div>
-            <div className="font-display text-xl leading-none">{utilization}%</div>
+          <div className="bg-white shadow-card rounded-[16px] p-2.5">
+            <div className="font-sans text-xs font-medium text-ink-3 mb-1">Utilization</div>
+            <div className="font-sans text-xl font-bold leading-none">{utilization}%</div>
           </div>
         </div>
 
         {/* Bookings list */}
-        <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-1.5">Next up</div>
+        <div className="font-sans text-xs text-ink-3 mb-1.5">Next up</div>
 
         <div>
           {todayBookings.map((booking) => {
@@ -201,10 +201,10 @@ export default function DashboardPage() {
                 className="w-full grid grid-cols-[44px_1fr_auto] gap-2.5 items-center py-2.5 border-b border-line-2 text-left"
               >
                 <div>
-                  <div className="font-mono text-[11px] leading-tight">
+                  <div className="font-sans text-sm font-semibold leading-tight">
                     {booking.startHour}:00
                   </div>
-                  <div className="font-mono text-[8px] text-ink-3">
+                  <div className="font-sans text-xs text-ink-3">
                     {booking.durationMinutes} min
                   </div>
                 </div>
@@ -212,7 +212,7 @@ export default function DashboardPage() {
                   <div className="font-medium text-xs text-ink mb-px">
                     {booking.memberName}
                   </div>
-                  <div className="font-mono text-[9px] text-ink-3 tracking-wide">
+                  <div className="font-sans text-xs text-ink-3">
                     {court?.name} · Pickleball
                     {hasItems && ` · ${booking.items.map((i) => `${i.quantity} ${i.itemName.split(' ')[0].toLowerCase()}`).join(', ')}`}
                   </div>
@@ -223,7 +223,7 @@ export default function DashboardPage() {
           })}
 
           {todayBookings.length === 0 && (
-            <div className="text-center py-8 text-ink-3 font-mono text-xs">
+            <div className="text-center py-8 text-ink-3 font-sans text-xs">
               No bookings today
             </div>
           )}

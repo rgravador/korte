@@ -48,7 +48,7 @@ export default function SchedulePage() {
       d.setDate(today.getDate() + i);
       return {
         date: d.toISOString().split('T')[0],
-        dayAbbr: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
+        dayAbbr: d.toLocaleDateString('en-US', { weekday: 'short' }),
         dayNum: d.getDate(),
       };
     });
@@ -126,11 +126,11 @@ export default function SchedulePage() {
   const gridColCount = filteredCourts.length;
 
   return (
-    <div className="min-h-screen bg-cream max-w-lg mx-auto">
+    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
       <div className="px-5 pt-4 pb-24">
         <Header />
 
-        <h1 className="font-display font-light text-2xl tracking-tight mb-3">
+        <h1 className="font-sans font-light text-2xl tracking-tight mb-3">
           Schedule
         </h1>
 
@@ -144,12 +144,12 @@ export default function SchedulePage() {
                 onClick={() => setSelectedDate(day.date)}
                 className={`flex-1 flex flex-col items-center py-1.5 rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-ink text-paper'
-                    : 'bg-paper-2 text-ink-2'
+                    ? 'bg-primary text-white'
+                    : 'bg-primary-faint text-ink'
                 }`}
               >
-                <span className="font-mono text-[7px] tracking-wider">{day.dayAbbr}</span>
-                <span className="font-display text-base leading-none mt-0.5">{day.dayNum}</span>
+                <span className="font-sans text-[11px]">{day.dayAbbr}</span>
+                <span className="font-sans text-base leading-none mt-0.5">{day.dayNum}</span>
               </button>
             );
           })}
@@ -163,9 +163,9 @@ export default function SchedulePage() {
             min={todayStr}
             onChange={(e) => setSelectedDate(e.target.value)}
             aria-label="Select date"
-            className="w-1/2 shrink-0 bg-paper rounded-lg px-3 py-2 text-sm font-mono border border-line focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink"
+            className="w-1/2 shrink-0 bg-white rounded-xl px-3 py-2 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
-          <span className="font-display text-lg tracking-tight text-ink truncate">
+          <span className="font-sans text-lg tracking-tight text-ink truncate">
             {formatSelectedDate(selectedDate)}
           </span>
         </div>
@@ -178,10 +178,10 @@ export default function SchedulePage() {
               <button
                 key={chip.id}
                 onClick={() => setCourtFilter(chip.id)}
-                className={`font-mono text-[9px] tracking-wider uppercase px-3 py-1.5 rounded-pill transition-colors ${
+                className={`font-sans text-xs px-3 py-1.5 rounded-full transition-colors ${
                   isActive
-                    ? 'bg-ink text-paper'
-                    : 'bg-paper-2 text-ink-3'
+                    ? 'bg-primary text-white'
+                    : 'bg-surface-3 text-ink-3'
                 }`}
               >
                 {chip.label}
@@ -192,7 +192,7 @@ export default function SchedulePage() {
 
         {/* Time-by-court grid */}
         <div className="overflow-x-auto">
-        <div className="bg-paper rounded-card overflow-hidden border border-line-2">
+        <div className="bg-white rounded-[16px] shadow-card overflow-hidden border border-line-2">
           {/* Grid header */}
           <div
             className="grid border-b border-line-2"
@@ -204,7 +204,7 @@ export default function SchedulePage() {
             {filteredCourts.map((court) => (
               <div
                 key={court.id}
-                className="font-mono text-[8px] tracking-wider uppercase text-ink-3 text-center p-1.5 border-l border-line-2"
+                className="font-sans text-xs text-ink-3 text-center p-1.5 border-l border-line-2"
               >
                 {court.name.replace('Court ', 'C')}
               </div>
@@ -221,7 +221,7 @@ export default function SchedulePage() {
               }}
             >
               {/* Hour label */}
-              <div className="font-mono text-[8px] text-ink-3 p-1.5 flex items-center">
+              <div className="font-sans text-xs text-ink-3 p-1.5 flex items-center">
                 {formatHour(hour)}
               </div>
 
@@ -236,23 +236,23 @@ export default function SchedulePage() {
                 let content: React.ReactNode;
 
                 if (isBooked && isRecurring) {
-                  cellClass += ' bg-accent text-ink';
+                  cellClass += ' bg-amber text-white';
                   content = (
-                    <span className="font-mono text-[8px] font-medium">
+                    <span className="font-sans text-xs font-medium">
                       Rec
                     </span>
                   );
                 } else if (isBooked) {
-                  cellClass += ' bg-ink text-paper';
+                  cellClass += ' bg-primary text-white';
                   content = (
-                    <span className="font-mono text-[8px] font-medium">
+                    <span className="font-sans text-xs font-medium">
                       {getInitials(booking.memberName)}
                     </span>
                   );
                 } else {
-                  cellClass += ' bg-paper text-ink-4 hover:bg-paper-2';
+                  cellClass += ' bg-white text-ink-4 hover:bg-surface-3';
                   content = (
-                    <span className="font-mono text-[8px]">&mdash;</span>
+                    <span className="font-sans text-xs">&mdash;</span>
                   );
                 }
 
@@ -275,20 +275,20 @@ export default function SchedulePage() {
         {/* Legend */}
         <div className="flex items-center gap-4 mt-3">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-ink" />
-            <span className="font-mono text-[8px] text-ink-3 tracking-wider uppercase">
+            <div className="w-3 h-3 rounded-sm bg-primary" />
+            <span className="font-sans text-xs text-ink-3">
               Booked
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-accent" />
-            <span className="font-mono text-[8px] text-ink-3 tracking-wider uppercase">
+            <div className="w-3 h-3 rounded-sm bg-amber" />
+            <span className="font-sans text-xs text-ink-3">
               Recurring
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm border border-line bg-paper" />
-            <span className="font-mono text-[8px] text-ink-3 tracking-wider uppercase">
+            <div className="w-3 h-3 rounded-sm border border-line bg-white" />
+            <span className="font-sans text-xs text-ink-3">
               Open
             </span>
           </div>
@@ -299,7 +299,7 @@ export default function SchedulePage() {
       <Link
         href="/booking/new"
         aria-label="Create new booking"
-        className="fixed bottom-20 right-4 z-50 w-12 h-12 bg-ink text-paper rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform max-w-lg"
+        className="fixed bottom-20 right-4 z-50 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center shadow-card-hover active:scale-95 transition-transform max-w-lg"
       >
         <svg
           viewBox="0 0 24 24"
@@ -320,32 +320,32 @@ export default function SchedulePage() {
           className="fixed inset-0 z-[60] flex items-end justify-center"
           onClick={() => setSelectedBooking(null)}
         >
-          <div className="absolute inset-0 bg-ink/30" />
+          <div className="absolute inset-0 bg-black/30" />
           <div
-            className="relative bg-paper rounded-t-2xl w-full max-w-lg p-5 pb-8"
+            className="relative bg-white shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-line rounded-full mx-auto mb-4" />
-            <h3 className="font-display text-xl font-light mb-1">
+            <h3 className="font-sans text-xl font-light mb-1">
               {selectedBooking.memberName}
             </h3>
-            <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-3">
+            <p className="font-sans text-xs text-ink-3 mb-3">
               {courts.find((c) => c.id === selectedBooking.courtId)?.name} ·{' '}
               {selectedBooking.startHour}:00 ·{' '}
               {selectedBooking.durationMinutes} min ·{' '}
               {selectedBooking.isRecurring ? 'Recurring' : 'One-time'}
             </p>
-            <div className="bg-paper-2 rounded-card p-3 mb-3">
-              <div className="flex justify-between font-display text-base">
+            <div className="bg-surface-3 rounded-[16px] p-3 mb-3">
+              <div className="flex justify-between font-sans text-base">
                 <span>Total</span>
-                <span className="italic text-accent-deep">
+                <span className="text-primary font-bold">
                   ₱{selectedBooking.total.toLocaleString()}
                 </span>
               </div>
             </div>
             <button
               onClick={() => setSelectedBooking(null)}
-              className="w-full bg-ink text-paper py-3 rounded-lg font-sans text-xs font-medium"
+              className="w-full bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium"
             >
               Close
             </button>

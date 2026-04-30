@@ -76,30 +76,30 @@ function MemberDetailSheet({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-ink/30" />
+      <div className="absolute inset-0 bg-black/30" />
       <div
-        className="relative bg-paper rounded-t-2xl w-full max-w-lg p-5 pb-8 max-h-[85vh] overflow-y-auto"
+        className="relative bg-white shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8 max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-line rounded-full mx-auto mb-4" />
 
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-paper-2 border border-line flex items-center justify-center font-mono text-xs font-medium text-ink-2 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-surface-3 border border-line flex items-center justify-center font-sans text-xs font-medium text-ink-2 shrink-0">
             {getInitials(member.firstName, member.lastName)}
           </div>
           <div className="flex-1">
-            <h3 className="font-display text-xl font-light">
+            <h3 className="font-sans text-xl font-light">
               {member.firstName} {member.lastName}
             </h3>
-            <p className="font-mono text-[9px] text-ink-3 tracking-wider mt-0.5">
+            <p className="font-sans text-xs text-ink-3 mt-0.5">
               {member.phone} · {member.email}
             </p>
           </div>
           <span
-            className={`px-2 py-0.5 rounded-pill font-mono text-[8px] tracking-wider uppercase ${
+            className={`px-2 py-0.5 rounded-full font-sans text-xs ${
               member.tier === 'vip'
-                ? 'bg-accent-soft text-accent-deep'
-                : 'bg-paper-2 text-ink-3'
+                ? 'bg-primary-soft text-primary-deep'
+                : 'bg-surface-3 text-ink-3'
             }`}
           >
             {member.tier}
@@ -107,23 +107,23 @@ function MemberDetailSheet({
         </div>
 
         <div className="grid grid-cols-3 gap-1.5 mb-4">
-          <div className="bg-paper-2 rounded-[10px] p-2.5">
-            <div className="font-mono text-[8px] tracking-wider uppercase text-ink-3 mb-1">Bookings</div>
-            <div className="font-display text-xl leading-none">{member.totalBookings}</div>
+          <div className="bg-surface-3 rounded-[10px] p-2.5">
+            <div className="font-sans text-xs text-ink-3 mb-1">Bookings</div>
+            <div className="font-sans text-xl leading-none">{member.totalBookings}</div>
           </div>
-          <div className="bg-paper-2 rounded-[10px] p-2.5">
-            <div className="font-mono text-[8px] tracking-wider uppercase text-ink-3 mb-1">No-shows</div>
-            <div className="font-display text-xl leading-none">{member.totalNoShows}</div>
+          <div className="bg-surface-3 rounded-[10px] p-2.5">
+            <div className="font-sans text-xs text-ink-3 mb-1">No-shows</div>
+            <div className="font-sans text-xl leading-none">{member.totalNoShows}</div>
           </div>
-          <div className="bg-paper-2 rounded-[10px] p-2.5">
-            <div className="font-mono text-[8px] tracking-wider uppercase text-ink-3 mb-1">Last visit</div>
-            <div className="font-display text-sm leading-none mt-1">
+          <div className="bg-surface-3 rounded-[10px] p-2.5">
+            <div className="font-sans text-xs text-ink-3 mb-1">Last visit</div>
+            <div className="font-sans text-sm leading-none mt-1">
               {member.lastVisit ? formatRelativeDate(member.lastVisit) : 'Never'}
             </div>
           </div>
         </div>
 
-        <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-1.5">
+        <div className="font-sans text-xs text-ink-3 mb-1.5">
           Booking history
         </div>
 
@@ -140,7 +140,7 @@ function MemberDetailSheet({
                     <div className="font-medium text-xs text-ink">
                       {formatDate(booking.date)} · {formatHour(booking.startHour)}
                     </div>
-                    <div className="font-mono text-[9px] text-ink-3 tracking-wide">
+                    <div className="font-sans text-xs text-ink-3">
                       {court?.name} · {booking.durationMinutes} min
                     </div>
                   </div>
@@ -150,7 +150,7 @@ function MemberDetailSheet({
             })}
           </div>
         ) : (
-          <div className="text-center py-6 text-ink-3 font-mono text-xs">
+          <div className="text-center py-6 text-ink-3 font-sans text-xs">
             No bookings yet
           </div>
         )}
@@ -195,13 +195,13 @@ function AddMemberSheet({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-ink/30" />
+      <div className="absolute inset-0 bg-black/30" />
       <div
-        className="relative bg-paper rounded-t-2xl w-full max-w-lg p-5 pb-8"
+        className="relative bg-white shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-line rounded-full mx-auto mb-4" />
-        <h3 className="font-display text-xl font-light mb-4">Add Member</h3>
+        <h3 className="font-sans text-xl font-light mb-4">Add Member</h3>
 
         <div className="space-y-3 mb-4">
           <div className="grid grid-cols-2 gap-2">
@@ -210,14 +210,14 @@ function AddMemberSheet({
               placeholder="First name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="bg-paper-2 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-accent"
+              className="bg-surface-3 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
             />
             <input
               type="text"
               placeholder="Last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="bg-paper-2 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-accent"
+              className="bg-surface-3 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <input
@@ -225,35 +225,35 @@ function AddMemberSheet({
             placeholder="Phone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full bg-paper-2 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-accent"
+            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-paper-2 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-accent"
+            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
-        <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-2">Tier</div>
+        <div className="font-sans text-xs text-ink-3 mb-2">Tier</div>
         <div className="flex gap-2 mb-5">
           <button
             onClick={() => setTier('regular')}
-            className={`px-4 py-1.5 rounded-pill font-mono text-[10px] tracking-wider uppercase transition-colors ${
+            className={`px-4 py-1.5 rounded-full font-sans text-xs transition-colors ${
               tier === 'regular'
-                ? 'bg-ink text-paper'
-                : 'bg-paper-2 text-ink-3'
+                ? 'bg-primary text-white'
+                : 'bg-surface-3 text-ink-3'
             }`}
           >
             Regular
           </button>
           <button
             onClick={() => setTier('vip')}
-            className={`px-4 py-1.5 rounded-pill font-mono text-[10px] tracking-wider uppercase transition-colors ${
+            className={`px-4 py-1.5 rounded-full font-sans text-xs transition-colors ${
               tier === 'vip'
-                ? 'bg-ink text-paper'
-                : 'bg-paper-2 text-ink-3'
+                ? 'bg-primary text-white'
+                : 'bg-surface-3 text-ink-3'
             }`}
           >
             VIP
@@ -264,9 +264,9 @@ function AddMemberSheet({
           <button
             onClick={handleSubmit}
             disabled={!isValid}
-            className={`flex-1 py-3 rounded-lg font-sans text-xs font-medium transition-colors ${
+            className={`flex-1 py-3 rounded-xl font-sans text-xs font-medium transition-colors ${
               isValid
-                ? 'bg-ink text-paper'
+                ? 'bg-primary text-white'
                 : 'bg-line text-ink-4 cursor-not-allowed'
             }`}
           >
@@ -274,7 +274,7 @@ function AddMemberSheet({
           </button>
           <button
             onClick={onClose}
-            className="flex-1 border border-line text-ink-3 py-3 rounded-lg font-sans text-xs font-medium"
+            className="flex-1 border border-line text-ink-3 py-3 rounded-xl font-sans text-xs font-medium"
           >
             Cancel
           </button>
@@ -325,12 +325,12 @@ export default function MembersPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-cream max-w-lg mx-auto">
+    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
       <div className="px-5 pt-4 pb-20">
         <Header />
 
-        <h1 className="font-display font-light text-2xl tracking-tight mb-1">Members</h1>
-        <p className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-4">
+        <h1 className="font-sans font-light text-2xl tracking-tight mb-1">Members</h1>
+        <p className="font-sans text-xs text-ink-3 mb-4">
           {activeCount} active · {lapsedCount} lapsed
         </p>
 
@@ -352,7 +352,7 @@ export default function MembersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search members"
-            className="w-full bg-paper-2 rounded-lg pl-9 pr-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-accent"
+            className="w-full bg-surface-3 rounded-xl pl-9 pr-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -362,10 +362,10 @@ export default function MembersPage() {
             <button
               key={chip.key}
               onClick={() => setActiveFilter(chip.key)}
-              className={`px-3 py-1 rounded-pill font-mono text-[10px] tracking-wider uppercase transition-colors ${
+              className={`px-3 py-1 rounded-full font-sans text-xs transition-colors ${
                 activeFilter === chip.key
-                  ? 'bg-ink text-paper'
-                  : 'bg-paper-2 text-ink-3'
+                  ? 'bg-primary text-white'
+                  : 'bg-surface-3 text-ink-3'
               }`}
             >
               {chip.label}
@@ -381,25 +381,25 @@ export default function MembersPage() {
               onClick={() => setSelectedMember(member)}
               className="w-full grid grid-cols-[32px_1fr_auto] gap-2.5 items-center py-2.5 border-b border-line-2 text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-paper-2 border border-line flex items-center justify-center font-mono text-[10px] font-medium text-ink-2">
+              <div className="w-8 h-8 rounded-full bg-surface-3 border border-line flex items-center justify-center font-sans text-xs font-medium text-ink-2">
                 {getInitials(member.firstName, member.lastName)}
               </div>
               <div>
                 <div className="font-medium text-xs text-ink">
                   {member.firstName} {member.lastName}
                 </div>
-                <div className="font-mono text-[9px] text-ink-3 tracking-wide">
+                <div className="font-sans text-xs text-ink-3">
                   {member.totalBookings} visits · last {formatRelativeDate(member.lastVisit)}
                 </div>
               </div>
-              <div className="font-mono text-[9px] text-ink-3 text-right">
+              <div className="font-sans text-xs text-ink-3 text-right">
                 {member.totalBookings} bookings
               </div>
             </button>
           ))}
 
           {filteredMembers.length === 0 && (
-            <div className="text-center py-8 text-ink-3 font-mono text-xs">
+            <div className="text-center py-8 text-ink-3 font-sans text-xs">
               No members found
             </div>
           )}
@@ -410,7 +410,7 @@ export default function MembersPage() {
       <button
         onClick={() => setShowAddSheet(true)}
         aria-label="Add new member"
-        className="fixed bottom-20 right-4 max-w-lg w-12 h-12 bg-ink text-paper rounded-full flex items-center justify-center shadow-lg z-40"
+        className="fixed bottom-20 right-4 max-w-lg w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center shadow-card-hover z-40"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
           <path d="M12 5v14M5 12h14" />

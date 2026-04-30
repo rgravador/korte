@@ -26,17 +26,17 @@ export function Header() {
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center gap-2">
-        <div className="font-display font-normal italic text-lg tracking-tight">
-          Court<span className="text-accent-deep not-italic">.</span>
+        <div className="font-sans font-semibold text-lg tracking-tight">
+          Court<span className="text-primary">.</span>
         </div>
         {/* Online/offline indicator */}
         {!isOnline && (
-          <span className="font-mono text-[8px] tracking-wider uppercase px-1.5 py-0.5 rounded bg-status-pending-bg text-status-pending-text">
+          <span className="text-xs font-medium px-2.5 py-1 rounded-tag bg-warn-soft text-warn-text">
             Offline
           </span>
         )}
         {isOnline && pendingSync > 0 && (
-          <span className="font-mono text-[8px] tracking-wider uppercase px-1.5 py-0.5 rounded bg-accent-soft text-status-confirmed-text">
+          <span className="text-xs font-medium px-2.5 py-1 rounded-tag bg-primary-soft text-primary-deep">
             Syncing {pendingSync}
           </span>
         )}
@@ -45,28 +45,28 @@ export function Header() {
         <button
           onClick={() => setShowMenu(!showMenu)}
           aria-label="User menu"
-          className="w-7 h-7 rounded-full bg-ink text-paper flex items-center justify-center font-mono text-[10px] font-medium"
+          className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center font-sans text-[10px] font-medium"
         >
           {initials}
         </button>
         {showMenu && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-            <div role="menu" className="absolute right-0 top-9 bg-paper rounded-card border border-line shadow-lg z-50 w-48 overflow-hidden">
+            <div role="menu" className="absolute right-0 top-9 bg-white rounded-[16px] border border-line shadow-dropdown z-50 w-48 overflow-hidden">
               <div className="px-3 py-2.5 border-b border-line-2">
                 <div className="font-medium text-xs">{currentUser?.displayName}</div>
-                <div className="font-mono text-[8px] text-ink-3 tracking-wider uppercase">{currentUser?.role.replace('_', ' ')}</div>
+                <div className="text-xs text-ink-3">{currentUser?.role.replace('_', ' ')}</div>
               </div>
               <div className="px-3 py-2 border-b border-line-2 flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-signal' : 'bg-warn'}`} />
-                <span className="font-mono text-[8px] text-ink-3 tracking-wider uppercase">
+                <span className="text-xs text-ink-3">
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
               </div>
               <button
                 onClick={handleLogout}
                 aria-label="Sign out"
-                className="w-full px-3 py-2.5 text-left text-xs text-warn hover:bg-paper-2"
+                className="w-full px-3 py-2.5 text-left text-xs text-warn hover:bg-surface-3"
               >
                 Sign out
               </button>

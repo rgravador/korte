@@ -49,51 +49,51 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream max-w-lg mx-auto flex flex-col justify-center px-5">
-      <div className="font-display font-normal italic text-lg tracking-tight mb-8">
-        Court<span className="text-accent-deep not-italic">.</span>
+    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto flex flex-col justify-center px-5">
+      <div className="font-sans font-bold text-lg tracking-tight mb-8">
+        Court<span className="text-primary">.</span>
       </div>
 
-      <h1 className="font-display font-light text-3xl tracking-tight mb-1">
-        Welcome <em className="text-accent-deep">back.</em>
+      <h1 className="font-sans font-bold text-3xl tracking-tight mb-1">
+        Welcome <span className="text-primary font-bold">back.</span>
       </h1>
-      <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-8">
+      <p className="font-sans text-xs text-ink-3 mb-8">
         Sign in to manage your facility
       </p>
 
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
-          <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Username</label>
+          <label className="font-sans text-xs text-ink-3 block mb-1.5">Username</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Enter username"
             autoComplete="username"
-            className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink"
+            className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
 
         <div>
-          <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Password</label>
+          <label className="font-sans text-xs text-ink-3 block mb-1.5">Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter password"
             autoComplete="current-password"
-            className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink"
+            className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
         </div>
 
         {error && (
-          <p className="text-warn text-xs font-mono">{error}</p>
+          <p className="text-warn text-xs font-sans">{error}</p>
         )}
 
         <button
           type="submit"
           disabled={!username || !password || loading}
-          className="w-full bg-ink text-paper py-4 rounded-lg font-sans text-sm font-medium disabled:opacity-40"
+          className="w-full bg-primary text-white py-4 rounded-xl font-sans text-sm font-medium disabled:opacity-40"
         >
           {loading ? 'Signing in...' : 'Sign In'}
         </button>

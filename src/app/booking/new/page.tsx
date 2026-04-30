@@ -169,33 +169,33 @@ function NewBookingForm() {
   };
 
   return (
-    <div className="min-h-screen bg-cream max-w-lg mx-auto">
+    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
       <div className="px-5 pt-4 pb-8">
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">
           <button
             onClick={() => router.back()}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-paper-2"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-3"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-ink">
               <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <h1 className="font-display font-light text-xl tracking-tight">New Booking</h1>
+          <h1 className="font-sans font-light text-xl tracking-tight">New Booking</h1>
         </div>
 
         {/* Validation errors */}
         {errors.length > 0 && (
-          <div className="bg-warn/10 border border-warn/30 rounded-card p-3 mb-4">
+          <div className="bg-warn/10 border border-warn/30 rounded-[16px] p-3 mb-4">
             {errors.map((err, i) => (
-              <p key={i} className="font-mono text-[10px] text-warn">{err}</p>
+              <p key={i} className="font-sans text-xs text-warn">{err}</p>
             ))}
           </div>
         )}
 
         {/* A) Court Selection */}
         <div className="mb-5">
-          <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-2">Court</div>
+          <div className="font-sans text-xs text-ink-3 mb-2">Court</div>
           <div className="flex gap-2">
             {activeCourts.map((court) => {
               const isSelected = court.id === selectedCourtId;
@@ -206,16 +206,16 @@ function NewBookingForm() {
                     setSelectedCourtId(court.id);
                     setSelectedHour(null);
                   }}
-                  className={`flex-1 rounded-card px-3 py-2.5 text-left transition-colors ${
+                  className={`flex-1 rounded-[16px] px-3 py-2.5 text-left transition-colors ${
                     isSelected
-                      ? 'bg-ink text-paper'
-                      : 'bg-paper-2 text-ink hover:bg-cream-2'
+                      ? 'bg-primary text-white'
+                      : 'bg-surface-3 text-ink hover:bg-surface-3'
                   }`}
                 >
-                  <div className={`font-sans text-xs font-medium ${isSelected ? 'text-paper' : 'text-ink'}`}>
+                  <div className={`font-sans text-xs font-medium ${isSelected ? 'text-white' : 'text-ink'}`}>
                     {court.name}
                   </div>
-                  <div className={`font-mono text-[9px] mt-0.5 ${isSelected ? 'text-paper/70' : 'text-ink-3'}`}>
+                  <div className={`font-sans text-xs mt-0.5 ${isSelected ? 'text-white/70' : 'text-ink-3'}`}>
                     ₱{court.hourlyRate}/hr
                   </div>
                 </button>
@@ -226,7 +226,7 @@ function NewBookingForm() {
 
         {/* B) Date & Time */}
         <div className="mb-5">
-          <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-2">Date & Time</div>
+          <div className="font-sans text-xs text-ink-3 mb-2">Date & time</div>
 
           <input
             type="date"
@@ -236,7 +236,7 @@ function NewBookingForm() {
               setSelectedHour(null);
             }}
             min={today}
-            className="w-full bg-paper-2 rounded-card px-3 py-2.5 font-mono text-xs text-ink border-none outline-none mb-3"
+            className="w-full bg-surface-3 rounded-[16px] px-3 py-2.5 font-sans text-xs text-ink border-none outline-none mb-3"
           />
 
           {selectedCourtId && (
@@ -249,12 +249,12 @@ function NewBookingForm() {
                     key={hour}
                     onClick={() => !isBooked && setSelectedHour(hour)}
                     disabled={isBooked}
-                    className={`rounded-lg px-2 py-2 font-mono text-[11px] text-center transition-colors ${
+                    className={`rounded-lg px-2 py-2 font-sans text-[11px] text-center transition-colors ${
                       isSelected
-                        ? 'bg-ink text-paper'
+                        ? 'bg-primary text-white'
                         : isBooked
-                          ? 'bg-paper-2 text-ink-4 line-through cursor-not-allowed'
-                          : 'bg-paper-2 text-ink hover:bg-cream-2'
+                          ? 'bg-surface-3 text-ink-4 line-through cursor-not-allowed'
+                          : 'bg-surface-3 text-ink hover:bg-surface-3'
                     }`}
                   >
                     {formatHour(hour)}
@@ -265,13 +265,13 @@ function NewBookingForm() {
           )}
 
           {!selectedCourtId && (
-            <p className="font-mono text-[10px] text-ink-3">Select a court to see available times</p>
+            <p className="font-sans text-xs text-ink-3">Select a court to see available times</p>
           )}
         </div>
 
         {/* C) Member Assignment */}
         <div className="mb-5">
-          <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-2">Member</div>
+          <div className="font-sans text-xs text-ink-3 mb-2">Member</div>
 
           {!selectedMemberId && !isWalkIn && (
             <>
@@ -281,32 +281,32 @@ function NewBookingForm() {
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
                   placeholder="Search by name or phone..."
-                  className="flex-1 bg-paper-2 rounded-card px-3 py-2.5 font-mono text-xs text-ink placeholder:text-ink-4 border-none outline-none"
+                  className="flex-1 bg-surface-3 rounded-[16px] px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 border-none outline-none"
                 />
                 <button
                   onClick={handleWalkIn}
-                  className="bg-paper-2 hover:bg-cream-2 rounded-card px-3 py-2.5 font-mono text-[10px] text-ink-3 whitespace-nowrap transition-colors"
+                  className="bg-surface-3 hover:bg-surface-3 rounded-[16px] px-3 py-2.5 font-sans text-xs text-ink-2 whitespace-nowrap transition-colors"
                 >
                   Walk-in
                 </button>
               </div>
 
               {filteredMembers.length > 0 && (
-                <div className="bg-paper rounded-card border border-line-2 overflow-hidden">
+                <div className="bg-white rounded-[16px] border border-line-2 overflow-hidden">
                   {filteredMembers.slice(0, 5).map((member) => (
                     <button
                       key={member.id}
                       onClick={() => handleSelectMember(member.id)}
-                      className="w-full flex justify-between items-center px-3 py-2.5 border-b border-line-2 last:border-b-0 text-left hover:bg-paper-2 transition-colors"
+                      className="w-full flex justify-between items-center px-3 py-2.5 border-b border-line-2 last:border-b-0 text-left hover:bg-surface-3 transition-colors"
                     >
                       <div>
                         <div className="font-sans text-xs font-medium text-ink">
                           {member.firstName} {member.lastName}
                         </div>
-                        <div className="font-mono text-[9px] text-ink-3">{member.phone}</div>
+                        <div className="font-sans text-xs text-ink-3">{member.phone}</div>
                       </div>
                       {member.tier === 'vip' && (
-                        <span className="font-mono text-[8px] tracking-wider uppercase text-accent-deep bg-accent-soft px-1.5 py-0.5 rounded-pill">
+                        <span className="font-sans text-xs text-primary-deep bg-primary-soft px-1.5 py-0.5 rounded-full">
                           VIP
                         </span>
                       )}
@@ -319,19 +319,19 @@ function NewBookingForm() {
 
           {(selectedMemberId || isWalkIn) && (
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-paper-2 rounded-card px-3 py-2.5 flex items-center gap-2">
-                <span className="font-sans text-xs font-medium text-ink">
+              <div className="flex-1 bg-primary-soft rounded-[16px] px-3 py-2.5 flex items-center gap-2">
+                <span className="font-sans text-xs font-medium text-primary-deep">
                   {memberDisplayName}
                 </span>
                 {selectedMember?.tier === 'vip' && (
-                  <span className="font-mono text-[8px] tracking-wider uppercase text-accent-deep bg-accent-soft px-1.5 py-0.5 rounded-pill">
+                  <span className="font-sans text-xs text-primary-deep bg-primary-soft px-1.5 py-0.5 rounded-full">
                     VIP
                   </span>
                 )}
               </div>
               <button
                 onClick={handleClearMember}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-paper-2 hover:bg-cream-2 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-3 hover:bg-surface-3 transition-colors"
               >
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-ink-3">
                   <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -343,7 +343,7 @@ function NewBookingForm() {
 
         {/* D) Add Items */}
         <div className="mb-5">
-          <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-2">Add items</div>
+          <div className="font-sans text-xs text-ink-3 mb-2">Add items</div>
           <div>
             {activeItems.map((item, idx) => {
               const qty = itemQuantities[item.id] ?? 0;
@@ -356,7 +356,7 @@ function NewBookingForm() {
                 >
                   <div className="flex-1">
                     <div className="font-sans text-xs font-medium text-ink">{item.name}</div>
-                    <div className="font-mono text-[9px] text-ink-3">
+                    <div className="font-sans text-xs text-ink-3">
                       ₱{item.price.toLocaleString()} · {item.type}
                     </div>
                   </div>
@@ -364,18 +364,18 @@ function NewBookingForm() {
                     <button
                       onClick={() => handleUpdateQuantity(item.id, -1)}
                       disabled={qty === 0}
-                      className={`w-7 h-7 flex items-center justify-center rounded-full font-mono text-sm transition-colors ${
+                      className={`w-7 h-7 flex items-center justify-center rounded-full font-sans text-sm transition-colors ${
                         qty === 0
-                          ? 'bg-paper-2 text-ink-4 cursor-not-allowed'
-                          : 'bg-paper-2 text-ink hover:bg-cream-2'
+                          ? 'bg-surface-3 text-ink-4 cursor-not-allowed'
+                          : 'bg-surface-3 text-ink hover:bg-surface-3'
                       }`}
                     >
                       -
                     </button>
-                    <span className="font-mono text-xs text-ink w-5 text-center">{qty}</span>
+                    <span className="font-sans text-xs text-ink w-5 text-center">{qty}</span>
                     <button
                       onClick={() => handleUpdateQuantity(item.id, 1)}
-                      className="w-7 h-7 flex items-center justify-center rounded-full bg-paper-2 text-ink hover:bg-cream-2 font-mono text-sm transition-colors"
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-surface-3 text-ink hover:bg-surface-3 font-sans text-sm transition-colors"
                     >
                       +
                     </button>
@@ -388,23 +388,23 @@ function NewBookingForm() {
 
         {/* E) Booking Summary */}
         {selectedCourt && selectedHour !== null && (
-          <div className="bg-paper rounded-card border border-line p-4 mb-5">
-            <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-3">Summary</div>
+          <div className="bg-surface-3 rounded-[16px] p-4 mb-5">
+            <div className="font-sans text-xs text-ink-3 mb-3">Summary</div>
 
             <div className="space-y-1.5 mb-3">
-              <div className="flex justify-between font-mono text-[10px]">
+              <div className="flex justify-between font-sans text-xs">
                 <span className="text-ink-3">Court</span>
                 <span className="text-ink">{selectedCourt.name} · ₱{selectedCourt.hourlyRate}/hr</span>
               </div>
-              <div className="flex justify-between font-mono text-[10px]">
+              <div className="flex justify-between font-sans text-xs">
                 <span className="text-ink-3">Date</span>
                 <span className="text-ink">{formatDate(selectedDate)}</span>
               </div>
-              <div className="flex justify-between font-mono text-[10px]">
+              <div className="flex justify-between font-sans text-xs">
                 <span className="text-ink-3">Time</span>
                 <span className="text-ink">{formatHour(selectedHour)}</span>
               </div>
-              <div className="flex justify-between font-mono text-[10px]">
+              <div className="flex justify-between font-sans text-xs">
                 <span className="text-ink-3">Member</span>
                 <span className="text-ink">{memberDisplayName ?? '—'}</span>
               </div>
@@ -418,7 +418,7 @@ function NewBookingForm() {
                   .map((item) => {
                     const qty = itemQuantities[item.id];
                     return (
-                      <div key={item.id} className="flex justify-between font-mono text-[10px] py-0.5">
+                      <div key={item.id} className="flex justify-between font-sans text-xs py-0.5">
                         <span className="text-ink-3">{item.name} x{qty}</span>
                         <span className="text-ink">₱{(item.price * qty).toLocaleString()}</span>
                       </div>
@@ -428,19 +428,19 @@ function NewBookingForm() {
             )}
 
             <div className="border-t border-line pt-2 space-y-1">
-              <div className="flex justify-between font-mono text-[10px]">
+              <div className="flex justify-between font-sans text-xs">
                 <span className="text-ink-3">Court fee</span>
                 <span className="text-ink">₱{courtFee.toLocaleString()}</span>
               </div>
               {itemsTotal > 0 && (
-                <div className="flex justify-between font-mono text-[10px]">
+                <div className="flex justify-between font-sans text-xs">
                   <span className="text-ink-3">Items total</span>
                   <span className="text-ink">₱{itemsTotal.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between font-display text-base pt-1 border-t border-line mt-1">
+              <div className="flex justify-between font-sans text-base pt-1 border-t border-line mt-1">
                 <span>Total</span>
-                <span className="italic text-accent-deep font-medium">₱{total.toLocaleString()}</span>
+                <span className="text-primary font-bold">₱{total.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -450,9 +450,9 @@ function NewBookingForm() {
         <button
           onClick={handleConfirm}
           disabled={!canSubmit}
-          className={`w-full py-3.5 rounded-card font-sans text-sm font-medium transition-colors ${
+          className={`w-full py-3.5 rounded-xl font-sans text-sm font-medium transition-colors ${
             canSubmit
-              ? 'bg-ink text-paper hover:bg-ink-2'
+              ? 'bg-primary text-white hover:bg-ink-2'
               : 'bg-line text-ink-4 cursor-not-allowed'
           }`}
         >
@@ -467,8 +467,8 @@ export default function NewBookingPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-cream max-w-lg mx-auto flex items-center justify-center">
-          <div className="font-mono text-xs text-ink-3">Loading...</div>
+        <div className="min-h-screen bg-surface-2 max-w-lg mx-auto flex items-center justify-center">
+          <div className="font-sans text-xs text-ink-3">Loading...</div>
         </div>
       }
     >

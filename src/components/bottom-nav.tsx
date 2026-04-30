@@ -93,7 +93,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 h-16 bg-paper border-t border-line items-center z-50 max-w-lg mx-auto grid"
+      className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-line shadow-card items-center z-50 max-w-lg mx-auto grid"
       style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
     >
       {visibleItems.map((item) => {
@@ -103,15 +103,15 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-0.5 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 ${
-              isActive ? 'text-ink' : 'text-ink-3'
+            className={`flex flex-col items-center gap-0.5 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+              isActive ? 'text-primary' : 'text-ink-3'
             }`}
           >
             {isActive && (
-              <span className="absolute top-0 w-7 h-0.5 bg-accent" />
+              <span className="absolute top-0 w-7 h-[3px] rounded-full bg-primary" />
             )}
             {item.icon}
-            <span className="font-mono text-[8px] tracking-wider uppercase">
+            <span className="text-[11px] font-medium">
               {item.label}
             </span>
           </Link>

@@ -49,37 +49,37 @@ export default function CheckinPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream max-w-lg mx-auto">
+    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
       <div className="px-5 pt-4 pb-20">
         {/* Staff header */}
         <div className="flex justify-between items-center mb-4">
-          <div className="font-display font-normal italic text-lg tracking-tight">
-            Court<span className="text-accent-deep not-italic">.</span>
+          <div className="font-sans font-normal italic text-lg tracking-tight">
+            Court<span className="text-primary not-italic">.</span>
           </div>
-          <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase">
+          <div className="font-sans text-xs text-ink-3">
             Staff · {currentUser?.displayName.split(' ')[0] ?? 'Staff'}
           </div>
         </div>
 
-        <h1 className="font-display font-light text-2xl tracking-tight mb-1">
-          Check-<em className="text-accent-deep">in.</em>
+        <h1 className="font-sans font-light text-2xl tracking-tight mb-1">
+          Check-<span className="text-primary font-bold">in.</span>
         </h1>
-        <p className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-4">
+        <p className="font-sans text-xs text-ink-3 mb-4">
           {new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })} · {expectedCount} expected today
         </p>
 
         {/* QR Scanner frame */}
         <button
           onClick={handleMockScan}
-          className="w-full aspect-square border-2 border-dashed border-ink rounded-2xl mb-3 relative flex items-center justify-center bg-paper-2"
+          className="w-full aspect-square border-2 border-dashed border-primary rounded-2xl mb-3 relative flex items-center justify-center bg-surface-3"
         >
           {/* Corner marks */}
-          <div className="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 border-ink" />
-          <div className="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 border-ink" />
-          <div className="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 border-ink" />
-          <div className="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 border-ink" />
+          <div className="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 border-primary" />
+          <div className="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 border-primary" />
+          <div className="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 border-primary" />
+          <div className="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 border-primary" />
 
-          <div className="font-mono text-[10px] text-ink-2 text-center">
+          <div className="font-sans text-xs text-ink-2 text-center">
             {scanActive ? (
               <span className="animate-pulse">Scanning...</span>
             ) : (
@@ -94,9 +94,9 @@ export default function CheckinPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-2.5 py-1 border rounded-pill font-mono text-[9px] uppercase tracking-wider ${
+              className={`px-2.5 py-1 border rounded-full font-sans text-xs ${
                 filter === f
-                  ? 'bg-ink text-paper border-ink'
+                  ? 'bg-primary text-white border-primary'
                   : 'border-line text-ink-2'
               }`}
             >
@@ -118,10 +118,10 @@ export default function CheckinPage() {
                 className="grid grid-cols-[44px_1fr_auto] gap-2.5 items-center py-2.5 border-b border-line-2"
               >
                 <div>
-                  <div className="font-mono text-[11px] leading-tight">
+                  <div className="font-sans text-[11px] leading-tight">
                     {booking.startHour}:00
                   </div>
-                  <div className="font-mono text-[8px] text-ink-3">
+                  <div className="font-sans text-xs text-ink-3">
                     {court?.name.replace('Court ', 'C')}
                   </div>
                 </div>
@@ -129,7 +129,7 @@ export default function CheckinPage() {
                   <div className="font-medium text-xs text-ink mb-px">
                     {booking.memberName}
                   </div>
-                  <div className="font-mono text-[9px] text-ink-3 tracking-wide">
+                  <div className="font-sans text-xs text-ink-3">
                     Pickleball · {booking.durationMinutes} min
                     {hasItems && ` · ${booking.items.map((i) => `${i.quantity} ${i.itemName.split(' ')[0].toLowerCase()}`).join(', ')}`}
                   </div>
@@ -137,7 +137,7 @@ export default function CheckinPage() {
                 {canCheckIn ? (
                   <button
                     onClick={() => handleCheckIn(booking.id)}
-                    className="font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded bg-signal text-paper"
+                    className="font-sans text-xs px-2 py-1 rounded bg-signal text-white"
                   >
                     Check in
                   </button>
@@ -149,7 +149,7 @@ export default function CheckinPage() {
           })}
 
           {filteredBookings.length === 0 && (
-            <div className="text-center py-8 text-ink-3 font-mono text-xs">
+            <div className="text-center py-8 text-ink-3 font-sans text-xs">
               No bookings in this window
             </div>
           )}
@@ -157,34 +157,34 @@ export default function CheckinPage() {
       </div>
 
       {/* Staff bottom nav */}
-      <nav aria-label="Staff navigation" className="fixed bottom-0 left-0 right-0 h-16 bg-paper border-t border-line grid grid-cols-4 items-center z-50 max-w-lg mx-auto">
-        <div className="flex flex-col items-center gap-0.5 text-ink relative">
-          <span className="absolute top-0 w-7 h-0.5 bg-accent" />
+      <nav aria-label="Staff navigation" className="fixed bottom-0 left-0 right-0 h-16 bg-white shadow-card border-t border-line grid grid-cols-4 items-center z-50 max-w-lg mx-auto">
+        <div className="flex flex-col items-center gap-0.5 text-primary relative">
+          <span className="absolute top-0 w-7 h-0.5 bg-primary" />
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
             <circle cx="12" cy="12" r="9" />
             <path d="m9 12 2 2 4-4" />
           </svg>
-          <span className="font-mono text-[8px] tracking-wider uppercase">Check-in</span>
+          <span className="font-sans text-xs">Check-in</span>
         </div>
         <Link href="/schedule" className="flex flex-col items-center gap-0.5 text-ink-3">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
             <rect x="3" y="4" width="18" height="17" rx="2" />
             <path d="M3 10h18M8 2v4M16 2v4" />
           </svg>
-          <span className="font-mono text-[8px] tracking-wider uppercase">Today</span>
+          <span className="font-sans text-xs">Today</span>
         </Link>
         <Link href="/booking/new" className="flex flex-col items-center gap-0.5 text-ink-3">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
             <path d="M5 12h14M12 5v14" />
           </svg>
-          <span className="font-mono text-[8px] tracking-wider uppercase">Walk-in</span>
+          <span className="font-sans text-xs">Walk-in</span>
         </Link>
         <Link href="/settings" className="flex flex-col items-center gap-0.5 text-ink-3">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
             <circle cx="12" cy="8" r="4" />
             <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
           </svg>
-          <span className="font-mono text-[8px] tracking-wider uppercase">Account</span>
+          <span className="font-sans text-xs">Account</span>
         </Link>
       </nav>
     </div>

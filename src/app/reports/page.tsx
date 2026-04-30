@@ -15,11 +15,11 @@ const PERIODS = [
 const DAYS_OF_WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const HOUR_LABELS = ['8', '10', '12', '14', '16', '18', '20'];
 const HEAT_COLORS = [
-  'bg-paper-2',
-  'bg-heatmap-1',
-  'bg-heatmap-2',
-  'bg-accent',
-  'bg-accent-deep',
+  'bg-surface-3',
+  'bg-line',
+  'bg-primary-soft',
+  'bg-primary',
+  'bg-primary-deep',
 ];
 
 function getDateDaysAgo(days: number): string {
@@ -102,11 +102,11 @@ export default function ReportsPage() {
   const lastY = 60 - (lastPoint / maxSpark) * 50;
 
   return (
-    <div className="min-h-screen bg-cream max-w-lg mx-auto">
+    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
       <div className="px-5 pt-4 pb-20">
         <Header />
 
-        <h1 className="font-display font-light text-2xl tracking-tight mb-1">Reports</h1>
+        <h1 className="font-sans font-light text-2xl tracking-tight mb-1">Reports</h1>
 
         {/* Period selector */}
         <div className="flex gap-1.5 mb-4 mt-3">
@@ -114,9 +114,9 @@ export default function ReportsPage() {
             <button
               key={p.label}
               onClick={() => setActivePeriod(i)}
-              className={`px-2.5 py-1 border rounded-pill font-mono text-[9px] uppercase tracking-wider ${
+              className={`px-2.5 py-1 border rounded-full font-sans text-xs ${
                 i === activePeriod
-                  ? 'bg-ink text-paper border-ink'
+                  ? 'bg-primary text-white border-primary'
                   : 'border-line text-ink-2'
               }`}
             >
@@ -126,10 +126,10 @@ export default function ReportsPage() {
         </div>
 
         {/* Headline metric */}
-        <div className="font-display text-[44px] font-light leading-none tracking-tight">
+        <div className="font-sans text-[44px] font-bold leading-none tracking-tight">
           <span className="text-ink">{totalBookings}</span>
         </div>
-        <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mt-1">
+        <div className="font-sans text-xs text-ink-3 mt-1">
           Bookings · {periodConfig.label}
         </div>
 
@@ -137,15 +137,15 @@ export default function ReportsPage() {
         <svg viewBox="0 0 280 70" className="w-full my-3 overflow-visible">
           <defs>
             <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F2C94C" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#F2C94C" stopOpacity="0" />
+              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
             </linearGradient>
           </defs>
           <path d={sparklineFill} fill="url(#sparkGrad)" />
           <path
             d={sparklinePath}
             fill="none"
-            stroke="#1A1715"
+            stroke="#0F172A"
             strokeWidth="1.4"
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -154,8 +154,8 @@ export default function ReportsPage() {
             cx={lastX}
             cy={lastY}
             r="3"
-            fill="#F2C94C"
-            stroke="#1A1715"
+            fill="#3B82F6"
+            stroke="#0F172A"
             strokeWidth="1.2"
           />
         </svg>
@@ -165,26 +165,26 @@ export default function ReportsPage() {
         {/* No-show rate */}
         <div className="flex justify-between items-baseline mb-4">
           <div>
-            <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase">No-show rate</div>
-            <div className="font-display text-xl font-light">{noShowRate}%</div>
+            <div className="font-sans text-xs text-ink-3">No-show rate</div>
+            <div className="font-sans text-xl font-light">{noShowRate}%</div>
           </div>
           <div className="text-right">
-            <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase">No-shows</div>
-            <div className="font-display text-xl font-light">{noShowCount}</div>
+            <div className="font-sans text-xs text-ink-3">No-shows</div>
+            <div className="font-sans text-xl font-light">{noShowCount}</div>
           </div>
         </div>
 
         <div className="h-px bg-line my-3" />
 
         {/* Utilization heatmap */}
-        <div className="font-mono text-[9px] tracking-wider uppercase text-ink-3 mb-2">
+        <div className="font-sans text-xs text-ink-3 mb-2">
           Utilization · by hour
         </div>
 
         <div className="grid gap-0.5" style={{ gridTemplateColumns: '22px repeat(7, 1fr)' }}>
           {heatmapData.map((row, ri) => (
             <div key={ri} className="contents">
-              <div className="font-mono text-[7px] text-ink-3 uppercase flex items-center justify-end pr-0.5">
+              <div className="font-sans text-[11px] text-ink-3 flex items-center justify-end pr-0.5">
                 {HOUR_LABELS[ri]}
               </div>
               {row.map((val, ci) => (
@@ -198,7 +198,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Day labels */}
-        <div className="flex justify-between font-mono text-[8px] text-ink-3 mt-1.5 pl-6">
+        <div className="flex justify-between font-sans text-xs text-ink-3 mt-1.5 pl-6">
           {DAYS_OF_WEEK.map((d, i) => (
             <span key={i}>{d}</span>
           ))}

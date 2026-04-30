@@ -24,7 +24,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
         <div
           key={i}
           className={`h-1 flex-1 rounded-full transition-colors ${
-            i <= current ? 'bg-ink' : 'bg-line'
+            i <= current ? 'bg-primary' : 'bg-line'
           }`}
         />
       ))}
@@ -157,35 +157,35 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream max-w-lg mx-auto">
+    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
       <div className="px-5 pt-8 pb-12">
 
         {/* Welcome */}
         {step === 'welcome' && (
           <div className="min-h-[80vh] flex flex-col justify-center">
-            <div className="font-display font-normal italic text-lg tracking-tight mb-8">
-              Court<span className="text-accent-deep not-italic">.</span>
+            <div className="font-sans font-bold text-lg tracking-tight mb-8">
+              Court<span className="text-primary">.</span>
             </div>
 
-            <h1 className="font-display font-light text-4xl leading-tight tracking-tight mb-3">
+            <h1 className="font-sans font-bold text-4xl leading-tight tracking-tight mb-3">
               Set up your<br />
-              <em className="text-accent-deep">pickleball facility.</em>
+              <span className="text-primary font-bold">pickleball facility.</span>
             </h1>
 
             <p className="text-ink-2 text-sm mb-2 max-w-[32ch]">
               Get your courts online in under 5 minutes. Staff can start managing bookings right away.
             </p>
 
-            <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-8">
+            <p className="font-sans text-xs text-ink-3 mb-8">
               No credit card required · Free during setup
             </p>
 
             <button
               onClick={() => setStep('facility')}
-              className="w-full bg-ink text-paper py-4 rounded-lg font-sans text-sm font-medium flex justify-between items-center px-5"
+              className="w-full bg-primary text-white py-4 rounded-xl font-sans text-sm font-medium flex justify-between items-center px-5"
             >
               <span>Get Started</span>
-              <span className="font-mono">→</span>
+              <span className="font-sans">&rarr;</span>
             </button>
 
           </div>
@@ -196,77 +196,77 @@ export default function OnboardingPage() {
           <>
             <StepIndicator current={0} total={4} />
 
-            <h1 className="font-display font-light text-2xl tracking-tight mb-1">
-              Your <em className="text-accent-deep">facility.</em>
+            <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
+              Your <span className="text-primary font-bold">facility.</span>
             </h1>
-            <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-6">
+            <p className="font-sans text-xs text-ink-3 mb-6">
               Step 1 of 4 · Basic info
             </p>
 
             <div className="space-y-4">
               <div>
-                <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Facility name</label>
+                <label className="font-sans text-xs text-ink-3 block mb-1.5">Facility name</label>
                 <input
                   type="text"
                   placeholder="e.g. QC Pickle Hub"
                   value={facilityName}
                   onChange={(e) => setFacilityName(e.target.value)}
-                  className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink"
+                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
                 {subdomain && (
-                  <p className="font-mono text-[9px] text-ink-3 mt-1.5">
+                  <p className="font-sans text-xs text-ink-3 mt-1.5">
                     Your URL: <span className="text-ink">{subdomain}.courtbooks.app</span>
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Your name</label>
+                <label className="font-sans text-xs text-ink-3 block mb-1.5">Your name</label>
                 <input
                   type="text"
                   placeholder="e.g. Marco Reyes"
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
-                  className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink"
+                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Email</label>
+                <label className="font-sans text-xs text-ink-3 block mb-1.5">Email</label>
                 <input
                   type="email"
                   placeholder="marco@qcpicklehub.com"
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
-                  className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink"
+                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="h-px bg-line my-1" />
 
-              <div className="font-mono text-[8px] text-ink-3 tracking-wider uppercase">Login credentials</div>
+              <div className="font-sans text-xs text-ink-3">Login credentials</div>
 
               <div>
-                <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Username</label>
+                <label className="font-sans text-xs text-ink-3 block mb-1.5">Username</label>
                 <input
                   type="text"
                   placeholder="e.g. marco"
                   value={ownerUsername}
                   onChange={(e) => setOwnerUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                   autoComplete="username"
-                  className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-mono border border-line focus:outline-none focus:border-ink"
+                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Password</label>
+                <label className="font-sans text-xs text-ink-3 block mb-1.5">Password</label>
                 <input
                   type="password"
                   placeholder="Min 6 characters"
                   value={ownerPassword}
                   onChange={(e) => setOwnerPassword(e.target.value)}
                   autoComplete="new-password"
-                  className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink"
+                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -274,11 +274,11 @@ export default function OnboardingPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Opens at</label>
+                  <label className="font-sans text-xs text-ink-3 block mb-1.5">Opens at</label>
                   <select
                     value={hoursStart}
                     onChange={(e) => setHoursStart(Number(e.target.value))}
-                    className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-mono border border-line focus:outline-none focus:border-ink"
+                    className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   >
                     {Array.from({ length: 18 }, (_, i) => i + 4).map((h) => (
                       <option key={h} value={h}>{h}:00</option>
@@ -286,11 +286,11 @@ export default function OnboardingPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1.5">Closes at</label>
+                  <label className="font-sans text-xs text-ink-3 block mb-1.5">Closes at</label>
                   <select
                     value={hoursEnd}
                     onChange={(e) => setHoursEnd(Number(e.target.value))}
-                    className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-mono border border-line focus:outline-none focus:border-ink"
+                    className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   >
                     {Array.from({ length: 18 }, (_, i) => i + 7).map((h) => (
                       <option key={h} value={h}>{h}:00</option>
@@ -303,14 +303,14 @@ export default function OnboardingPage() {
             <div className="flex gap-3 mt-8">
               <button
                 onClick={() => setStep('welcome')}
-                className="flex-1 border border-line text-ink-3 py-3 rounded-lg font-sans text-xs font-medium"
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep('courts')}
                 disabled={!facilityName.trim() || !ownerName.trim() || !ownerUsername.trim() || ownerPassword.length < 6}
-                className="flex-1 bg-ink text-paper py-3 rounded-lg font-sans text-xs font-medium disabled:opacity-40"
+                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-40"
               >
                 Next
               </button>
@@ -323,41 +323,41 @@ export default function OnboardingPage() {
           <>
             <StepIndicator current={1} total={4} />
 
-            <h1 className="font-display font-light text-2xl tracking-tight mb-1">
-              Your <em className="text-accent-deep">courts.</em>
+            <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
+              Your <span className="text-primary font-bold">courts.</span>
             </h1>
-            <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-6">
+            <p className="font-sans text-xs text-ink-3 mb-6">
               Step 2 of 4 · How many pickleball courts?
             </p>
 
             <div className="space-y-2">
               {courts.map((court, index) => (
-                <div key={index} className="bg-paper rounded-card p-3 flex gap-2 items-end">
+                <div key={index} className="bg-white rounded-[16px] shadow-card p-3 flex gap-2 items-end">
                   <div className="flex-1">
-                    <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1">Name</label>
+                    <label className="font-sans text-xs text-ink-3 block mb-1">Name</label>
                     <input
                       type="text"
                       value={court.name}
                       onChange={(e) => updateCourt(index, 'name', e.target.value)}
-                      className="w-full bg-paper-2 rounded-lg px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-ink"
+                      className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   <div className="w-28">
-                    <label className="font-mono text-[8px] text-ink-3 tracking-wider uppercase block mb-1">₱/hour</label>
+                    <label className="font-sans text-xs text-ink-3 block mb-1">₱/hour</label>
                     <input
                       type="number"
                       value={court.hourlyRate}
                       onChange={(e) => updateCourt(index, 'hourlyRate', e.target.value)}
-                      className="w-full bg-paper-2 rounded-lg px-3 py-2.5 text-sm font-mono border border-line focus:outline-none focus:border-ink"
+                      className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   {courts.length > 1 && (
                     <button
                       onClick={() => removeCourt(index)}
-                      className="w-8 h-8 flex items-center justify-center text-warn font-mono text-sm"
+                      className="w-8 h-8 flex items-center justify-center text-warn font-sans text-sm"
                       aria-label="Remove court"
                     >
-                      ×
+                      &times;
                     </button>
                   )}
                 </div>
@@ -366,7 +366,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={addCourt}
-              className="w-full mt-3 border border-dashed border-line text-ink-3 py-3 rounded-card font-mono text-[9px] tracking-wider uppercase"
+              className="w-full mt-3 border border-dashed border-line text-ink-3 py-3 rounded-[16px] font-sans text-xs"
             >
               + Add another court
             </button>
@@ -374,13 +374,13 @@ export default function OnboardingPage() {
             <div className="flex gap-3 mt-8">
               <button
                 onClick={() => setStep('facility')}
-                className="flex-1 border border-line text-ink-3 py-3 rounded-lg font-sans text-xs font-medium"
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep('items')}
-                className="flex-1 bg-ink text-paper py-3 rounded-lg font-sans text-xs font-medium"
+                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium"
               >
                 Next
               </button>
@@ -393,17 +393,17 @@ export default function OnboardingPage() {
           <>
             <StepIndicator current={2} total={4} />
 
-            <h1 className="font-display font-light text-2xl tracking-tight mb-1">
-              Rentals & <em className="text-accent-deep">extras.</em>
+            <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
+              Rentals & <span className="text-primary font-bold">extras.</span>
             </h1>
-            <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-2">
+            <p className="font-sans text-xs text-ink-3 mb-2">
               Step 3 of 4 · Equipment and items to sell
             </p>
             <p className="text-ink-2 text-xs mb-5">
               Select items your facility offers. Staff can add these when creating bookings. You can always change this later.
             </p>
 
-            <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-2">Suggested items</div>
+            <div className="font-sans text-xs text-ink-3 mb-2">Suggested items</div>
             <div className="space-y-1.5 mb-4">
               {SUGGESTED_ITEMS.map((item, index) => {
                 const isSelected = selectedItems.has(index);
@@ -411,23 +411,23 @@ export default function OnboardingPage() {
                   <button
                     key={index}
                     onClick={() => toggleSuggestedItem(index)}
-                    className={`w-full bg-paper rounded-card p-3 flex justify-between items-center text-left transition-colors ${
-                      isSelected ? 'ring-1 ring-ink' : ''
+                    className={`w-full bg-white rounded-[16px] shadow-card p-3 flex justify-between items-center text-left transition-colors ${
+                      isSelected ? 'ring-1 ring-primary' : ''
                     }`}
                   >
                     <div>
                       <div className="font-medium text-sm">{item.name}</div>
-                      <div className="font-mono text-[9px] text-ink-3">
+                      <div className="font-sans text-xs text-ink-3">
                         ₱{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}
                       </div>
                     </div>
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-ink border-ink' : 'border-line'
+                        isSelected ? 'bg-primary border-primary' : 'border-line'
                       }`}
                     >
                       {isSelected && (
-                        <svg viewBox="0 0 16 16" className="w-3 h-3 text-paper">
+                        <svg viewBox="0 0 16 16" className="w-3 h-3 text-white">
                           <path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       )}
@@ -440,17 +440,17 @@ export default function OnboardingPage() {
             {/* Custom items */}
             {customItems.length > 0 && (
               <>
-                <div className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-2">Your items</div>
+                <div className="font-sans text-xs text-ink-3 mb-2">Your items</div>
                 <div className="space-y-1.5 mb-4">
                   {customItems.map((item, index) => (
-                    <div key={index} className="bg-paper rounded-card p-3 flex justify-between items-center">
+                    <div key={index} className="bg-white rounded-[16px] shadow-card p-3 flex justify-between items-center">
                       <div>
                         <div className="font-medium text-sm">{item.name}</div>
-                        <div className="font-mono text-[9px] text-ink-3">₱{item.price} · {item.type}</div>
+                        <div className="font-sans text-xs text-ink-3">₱{item.price} · {item.type}</div>
                       </div>
                       <button
                         onClick={() => setCustomItems(customItems.filter((_, i) => i !== index))}
-                        className="text-warn font-mono text-[9px]"
+                        className="text-warn font-sans text-xs"
                       >
                         Remove
                       </button>
@@ -461,43 +461,43 @@ export default function OnboardingPage() {
             )}
 
             {showAddCustom ? (
-              <div className="bg-paper rounded-card p-3 space-y-2 mb-4">
+              <div className="bg-white rounded-[16px] shadow-card p-3 space-y-2 mb-4">
                 <input
                   type="text"
                   placeholder="Item name"
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
-                  className="w-full bg-paper-2 rounded-lg px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-ink"
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
                 <input
                   type="number"
                   placeholder="Price (₱)"
                   value={customPrice}
                   onChange={(e) => setCustomPrice(e.target.value)}
-                  className="w-full bg-paper-2 rounded-lg px-3 py-2.5 text-sm font-mono border border-line focus:outline-none focus:border-ink"
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
                 <div className="flex gap-1.5">
                   {(['rental', 'sale'] as const).map((t) => (
                     <button
                       key={t}
                       onClick={() => setCustomType(t)}
-                      className={`flex-1 font-mono text-[9px] tracking-wider uppercase py-2 rounded-lg ${
-                        customType === t ? 'bg-ink text-paper' : 'border border-line text-ink-2'
+                      className={`flex-1 font-sans text-xs py-2 rounded-xl ${
+                        customType === t ? 'bg-primary text-white' : 'border border-line text-ink-2'
                       }`}
                     >
-                      {t}
+                      {t === 'rental' ? 'Rental' : 'Sale'}
                     </button>
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={addCustomItem} className="flex-1 bg-ink text-paper py-2.5 rounded-lg font-sans text-xs font-medium">Add</button>
-                  <button onClick={() => setShowAddCustom(false)} className="flex-1 border border-line text-ink-3 py-2.5 rounded-lg font-sans text-xs font-medium">Cancel</button>
+                  <button onClick={addCustomItem} className="flex-1 bg-primary text-white py-2.5 rounded-xl font-sans text-xs font-medium">Add</button>
+                  <button onClick={() => setShowAddCustom(false)} className="flex-1 bg-surface-3 text-ink-2 py-2.5 rounded-xl font-sans text-xs font-medium">Cancel</button>
                 </div>
               </div>
             ) : (
               <button
                 onClick={() => setShowAddCustom(true)}
-                className="w-full border border-dashed border-line text-ink-3 py-3 rounded-card font-mono text-[9px] tracking-wider uppercase mb-4"
+                className="w-full border border-dashed border-line text-ink-3 py-3 rounded-[16px] font-sans text-xs mb-4"
               >
                 + Add custom item
               </button>
@@ -506,13 +506,13 @@ export default function OnboardingPage() {
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => setStep('courts')}
-                className="flex-1 border border-line text-ink-3 py-3 rounded-lg font-sans text-xs font-medium"
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep('review')}
-                className="flex-1 bg-ink text-paper py-3 rounded-lg font-sans text-xs font-medium"
+                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium"
               >
                 Next
               </button>
@@ -525,44 +525,44 @@ export default function OnboardingPage() {
           <>
             <StepIndicator current={3} total={4} />
 
-            <h1 className="font-display font-light text-2xl tracking-tight mb-1">
-              Ready to <em className="text-accent-deep">launch.</em>
+            <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
+              Ready to <span className="text-primary font-bold">launch.</span>
             </h1>
-            <p className="font-mono text-[9px] text-ink-3 tracking-wider uppercase mb-6">
+            <p className="font-sans text-xs text-ink-3 mb-6">
               Step 4 of 4 · Review your setup
             </p>
 
             {/* Facility summary */}
-            <div className="bg-paper rounded-card p-4 mb-3">
-              <div className="font-mono text-[8px] text-ink-3 tracking-wider uppercase mb-2">Facility</div>
-              <div className="font-display text-lg font-light mb-1">{facilityName}</div>
-              <div className="font-mono text-[9px] text-ink-3">
-                {subdomain}.courtbooks.app · {hoursStart}:00–{hoursEnd}:00
+            <div className="bg-white rounded-[16px] shadow-card p-4 mb-3">
+              <div className="font-sans text-xs font-semibold text-ink-3 mb-2">Facility</div>
+              <div className="font-sans text-lg font-semibold mb-1">{facilityName}</div>
+              <div className="font-sans text-xs text-ink-3">
+                {subdomain}.courtbooks.app · {hoursStart}:00&ndash;{hoursEnd}:00
               </div>
-              <div className="font-mono text-[9px] text-ink-3 mt-1">
+              <div className="font-sans text-xs text-ink-3 mt-1">
                 Owner: {ownerName} · {ownerEmail}
               </div>
-              <div className="font-mono text-[9px] text-ink-3 mt-1">
+              <div className="font-sans text-xs text-ink-3 mt-1">
                 Login: <span className="text-ink">@{ownerUsername}</span>
               </div>
             </div>
 
             {/* Courts summary */}
-            <div className="bg-paper rounded-card p-4 mb-3">
-              <div className="font-mono text-[8px] text-ink-3 tracking-wider uppercase mb-2">
+            <div className="bg-white rounded-[16px] shadow-card p-4 mb-3">
+              <div className="font-sans text-xs font-semibold text-ink-3 mb-2">
                 {courts.length} Court{courts.length !== 1 ? 's' : ''}
               </div>
               {courts.map((court, i) => (
                 <div key={i} className="flex justify-between py-1.5 border-b border-line-2 last:border-0">
                   <span className="text-sm">{court.name}</span>
-                  <span className="font-mono text-[10px] text-ink-3">₱{court.hourlyRate}/hr</span>
+                  <span className="font-sans text-xs text-ink-3">₱{court.hourlyRate}/hr</span>
                 </div>
               ))}
             </div>
 
             {/* Items summary */}
-            <div className="bg-paper rounded-card p-4 mb-6">
-              <div className="font-mono text-[8px] text-ink-3 tracking-wider uppercase mb-2">
+            <div className="bg-white rounded-[16px] shadow-card p-4 mb-6">
+              <div className="font-sans text-xs font-semibold text-ink-3 mb-2">
                 {allItems.length} Item{allItems.length !== 1 ? 's' : ''}
               </div>
               {allItems.length === 0 ? (
@@ -571,7 +571,7 @@ export default function OnboardingPage() {
                 allItems.map((item, i) => (
                   <div key={i} className="flex justify-between py-1.5 border-b border-line-2 last:border-0">
                     <span className="text-sm">{item.name}</span>
-                    <span className="font-mono text-[10px] text-ink-3">₱{item.price} · {item.type}</span>
+                    <span className="font-sans text-xs text-ink-3">₱{item.price} · {item.type}</span>
                   </div>
                 ))
               )}
@@ -579,15 +579,15 @@ export default function OnboardingPage() {
 
             <button
               onClick={handleFinish}
-              className="w-full bg-ink text-paper py-4 rounded-lg font-sans text-sm font-medium flex justify-between items-center px-5"
+              className="w-full bg-primary text-white py-4 rounded-xl font-sans text-sm font-medium flex justify-between items-center px-5"
             >
               <span>Launch {facilityName || 'your facility'}</span>
-              <span className="font-mono">→</span>
+              <span className="font-sans">&rarr;</span>
             </button>
 
             <button
               onClick={() => setStep('items')}
-              className="w-full mt-3 border border-line text-ink-3 py-3 rounded-lg font-sans text-xs font-medium"
+              className="w-full mt-3 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
             >
               Back
             </button>
