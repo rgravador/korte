@@ -3,36 +3,22 @@
 import { Header } from '@/components/header';
 import { BottomNav } from '@/components/bottom-nav';
 import { useStore } from '@/store';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Booking } from '@/lib/types';
 import Link from 'next/link';
 
-function buildDayStrip(weekOffset: number): { date: string; dayAbbr: string; dayNum: number; monthAbbr: string }[] {
-  const days: { date: string; dayAbbr: string; dayNum: number; monthAbbr: string }[] = [];
+function formatSelectedDate(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
   const today = new Date();
-  const startOffset = weekOffset * 7;
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + startOffset + i);
-    days.push({
-      date: d.toISOString().split('T')[0],
-      dayAbbr: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(),
-      dayNum: d.getDate(),
-      monthAbbr: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-    });
-  }
-  return days;
-}
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
 
-function getWeekLabel(days: { date: string; monthAbbr: string; dayNum: number }[]): string {
-  if (days.length === 0) return '';
-  const first = days[0];
-  const last = days[days.length - 1];
-  if (first.monthAbbr === last.monthAbbr) {
-    return `${first.monthAbbr} ${first.dayNum}–${last.dayNum}`;
-  }
-  return `${first.monthAbbr} ${first.dayNum} – ${last.monthAbbr} ${last.dayNum}`;
+  if (d.getTime() === today.getTime()) return 'Today';
+  if (d.getTime() === tomorrow.getTime()) return 'Tomorrow';
+
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 function getInitials(name: string): string {
@@ -52,14 +38,8 @@ export default function SchedulePage() {
   const { bookings, courts, tenant } = useStore();
   const router = useRouter();
 
-  const [weekOffset, setWeekOffset] = useState(0);
-  const days = useMemo(() => buildDayStrip(weekOffset), [weekOffset]);
-  const [selectedDate, setSelectedDate] = useState(days[0].date);
-
-  // Auto-select first day when week changes
-  useEffect(() => {
-    setSelectedDate(days[0].date);
-  }, [weekOffset, days]);
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const [selectedDate, setSelectedDate] = useState(todayStr);
   const [courtFilter, setCourtFilter] = useState<string>('all');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
@@ -141,59 +121,21 @@ export default function SchedulePage() {
           Schedule
         </h1>
 
-        {/* Week navigation */}
-        <div className="flex items-center justify-between mb-2">
-          <button
-            onClick={() => { setWeekOffset((w) => w - 1); }}
-            disabled={weekOffset <= 0}
-            aria-label="Previous week"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-3 disabled:opacity-30"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-          <span className="font-mono text-[9px] tracking-wider uppercase text-ink-3">
-            {weekOffset === 0 ? 'This week' : getWeekLabel(days)}
+        {/* Date picker */}
+        <div className="flex items-center gap-3 mb-3">
+          <div className="relative flex-1">
+            <input
+              type="date"
+              value={selectedDate}
+              min={todayStr}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              aria-label="Select date"
+              className="w-full bg-paper rounded-lg px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink appearance-none"
+            />
+          </div>
+          <span className="font-display text-sm text-ink-2 shrink-0">
+            {formatSelectedDate(selectedDate)}
           </span>
-          <button
-            onClick={() => { setWeekOffset((w) => w + 1); }}
-            aria-label="Next week"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-3"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-4 h-4">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Day strip */}
-        <div className="flex gap-1.5 pb-3">
-          {days.map((day) => {
-            const isActive = day.date === selectedDate;
-            const todayStr = new Date().toISOString().split('T')[0];
-            const isToday = day.date === todayStr;
-            return (
-              <button
-                key={day.date}
-                onClick={() => setSelectedDate(day.date)}
-                className={`flex-1 flex flex-col items-center py-2 rounded-lg transition-colors ${
-                  isActive
-                    ? 'bg-ink text-paper'
-                    : isToday
-                    ? 'bg-accent-soft text-ink'
-                    : 'bg-paper-2 text-ink-2'
-                }`}
-              >
-                <span className="font-mono text-[8px] tracking-wider">
-                  {day.dayAbbr}
-                </span>
-                <span className="font-display text-lg leading-none mt-0.5">
-                  {day.dayNum}
-                </span>
-              </button>
-            );
-          })}
         </div>
 
         {/* Court filter chips */}
