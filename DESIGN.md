@@ -2,279 +2,290 @@
 name: Court Books
 description: Pickleball court booking PWA for Philippine facilities
 colors:
-  court-line-gold: "#F2C94C"
-  court-line-gold-deep: "#E2B43E"
-  court-line-gold-soft: "#FBEBB0"
-  warm-charcoal: "#1A1715"
-  warm-charcoal-2: "#4A4540"
-  warm-charcoal-3: "#8A847D"
-  warm-charcoal-4: "#BDB6AB"
-  manila-paper: "#FCFAF5"
-  manila-paper-2: "#F0EBDF"
-  warm-cream: "#F6F2E9"
-  warm-cream-2: "#EFE9DB"
-  hairline: "#D9D2C2"
-  hairline-faint: "#E8E1D0"
-  court-surface-green: "#2D5A3F"
-  clay-red: "#A33A2A"
-  status-confirmed-bg: "#FBEBB0"
-  status-confirmed-text: "#6F5A1A"
-  status-pending-bg: "#F4E1D8"
-  status-pending-text: "#8A4A2D"
-  status-checked-in-bg: "#D8E5DD"
-  status-checked-in-text: "#2D5A3F"
-  status-no-show-bg: "#F4D8D8"
-  status-no-show-text: "#A33A2A"
+  primary: "#3B82F6"
+  primary-deep: "#2563EB"
+  primary-soft: "#DBEAFE"
+  primary-faint: "#EFF6FF"
+  surface: "#FFFFFF"
+  surface-2: "#F8FAFC"
+  surface-3: "#F1F5F9"
+  bg: "#F8FAFC"
+  ink: "#0F172A"
+  ink-2: "#334155"
+  ink-3: "#64748B"
+  ink-4: "#94A3B8"
+  line: "#E2E8F0"
+  line-2: "#F1F5F9"
+  signal: "#10B981"
+  signal-soft: "#D1FAE5"
+  signal-text: "#065F46"
+  warn: "#EF4444"
+  warn-soft: "#FEE2E2"
+  warn-text: "#991B1B"
+  amber: "#F59E0B"
+  amber-soft: "#FEF3C7"
+  amber-text: "#92400E"
+  pending-bg: "#FFF7ED"
+  pending-text: "#C2410C"
 typography:
   display:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: "clamp(1.5rem, 5vw, 3.75rem)"
-    fontWeight: 300
-    lineHeight: 0.92
-    letterSpacing: "-0.04em"
-    fontVariation: "opsz 9..144"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    fontSize: "clamp(1.75rem, 5vw, 3rem)"
+    fontWeight: 700
+    lineHeight: 1.1
+    letterSpacing: "-0.025em"
   headline:
-    fontFamily: "Fraunces, Georgia, serif"
-    fontSize: "1.5rem"
-    fontWeight: 300
-    lineHeight: 1.05
-    letterSpacing: "-0.02em"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 600
+    lineHeight: 1.2
+    letterSpacing: "-0.015em"
   body:
-    fontFamily: "Geist, -apple-system, BlinkMacSystemFont, sans-serif"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
-    lineHeight: 1.55
+    lineHeight: 1.5
   label:
-    fontFamily: "Geist Mono, ui-monospace, monospace"
-    fontSize: "0.5rem"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+    fontSize: "0.75rem"
     fontWeight: 500
     lineHeight: 1.4
-    letterSpacing: "0.08em"
+    letterSpacing: "0.01em"
 rounded:
-  card: "14px"
+  card: "16px"
   pill: "999px"
-  button: "8px"
-  input: "8px"
+  button: "12px"
+  input: "12px"
   chip: "999px"
+  tag: "8px"
 spacing:
   xs: "4px"
-  sm: "6px"
-  md: "10px"
+  sm: "8px"
+  md: "12px"
   lg: "16px"
-  xl: "20px"
+  xl: "24px"
   section: "32px"
 components:
   button-primary:
-    backgroundColor: "{colors.warm-charcoal}"
-    textColor: "{colors.manila-paper}"
+    backgroundColor: "{colors.primary}"
+    textColor: "#FFFFFF"
     rounded: "{rounded.button}"
-    padding: "12px 20px"
+    padding: "12px 24px"
   button-primary-hover:
-    backgroundColor: "{colors.warm-charcoal-2}"
-    textColor: "{colors.manila-paper}"
+    backgroundColor: "{colors.primary-deep}"
+    textColor: "#FFFFFF"
   button-secondary:
-    backgroundColor: "transparent"
-    textColor: "{colors.warm-charcoal-3}"
+    backgroundColor: "{colors.surface-3}"
+    textColor: "{colors.ink-2}"
     rounded: "{rounded.button}"
-    padding: "12px 20px"
+    padding: "12px 24px"
   button-danger:
-    backgroundColor: "transparent"
-    textColor: "{colors.clay-red}"
+    backgroundColor: "{colors.warn-soft}"
+    textColor: "{colors.warn}"
     rounded: "{rounded.button}"
-    padding: "12px 20px"
+    padding: "12px 24px"
   button-signal:
-    backgroundColor: "{colors.court-surface-green}"
-    textColor: "{colors.manila-paper}"
+    backgroundColor: "{colors.signal}"
+    textColor: "#FFFFFF"
     rounded: "{rounded.button}"
-    padding: "12px 20px"
+    padding: "12px 24px"
   chip-active:
-    backgroundColor: "{colors.warm-charcoal}"
-    textColor: "{colors.manila-paper}"
+    backgroundColor: "{colors.primary}"
+    textColor: "#FFFFFF"
     rounded: "{rounded.chip}"
-    padding: "4px 10px"
+    padding: "6px 14px"
   chip-inactive:
-    backgroundColor: "{colors.manila-paper-2}"
-    textColor: "{colors.warm-charcoal-3}"
+    backgroundColor: "{colors.surface-3}"
+    textColor: "{colors.ink-3}"
     rounded: "{rounded.chip}"
-    padding: "4px 10px"
+    padding: "6px 14px"
   input-default:
-    backgroundColor: "{colors.manila-paper}"
-    textColor: "{colors.warm-charcoal}"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
     rounded: "{rounded.input}"
     padding: "12px 16px"
   status-tag-confirmed:
-    backgroundColor: "{colors.status-confirmed-bg}"
-    textColor: "{colors.status-confirmed-text}"
-    rounded: "4px"
-    padding: "2px 6px"
+    backgroundColor: "{colors.primary-soft}"
+    textColor: "{colors.primary-deep}"
+    rounded: "{rounded.tag}"
+    padding: "4px 10px"
   status-tag-pending:
-    backgroundColor: "{colors.status-pending-bg}"
-    textColor: "{colors.status-pending-text}"
-    rounded: "4px"
-    padding: "2px 6px"
+    backgroundColor: "{colors.pending-bg}"
+    textColor: "{colors.pending-text}"
+    rounded: "{rounded.tag}"
+    padding: "4px 10px"
   status-tag-checked-in:
-    backgroundColor: "{colors.status-checked-in-bg}"
-    textColor: "{colors.status-checked-in-text}"
-    rounded: "4px"
-    padding: "2px 6px"
+    backgroundColor: "{colors.signal-soft}"
+    textColor: "{colors.signal-text}"
+    rounded: "{rounded.tag}"
+    padding: "4px 10px"
   status-tag-no-show:
-    backgroundColor: "{colors.status-no-show-bg}"
-    textColor: "{colors.status-no-show-text}"
-    rounded: "4px"
-    padding: "2px 6px"
+    backgroundColor: "{colors.warn-soft}"
+    textColor: "{colors.warn-text}"
+    rounded: "{rounded.tag}"
+    padding: "4px 10px"
   nav-item-active:
-    textColor: "{colors.warm-charcoal}"
+    textColor: "{colors.primary}"
   nav-item-inactive:
-    textColor: "{colors.warm-charcoal-3}"
+    textColor: "{colors.ink-3}"
 ---
 
 # Design System: Court Books
 
 ## 1. Overview
 
-**Creative North Star: "The Brass Clipboard"**
+**Creative North Star: "The Social Court"**
 
-The facility manager's most trusted tool is the clipboard hanging by the front desk: battered, brass-clipped, holding today's schedule on cream-colored paper. Court Books is the digital version of that object. Not a "platform." Not a "dashboard." A clipboard that knows what's happening on every court, right now, and gets out of the way.
+Court Books feels like a modern social app that happens to manage courts. Think Instagram's clean surfaces, Facebook's confident blues, and the comfort of an app you open twenty times a day without friction. Bold typography, vibrant-but-soft accent colors, generous white space, and rounded surfaces that feel approachable on every tap.
 
-The system projects competence through restraint. Warm paper tones replace clinical whites. A high-contrast serif (Fraunces) carries headlines with the confidence of a well-set ledger, while monospace labels handle the data-dense work of times, prices, and status codes. Gold accents appear sparingly, like brass hardware on wood: functional, not decorative.
+The system is confident without being corporate. The primary blue is present and unapologetic; it carries CTAs, active states, and the brand itself. Surfaces are clean white and cool slate, never yellowed or themed to the point of fatigue. Status colors are vibrant but always paired with soft tinted backgrounds that prevent eye strain.
 
-This system explicitly rejects the North American SaaS booking template (CourtReserve, Skedda), generic Bootstrap admin panels, and overly playful sports app aesthetics. No neon. No mascots. No gamification badges. No identical card grids with icon-heading-text repeated six times.
+This system rejects the North American SaaS booking template (CourtReserve, Skedda), enterprise scheduling tools (Calendly, Acuity), and overly retro or papery aesthetics. Court Books is a modern product, not a vintage ledger.
 
 **Key Characteristics:**
-- Warm neutrals dominate; gold accent at less than 10% of any screen
-- Serif for authority, monospace for data, sans-serif for body
+- Clean white surfaces with a bold blue primary accent
+- Single sans-serif typeface (Inter) for everything: bold for headlines, medium for labels, regular for body
+- Generous border radius on all interactive elements (12px buttons, 16px cards)
+- Vibrant semantic colors on soft tinted backgrounds (blue/green/amber/red)
 - Mobile-first (max 425px), designed for one-handed standing use
 - Bottom sheets over modals; inline actions over popups
-- Every screen answers its question in under three seconds
+- Subtle shadows for elevation, not just tonal layering
 
 ## 2. Colors
 
-A palette of warm paper, ink, and brass. Every neutral is tinted toward amber; nothing reads as cool gray. The accent gold references the painted court lines on a pickleball surface.
+A modern, social-app palette. Cool slate neutrals keep the interface calm. The primary blue is bold enough to anchor every screen without overwhelming it. Semantic colors are vivid but always sit on pastel-tinted backgrounds so they pop without glaring.
 
 ### Primary
-- **Court Line Gold** (`#F2C94C`): The singular accent. Used on active navigation indicators, italic emphasis in headlines, booking totals, and the accent dot on sparkline charts. Never used as a background fill on large surfaces.
-- **Court Line Gold Deep** (`#E2B43E`): Darker variant for text set against light backgrounds. Used in italic display text where the gold carries meaning (owner names, totals, facility names).
-- **Court Line Gold Soft** (`#FBEBB0`): Muted tint for confirmed status tag backgrounds and subtle highlights. Never used as a standalone decorative element.
+- **Court Blue** (`#3B82F6`): The brand color. Buttons, active nav, selected chips, links, the accent bar. Present on every screen. Confident, not shy.
+- **Court Blue Deep** (`#2563EB`): Hover and pressed states. Focus rings. Slightly darker for interactive feedback.
+- **Court Blue Soft** (`#DBEAFE`): Confirmed status tag background, selected item highlights, light tint for emphasis areas.
+- **Court Blue Faint** (`#EFF6FF`): Barely-there tint for hover backgrounds on rows, subtle section emphasis.
 
 ### Neutral
-- **Manila Paper** (`#FCFAF5`): Primary content surface. Phone screen background, bottom sheet background, input field fill. Named for the city and the material.
-- **Manila Paper 2** (`#F0EBDF`): Elevated surface within the paper context. KPI cards, search bars, secondary containers. One step of tonal depth without a shadow.
-- **Warm Cream** (`#F6F2E9`): Page-level background. The color behind the content surface. Visible as body background on the landing page and app shell.
-- **Warm Cream 2** (`#EFE9DB`): Deeper cream for grid cells and value prop blocks on the landing page.
-- **Warm Charcoal** (`#1A1715`): Primary text, filled buttons, active navigation items, booked grid cells. The system's "black" carries a warm undertone.
-- **Warm Charcoal 2** (`#4A4540`): Secondary text, section descriptions, intro copy.
-- **Warm Charcoal 3** (`#8A847D`): Tertiary text, monospace labels, inactive navigation, placeholder text.
-- **Warm Charcoal 4** (`#BDB6AB`): Disabled text, open grid cell dashes, lightest readable text.
-- **Hairline** (`#D9D2C2`): Primary borders, dividers between booking rows, card outlines.
-- **Hairline Faint** (`#E8E1D0`): Lightest divider, used between list items where Hairline feels too heavy.
+- **Surface** (`#FFFFFF`): Primary content surface. Cards, bottom sheets, inputs, bottom nav.
+- **Surface 2** (`#F8FAFC`): Page background. The color behind the content. Cool, barely visible.
+- **Surface 3** (`#F1F5F9`): Inactive chips, secondary buttons, search bars, KPI card fills. One step up from the background.
+- **Ink** (`#0F172A`): Primary text. Headlines, body text, active elements. Deep slate, not pure black.
+- **Ink 2** (`#334155`): Secondary text. Descriptions, subtitles, form labels.
+- **Ink 3** (`#64748B`): Tertiary text. Placeholders, inactive nav, timestamps.
+- **Ink 4** (`#94A3B8`): Disabled text, ghost elements, lightest readable text.
+- **Line** (`#E2E8F0`): Borders, dividers, card outlines. Cool and subtle.
+- **Line 2** (`#F1F5F9`): Faintest dividers, inner separators within cards.
 
 ### Semantic
-- **Court Surface Green** (`#2D5A3F`): Positive actions and states. Check-in buttons, "checked in" status, online indicator dot. Named for the green playing surface.
-- **Clay Red** (`#A33A2A`): Destructive actions and negative states. No-show tags, cancel buttons, warning text, offline indicator. Named for the clay court variant.
+- **Signal Green** (`#10B981`): Check-in button, success states, online indicator. Vibrant emerald.
+- **Signal Soft** (`#D1FAE5`): Checked-in status tag background.
+- **Signal Text** (`#065F46`): Text on signal-soft backgrounds.
+- **Warn Red** (`#EF4444`): No-show, cancel, destructive actions. Clear and urgent.
+- **Warn Soft** (`#FEE2E2`): No-show tag background, danger button fill.
+- **Warn Text** (`#991B1B`): Text on warn-soft backgrounds.
+- **Amber** (`#F59E0B`): Recurring bookings, warnings that aren't errors.
+- **Amber Soft** (`#FEF3C7`): Recurring booking tag background.
+- **Amber Text** (`#92400E`): Text on amber-soft backgrounds.
+- **Pending BG** (`#FFF7ED`): Pending status background. Warm orange tint.
+- **Pending Text** (`#C2410C`): Pending status text.
 
 ### Named Rules
-**The Brass Hardware Rule.** Court Line Gold appears on no more than 10% of any screen. It marks what matters: the active tab, the key number, the action that earns the tap. When everything is gold, nothing is.
+**The Confident Blue Rule.** Court Blue is the visual anchor of every screen. It carries buttons, active states, and key actions. Unlike a restrained accent, it's meant to be seen; the system looks incomplete without it.
 
 ## 3. Typography
 
-**Display Font:** Fraunces (with Georgia fallback)
-**Body Font:** Geist (with system sans-serif fallback)
-**Label Font:** Geist Mono (with system monospace fallback)
+**Primary Font:** Inter (with system sans-serif fallback)
 
-**Character:** Fraunces is a variable optical-size serif that shifts from delicate at large sizes to sturdy at small ones. Paired with Geist's neutral clarity for body text and Geist Mono's data-ready monospace for labels, the combination reads as "someone who takes their work seriously but doesn't wear a tie." The serif projects expertise; the mono projects precision; the sans stays invisible.
+**Character:** Inter is the workhorse of modern product design. Clean, highly legible at every size, with excellent weight range. Used for everything: bold and large for impact, medium for structure, regular for reading. No serif, no mono. One family, many weights, total consistency. The same typeface Facebook, Linear, and Vercel use, because it works.
 
 ### Hierarchy
-- **Display** (300, clamp(1.5rem, 5vw, 3.75rem), leading 0.92, tracking -0.04em): Landing page hero, onboarding step headlines. Italic variants carry the gold accent color for emphasis words.
-- **Headline** (300, 1.5rem, leading 1.05, tracking -0.02em): Page titles within the app ("Schedule", "Members", "Reports"). Light weight signals calm authority.
-- **Body** (400, 0.875rem, leading 1.55): Booking detail descriptions, member names in lists, form hint text. Geist sans-serif, never exceeding 65ch line length.
-- **Label** (500, 0.5rem, leading 1.4, tracking 0.08em, uppercase): Monospace. Section headers ("NEXT UP"), KPI labels ("TODAY"), filter chips, status tags, navigation labels. The smallest readable text in the system. Always uppercase, always tracked wide.
-- **Data** (400, 0.6875rem, leading 1.1): Monospace. Booking times ("10:00"), court identifiers ("C2"), member initials in the schedule grid. Not uppercase; set at their natural case.
+- **Display** (700, clamp(1.75rem, 5vw, 3rem), leading 1.1, tracking -0.025em): Landing page hero, onboarding headlines. Bold and large. Color emphasis via the blue primary, not italic.
+- **Headline** (600, 1.25rem, leading 1.2, tracking -0.015em): Page titles ("Schedule", "Members"). Semi-bold, compact, modern.
+- **Title** (600, 1rem, leading 1.3): Card headers, section labels, dialog titles. Same weight as headline, smaller.
+- **Body** (400, 0.875rem, leading 1.5): Descriptions, member names, form text. Regular weight, comfortable reading.
+- **Label** (500, 0.75rem, leading 1.4, tracking 0.01em): Navigation items, filter chips, status tags, KPI labels. Medium weight, not uppercase (unlike the old system). Sentence case reads more naturally.
+- **Caption** (400, 0.6875rem, leading 1.3): Timestamps, secondary metadata, helper text. Regular weight, slightly muted color.
 
 ### Named Rules
-**The Mono Is Structure Rule.** Monospace text carries structural information: times, counts, prices, labels, statuses. If the content answers "when," "how many," or "what state," it is monospace. Body text is never monospace.
+**The One Family Rule.** Inter for everything. No serif for "authority." No monospace for "data." Weight and size create hierarchy, not font family switches. If a number needs emphasis, make it bigger and bolder, not monospace.
 
 ## 4. Elevation
 
-Court Books is a flat system. Depth is conveyed through tonal layering (Manila Paper → Manila Paper 2 → Warm Cream), not shadows. The only shadow in the system is `shadow-lg` on the header dropdown menu, where the overlay demands separation from the content beneath it.
-
-Bottom sheets use a semi-transparent overlay (`bg-ink/30`) and rounded top corners to separate from the main surface. This is structural, not decorative: the sheet physically slides up from the bottom edge, and the rounded corner signals "I am a separate layer."
+Court Books uses subtle shadows to create comfortable depth. Cards float gently above the background. Active overlays (sheets, dropdowns) cast larger shadows. The system is not flat; it has just enough lift to feel modern and touchable.
 
 ### Shadow Vocabulary
-- **Menu shadow** (`0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)`): Header dropdown only. Tight, warm-tinted. If a shadow appears elsewhere, the design has drifted.
+- **Card** (`0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)`): Default card elevation. Barely there. Makes cards feel like objects, not painted rectangles.
+- **Card hover** (`0 4px 12px rgba(0,0,0,0.08)`): Interactive cards on hover. Slight lift.
+- **Dropdown** (`0 10px 25px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.06)`): Menus, popovers. Clear separation from content.
+- **Sheet** (`0 -4px 25px rgba(0,0,0,0.1)`): Bottom sheets. Shadow casts upward.
 
 ### Named Rules
-**The Flat Desk Rule.** Surfaces sit flat on the desk. No floating cards, no lifted elements, no ambient glow. Tonal steps (Paper → Paper 2 → Cream) create hierarchy. A shadow means "this is temporary and will go away" (dropdown menus, bottom sheets). Permanent UI never casts a shadow.
+**The Gentle Lift Rule.** Every card and container has a subtle shadow. Shadows are soft and diffuse, never hard-edged. The goal is "comfortable depth," not "floating in space." Flat surfaces are acceptable only for inline elements (list rows, form fields).
 
 ## 5. Components
 
 ### Buttons
-- **Shape:** Gently rounded corners (8px radius). Not pill-shaped; pills are reserved for chips and filter toggles.
-- **Primary:** Warm Charcoal fill, Manila Paper text, 12px vertical / 20px horizontal padding, font-sans text-xs font-medium. The default action button.
-- **Hover:** Warm Charcoal 2 fill. Subtle darkening, no scale or transform.
-- **Secondary:** Transparent fill, Hairline border, Warm Charcoal 3 text. Cancel, dismiss, back actions.
-- **Signal:** Court Surface Green fill, Manila Paper text. Positive confirmations: "Check In," "Confirm."
-- **Danger:** Transparent fill, Clay Red border, Clay Red text. Destructive: "No-show," "Cancel booking."
-- **CTA (landing/onboarding):** Full-width, taller padding (16px vertical), flex layout with label left and monospace arrow right. Used only on non-app surfaces.
+- **Shape:** Generously rounded (12px radius). Feels modern and tappable.
+- **Primary:** Court Blue fill, white text, 12px vertical / 24px horizontal padding. font-sans text-sm font-semibold. The main action.
+- **Hover:** Court Blue Deep fill. Slight scale transform optional.
+- **Secondary:** Surface 3 fill, Ink 2 text. No border. Background-only differentiation.
+- **Signal:** Signal Green fill, white text. Positive confirmations.
+- **Danger:** Warn Soft fill, Warn Red text. Destructive actions feel serious but not aggressive.
+- **CTA:** Full-width, taller padding (14px vertical), Court Blue fill.
 
 ### Chips
-- **Style:** Pill-shaped (999px radius), monospace label at 9px, uppercase, wide tracking.
-- **Active:** Warm Charcoal fill, Manila Paper text.
-- **Inactive:** Manila Paper 2 fill, Warm Charcoal 3 text. No border.
-- **Context:** Court filters ("All", "C1", "C2"), period selectors ("7d", "30d"), member filters ("Regular", "VIP", "Lapsed"), time filters ("Now", "Earlier").
+- **Style:** Pill-shaped (999px radius), font-sans text-xs font-medium, 6px vertical / 14px horizontal padding.
+- **Active:** Court Blue fill, white text.
+- **Inactive:** Surface 3 fill, Ink 3 text.
+- **Transition:** Background and color transition 150ms ease.
 
 ### Status Tags
-- **Shape:** Slightly rounded (4px radius), compact padding (2px 6px). Monospace, 8px, uppercase, tracked.
-- **Confirmed:** Gold Soft background, dark gold text.
-- **Pending:** Warm tan background (`#F4E1D8`), burnt sienna text (`#8A4A2D`).
-- **Checked In:** Soft green background (`#D8E5DD`), Court Surface Green text.
-- **No-show:** Soft red background (`#F4D8D8`), Clay Red text.
-- **Cancelled:** Manila Paper 2 background, Warm Charcoal 3 text.
-- Every tag pairs color with a text label. Color alone never carries status meaning.
+- **Shape:** Rounded (8px radius), 4px vertical / 10px horizontal padding. font-sans text-xs font-medium.
+- **Confirmed:** Blue Soft bg, Blue Deep text.
+- **Pending:** Pending BG, Pending Text.
+- **Checked In:** Signal Soft bg, Signal Text.
+- **No-show:** Warn Soft bg, Warn Text.
+- **Cancelled:** Surface 3 bg, Ink 3 text.
+- Every tag pairs color with a text label.
 
 ### Bottom Sheets
-- **Trigger:** Tap on a booking row, FAB button, or add-member action.
-- **Structure:** Fixed overlay with `bg-ink/30` backdrop. Sheet slides from bottom with `rounded-t-2xl` (16px top corners). Drag handle: 40px wide, 4px tall, Hairline color, pill-shaped, centered.
-- **Dismissal:** Tap overlay or close button. No swipe-to-dismiss in the current implementation.
-- **Content:** Title + meta line at top, action buttons at bottom, content fills the middle. Max height 85vh with internal scroll.
+- **Overlay:** `bg-black/30` backdrop with blur(4px).
+- **Sheet:** White surface, `rounded-t-2xl` (16px), sheet shadow. Drag handle: 40px wide, 4px tall, Line color, pill-shaped.
+- **Content:** Max height 85vh with internal scroll.
 
 ### Inputs
-- **Style:** Manila Paper fill, Hairline border, 8px radius, 12px vertical / 16px horizontal padding, font-sans text-sm.
-- **Focus:** Border shifts to Warm Charcoal. No glow, no scale. Outline suppressed.
-- **Search variant:** Manila Paper 2 fill, no border, inline SVG search icon, monospace placeholder at 10px.
+- **Style:** White fill, Line border, 12px radius, 12px vertical / 16px horizontal padding, font-sans text-sm.
+- **Focus:** Border shifts to Court Blue. Ring: 2px Court Blue Soft glow. Clean and clear.
+- **Search variant:** Surface 3 fill, no border, inline search icon, placeholder in Ink 3.
 
 ### Navigation (Bottom)
-- **Structure:** Fixed at viewport bottom, 64px tall, Manila Paper fill, Hairline top border. Grid columns match visible item count (role-dependent).
-- **Items:** Centered column layout, 20px SVG icon above 8px monospace uppercase label.
-- **Active:** Warm Charcoal text, 2px Gold accent bar at top edge of the item.
-- **Inactive:** Warm Charcoal 3 text, no accent bar.
-- **Staff variant:** Reduced item set (Check-in, Today, Walk-in, Account). No Reports, Members, or Settings.
+- **Structure:** Fixed bottom, 64px tall, white fill, Line top border, subtle card shadow upward.
+- **Items:** Centered column, 20px icon above text-xs font-medium label.
+- **Active:** Court Blue icon and text, 2px Court Blue bar at top.
+- **Inactive:** Ink 3 icon and text.
 
 ### Schedule Grid
-- **Structure:** CSS grid with time column (40px) and one column per court. Hairline borders between cells. Header row in Manila Paper 2.
-- **Booked cell:** Warm Charcoal fill, Manila Paper text, member initials in monospace 8px.
-- **Recurring cell:** Court Line Gold fill, Warm Charcoal text, "Rec" label.
-- **Open cell:** Manila Paper fill, Warm Charcoal 4 em dash. Hover shifts to Manila Paper 2.
-- **Legend:** Three inline swatches (Booked/Recurring/Open) with monospace labels, below the grid.
+- **Structure:** Rounded card with card shadow. Time column + court columns.
+- **Booked cell:** Court Blue fill, white text, initials in text-xs font-medium.
+- **Recurring cell:** Amber fill, white text, "Rec" label.
+- **Open cell:** Surface fill, Ink 4 dash. Hover shifts to Blue Faint.
+- **Legend:** Inline swatches below grid.
 
 ## 6. Do's and Don'ts
 
 ### Do:
-- **Do** use Manila Paper (`#FCFAF5`) as the default content surface, never pure white.
-- **Do** keep Court Line Gold under 10% of any screen. It marks active states and key figures.
-- **Do** use monospace for all structural data: times, prices, counts, labels, statuses.
-- **Do** use bottom sheets for contextual detail. They preserve spatial context better than full-screen modals on mobile.
-- **Do** maintain 44px minimum touch targets for all interactive elements, including status tag action buttons.
-- **Do** show a text label alongside every color-coded status. Color is a reinforcement, not the signal.
-- **Do** use tonal layering (Paper → Paper 2 → Cream) for depth instead of shadows.
+- **Do** use white (`#FFFFFF`) for content surfaces and Court Blue for primary actions.
+- **Do** use Inter for everything. Weight and size create hierarchy.
+- **Do** use generous border radius (12px buttons, 16px cards, 8px tags) for a modern feel.
+- **Do** use subtle shadows on cards and containers for comfortable depth.
+- **Do** use vibrant semantic colors on soft tinted backgrounds (blue-on-light-blue, green-on-light-green).
+- **Do** maintain 44px minimum touch targets.
+- **Do** show a text label alongside every color-coded status.
+- **Do** use sentence case for labels and navigation, not uppercase.
 
 ### Don't:
-- **Don't** use pure black (`#000000`) or pure white (`#ffffff`). Every neutral is warm-tinted.
-- **Don't** build layouts that look like CourtReserve, Skedda, or Playtomic: overbuilt dashboards, feature-count marketing, desktop-first grids.
-- **Don't** use generic Bootstrap or Material admin patterns: gray sidebars, blue primary buttons, identical card grids with icon-heading-text.
-- **Don't** add neon gradients, mascot illustrations, or gamification badges. Court Books serves operators, not players scrolling for fun.
-- **Don't** use side-stripe borders (border-left/right > 1px as accent). Rewrite with background tints or full borders.
-- **Don't** use gradient text (`background-clip: text`). Emphasis through weight or the gold accent color.
-- **Don't** reach for modals. Bottom sheets for mobile; inline expansion for settings.
-- **Don't** add shadows to permanent UI elements. Shadows mean "temporary" (dropdown menus, sheets).
-- **Don't** use Fraunces for body text or long passages. It is a display and headline font only.
-- **Don't** set monospace text in sentence case for labels. Labels are always uppercase with wide tracking.
+- **Don't** use cream, amber-tinted, or papery backgrounds. The system is cool and modern, not warm and vintage.
+- **Don't** use serif fonts. No Fraunces, no Georgia. Inter only.
+- **Don't** use monospace fonts for data or labels. Inter handles numbers and labels.
+- **Don't** use uppercase tracking-wide labels. Sentence case is more modern and readable.
+- **Don't** build layouts that look like CourtReserve, Skedda, or Playtomic.
+- **Don't** use side-stripe borders or gradient text.
+- **Don't** use neon gradients, mascot illustrations, or gamification badges.
+- **Don't** use flat tonal layering without shadows. Cards should have gentle lift.
+- **Don't** use gold or amber as the primary accent. Court Blue is the brand color.

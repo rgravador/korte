@@ -31,7 +31,7 @@ Court Books speaks with the assurance of someone who runs courts for a living. N
 
 1. **Glanceable, not studyable.** Every screen answers its question in under three seconds. If the owner has to scroll to understand today's status, the design failed.
 2. **Staff-speed interactions.** Booking, check-in, and member lookup are done standing up with one hand. Two taps maximum for the core action on any screen.
-3. **Warm authority.** The palette and typography project competence without coldness. Cream paper, not clinical white. Serif confidence, not sans-serif neutrality.
+3. **Modern comfort.** The app feels like opening Instagram or Facebook: clean surfaces, bold blue accents, soft rounded corners, vibrant but easy on the eyes. Not vintage, not corporate; the kind of app you'd show a friend.
 4. **Filipino-first, not localized-second.** PHP currency, local payment context, operating hours that match Manila schedules, copy that assumes the user's reality. Not a translated American product.
 5. **Offline-ready by default.** The app works without connectivity. Sync is invisible when it works; honest when it can't.
 
