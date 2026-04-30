@@ -13,9 +13,11 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const getHomeRoute = (role: string) => role === 'system_admin' ? '/admin' : '/dashboard';
+
   useEffect(() => {
     if (currentUser) {
-      router.replace('/dashboard');
+      router.replace(getHomeRoute(currentUser.role));
     }
   }, [currentUser, router]);
 
@@ -27,14 +29,18 @@ export default function LoginPage() {
     // Authenticate via API route (server-side, uses service_role key)
     const user = await apiLogin(username, password);
     if (user) {
-      useStore.setState({ currentUser: user });
-      // Hydrate all tenant data
-      const data = await apiHydrate(user.tenantId);
-      if (data) {
-        hydrateFromRemote(data);
+      useStore.setState({ currentUser: user, isOnboarded: true });
+
+      // Hydrate tenant data (skip for system_admin — they view all tenants)
+      if (user.role !== 'system_admin') {
+        const data = await apiHydrate(user.tenantId);
+        if (data) {
+          hydrateFromRemote(data);
+        }
       }
+
       setLoading(false);
-      router.push('/dashboard');
+      router.push(getHomeRoute(user.role));
       return;
     }
 

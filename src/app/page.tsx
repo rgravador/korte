@@ -6,15 +6,15 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 
 export default function LandingPage() {
-  const { isOnboarded, currentUser } = useStore();
+  const { currentUser } = useStore();
   const router = useRouter();
 
-  // If already logged in, go straight to dashboard
+  // If already logged in, go to the right place
   useEffect(() => {
-    if (isOnboarded && currentUser) {
-      router.replace('/dashboard');
+    if (currentUser) {
+      router.replace(currentUser.role === 'system_admin' ? '/admin' : '/dashboard');
     }
-  }, [isOnboarded, currentUser, router]);
+  }, [currentUser, router]);
 
   return (
     <div className="min-h-screen bg-cream max-w-lg mx-auto flex flex-col">

@@ -4,9 +4,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 let _client: SupabaseClient | null = null;
 
 function getEnv() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
-  const serviceRoleKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY ?? '';
+  const url = process.env.SUPABASE_URL ?? '';
+  const anonKey = process.env.SUPABASE_ANON_KEY ?? '';
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
   return { url, anonKey, serviceRoleKey };
 }
 
