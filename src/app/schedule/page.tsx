@@ -163,7 +163,7 @@ export default function SchedulePage() {
             min={todayStr}
             onChange={(e) => setSelectedDate(e.target.value)}
             aria-label="Select date"
-            className="w-28 shrink-0 bg-paper rounded-lg px-2.5 py-2 text-xs font-mono border border-line focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink"
+            className="w-1/2 shrink-0 bg-paper rounded-lg px-3 py-2 text-sm font-mono border border-line focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink"
           />
           <span className="font-display text-lg tracking-tight text-ink truncate">
             {formatSelectedDate(selectedDate)}
