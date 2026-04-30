@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ItemType } from '@/lib/types';
-import { setupTenantOnline, isSupabaseConfigured } from '@/lib/sync';
+import { apiRegister, apiHydrate } from '@/lib/api';
 
 type Step = 'welcome' | 'facility' | 'courts' | 'items' | 'review';
 
@@ -115,44 +115,37 @@ export default function OnboardingPage() {
   ];
 
   const handleFinish = async () => {
-    // Try Supabase first to get real UUIDs
-    if (isSupabaseConfigured()) {
-      console.debug('[onboarding] Creating tenant in Supabase...');
-      const result = await setupTenantOnline({
-        name: facilityName,
-        subdomain,
-        operatingHoursStart: hoursStart,
-        operatingHoursEnd: hoursEnd,
-        ownerName,
-        ownerEmail,
-        ownerUsername,
-        ownerPassword,
-        courts,
-        items: allItems,
-      });
-
-      if (result?.tenant && result?.user) {
-        // Hydrate store from Supabase with real UUIDs
-        console.debug('[onboarding] Supabase OK, hydrating from remote...');
-        const { hydrateFromSupabase } = await import('@/lib/sync');
-        const data = await hydrateFromSupabase(result.tenant.id);
-        if (data) {
-          hydrateFromRemote(data);
-          useStore.setState({ currentUser: result.user, isOnboarded: true });
-          router.push('/dashboard');
-          return;
-        }
-      }
-      console.warn('[onboarding] Supabase setup failed, falling back to local');
-    }
-
-    // Fallback: local-only setup
-    setupTenant({
+    // Register via API route (server-side, uses service_role key)
+    console.debug('[onboarding] Registering via API...');
+    const result = await apiRegister({
       name: facilityName,
+      subdomain,
+      operatingHoursStart: hoursStart,
+      operatingHoursEnd: hoursEnd,
       ownerName,
       ownerEmail,
       ownerUsername,
       ownerPassword,
+      courts,
+      items: allItems,
+    });
+
+    if (result?.tenant && result?.user) {
+      console.debug('[onboarding] API OK, hydrating...');
+      const data = await apiHydrate(result.tenant.id);
+      if (data) {
+        hydrateFromRemote(data);
+        useStore.setState({ currentUser: result.user, isOnboarded: true });
+        router.push('/dashboard');
+        return;
+      }
+    }
+
+    // Fallback: local-only setup if API fails
+    console.warn('[onboarding] API failed, falling back to local');
+    setupTenant({
+      name: facilityName,
+      ownerName, ownerEmail, ownerUsername, ownerPassword,
       subdomain,
       operatingHoursStart: hoursStart,
       operatingHoursEnd: hoursEnd,

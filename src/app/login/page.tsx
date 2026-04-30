@@ -3,10 +3,10 @@
 import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { loginOnline, isSupabaseConfigured } from '@/lib/sync';
+import { apiLogin, apiHydrate } from '@/lib/api';
 
 export default function LoginPage() {
-  const { login, currentUser, isOnline, hydrateFromRemote } = useStore();
+  const { currentUser, hydrateFromRemote } = useStore();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -24,31 +24,22 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    // Try Supabase first when online + configured
-    if (isSupabaseConfigured() && isOnline) {
-      const onlineUser = await loginOnline(username, password);
-      if (onlineUser) {
-        // Set user in store and hydrate tenant data
-        useStore.setState({ currentUser: onlineUser });
-        const { hydrateFromSupabase } = await import('@/lib/sync');
-        const data = await hydrateFromSupabase(onlineUser.tenantId);
-        if (data) {
-          hydrateFromRemote(data);
-        }
-        setLoading(false);
-        router.push('/dashboard');
-        return;
+    // Authenticate via API route (server-side, uses service_role key)
+    const user = await apiLogin(username, password);
+    if (user) {
+      useStore.setState({ currentUser: user });
+      // Hydrate all tenant data
+      const data = await apiHydrate(user.tenantId);
+      if (data) {
+        hydrateFromRemote(data);
       }
+      setLoading(false);
+      router.push('/dashboard');
+      return;
     }
 
-    // Fall back to local login (offline or Supabase not configured)
-    const user = login(username, password);
     setLoading(false);
-    if (user) {
-      router.push('/dashboard');
-    } else {
-      setError('Invalid username or password');
-    }
+    setError('Invalid username or password');
   };
 
   return (

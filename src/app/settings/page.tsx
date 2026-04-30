@@ -5,7 +5,6 @@ import { BottomNav } from '@/components/bottom-nav';
 import { useStore } from '@/store';
 import { useState } from 'react';
 import { ItemType } from '@/lib/types';
-import { isSupabaseConfigured } from '@/lib/supabase';
 import Link from 'next/link';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -274,11 +273,9 @@ export default function SettingsPage() {
         <Section title="Connection">
           <div className="bg-paper rounded-card p-3 space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm">Supabase</span>
-              <span className={`font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded ${
-                isSupabaseConfigured() ? 'bg-status-checked-bg text-signal' : 'bg-status-pending-bg text-status-pending-text'
-              }`}>
-                {isSupabaseConfigured() ? 'Configured' : 'Not configured'}
+              <span className="text-sm">Server</span>
+              <span className="font-mono text-[8px] tracking-wider uppercase px-2 py-1 rounded bg-status-checked-bg text-signal">
+                Connected
               </span>
             </div>
             <div className="flex justify-between items-center">
