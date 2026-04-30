@@ -4,7 +4,6 @@ import { Header } from '@/components/header';
 import { BottomNav } from '@/components/bottom-nav';
 import { useStore } from '@/store';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ItemType } from '@/lib/types';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import Link from 'next/link';
@@ -19,8 +18,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function SettingsPage() {
-  const { tenant, courts, items, users, isOnline, pendingSync, lastSyncedAt, updateTenant, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem, createUser, resetData, resetToFresh } = useStore();
-  const router = useRouter();
+  const { tenant, courts, items, users, isOnline, pendingSync, lastSyncedAt, updateTenant, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem, createUser } = useStore();
 
   const [editingFacility, setEditingFacility] = useState(false);
 
@@ -45,8 +43,6 @@ export default function SettingsPage() {
   const [newItemPrice, setNewItemPrice] = useState('');
   const [newItemType, setNewItemType] = useState<ItemType>('rental');
 
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-
   const handleSaveFacility = () => {
     updateTenant({ name: facilityName, operatingHoursStart: hoursStart, operatingHoursEnd: hoursEnd });
     setEditingFacility(false);
@@ -67,14 +63,6 @@ export default function SettingsPage() {
     setNewItemPrice('');
     setNewItemType('rental');
     setShowAddItem(false);
-  };
-
-  const handleReset = () => {
-    resetData();
-    setShowResetConfirm(false);
-    setFacilityName(tenant.name);
-    setHoursStart(tenant.operatingHoursStart);
-    setHoursEnd(tenant.operatingHoursEnd);
   };
 
   return (
@@ -317,31 +305,6 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        {/* Reset */}
-        <Section title="Demo">
-          {showResetConfirm ? (
-            <div className="bg-paper rounded-card p-3">
-              <p className="text-sm text-ink-2 mb-3">Reset all data to demo defaults? This cannot be undone.</p>
-              <div className="flex gap-2">
-                <button onClick={handleReset} className="flex-1 bg-warn text-paper py-2.5 rounded-lg font-sans text-xs font-medium">Reset Data</button>
-                <button onClick={() => setShowResetConfirm(false)} className="flex-1 border border-line text-ink-3 py-2.5 rounded-lg font-sans text-xs font-medium">Cancel</button>
-              </div>
-            </div>
-          ) : (
-            <button onClick={() => setShowResetConfirm(true)} className="w-full bg-paper rounded-card p-3 text-left">
-              <div className="font-medium text-sm text-warn">Reset Demo Data</div>
-              <div className="font-mono text-[9px] text-ink-3 tracking-wide">Restore all data to initial seed values</div>
-            </button>
-          )}
-
-          <button
-            onClick={() => { resetToFresh(); router.push('/'); }}
-            className="w-full bg-paper rounded-card p-3 text-left mt-2"
-          >
-            <div className="font-medium text-sm text-ink-2">Start Fresh</div>
-            <div className="font-mono text-[9px] text-ink-3 tracking-wide">Clear everything and re-run onboarding</div>
-          </button>
-        </Section>
       </div>
 
       <BottomNav />

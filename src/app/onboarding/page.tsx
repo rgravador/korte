@@ -180,15 +180,6 @@ export default function OnboardingPage() {
               <span className="font-mono">→</span>
             </button>
 
-            <button
-              onClick={() => {
-                useStore.getState().resetData();
-                router.push('/dashboard');
-              }}
-              className="w-full mt-3 text-ink-3 py-3 font-mono text-[10px] tracking-wider uppercase"
-            >
-              Load demo data instead
-            </button>
           </div>
         )}
 

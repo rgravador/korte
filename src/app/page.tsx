@@ -75,17 +75,6 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        {/* Demo shortcut */}
-        <button
-          onClick={() => {
-            useStore.getState().resetData();
-            router.push('/dashboard');
-          }}
-          aria-label="Load demo data and skip setup"
-          className="w-full mt-4 text-ink-3 py-3 font-mono text-[10px] tracking-wider uppercase"
-        >
-          Load demo data
-        </button>
       </div>
 
       {/* Footer */}

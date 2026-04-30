@@ -1,14 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User, Tenant, Court, Item, Member, Booking, BookingStatus, ItemType, UserRole } from '@/lib/types';
-import {
-  seedUsers,
-  seedTenant,
-  seedCourts,
-  seedItems,
-  seedMembers,
-  seedBookings,
-} from '@/lib/mock-data';
+import { seedTenant } from '@/lib/mock-data';
 import { getSupabase } from '@/lib/supabase';
 import {
   dbCreateBooking, dbUpdateBookingStatus, dbRescheduleBooking,
@@ -95,9 +88,6 @@ interface AppState {
     bookings: Booking[];
   }) => void;
 
-  // Utility
-  resetData: () => void;
-  resetToFresh: () => void;
 }
 
 const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -106,7 +96,7 @@ export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
       currentUser: null,
-      users: seedUsers,
+      users: [],
 
       isOnline: true,
       pendingSync: 0,
@@ -114,25 +104,15 @@ export const useStore = create<AppState>()(
 
       isOnboarded: false,
       tenant: seedTenant,
-      courts: seedCourts,
-      items: seedItems,
-      members: seedMembers,
-      bookings: seedBookings,
+      courts: [],
+      items: [],
+      members: [],
+      bookings: [],
 
       login: (username, password) => {
-        let user = get().users.find(
+        const user = get().users.find(
           (u) => u.username === username && u.password === password && u.isActive
         );
-
-        if (!user) {
-          const seedUser = seedUsers.find(
-            (u) => u.username === username && u.password === password && u.isActive
-          );
-          if (seedUser) {
-            user = get().users.find((u) => u.username === seedUser.username && u.isActive);
-          }
-        }
-
         if (user) {
           set({ currentUser: user });
           return user;
@@ -402,32 +382,6 @@ export const useStore = create<AppState>()(
           courts: data.courts, items: data.items,
           members: data.members, bookings: data.bookings,
           lastSyncedAt: new Date().toISOString(),
-        });
-      },
-
-      resetData: () => {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem('court-books-sync-queue');
-        }
-        set({
-          isOnboarded: true, currentUser: seedUsers[0],
-          users: seedUsers, tenant: seedTenant,
-          courts: seedCourts, items: seedItems,
-          members: seedMembers, bookings: seedBookings,
-          lastSyncedAt: null, pendingSync: 0,
-        });
-      },
-
-      resetToFresh: () => {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem('court-books-sync-queue');
-        }
-        set({
-          isOnboarded: false, currentUser: null,
-          users: [], tenant: seedTenant,
-          courts: [], items: [],
-          members: [], bookings: [],
-          lastSyncedAt: null, pendingSync: 0,
         });
       },
     }),
