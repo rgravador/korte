@@ -135,6 +135,7 @@ export async function dbLogin(
   username: string,
   password: string
 ): Promise<User | null> {
+  console.debug('[db] dbLogin', { username });
   // We call the DB function verify_password via rpc
   const { data, error } = await sb
     .from('users')
@@ -143,7 +144,10 @@ export async function dbLogin(
     .eq('is_active', true)
     .maybeSingle();
 
-  if (error || !data) return null;
+  if (error || !data) {
+    console.debug('[db] dbLogin user not found or error', { username, error: error?.message });
+    return null;
+  }
 
   // Verify password via rpc
   const { data: valid } = await sb.rpc('verify_password', {
@@ -151,7 +155,11 @@ export async function dbLogin(
     hashed: data.password_hash,
   });
 
-  if (!valid) return null;
+  if (!valid) {
+    console.debug('[db] dbLogin password verification failed', { username });
+    return null;
+  }
+  console.debug('[db] dbLogin OK', { username });
   return toUser(data);
 }
 
@@ -160,6 +168,7 @@ export async function dbCreateUser(
   tenantId: string,
   data: { username: string; password: string; role: UserRole; displayName: string; email: string }
 ): Promise<User | null> {
+  console.debug('[db] dbCreateUser', { username: data.username, role: data.role });
   // Hash password via rpc
   const { data: hash, error: hashError } = await sb.rpc('hash_password', { plain: data.password });
   if (hashError) {
@@ -170,6 +179,7 @@ export async function dbCreateUser(
     console.error('[db] hash_password returned empty');
     return null;
   }
+  console.debug('[db] dbCreateUser hash OK');
 
   const { data: row, error } = await sb
     .from('users')
@@ -189,6 +199,7 @@ export async function dbCreateUser(
     return null;
   }
   if (!row) return null;
+  console.debug('[db] dbCreateUser OK', { username: data.username });
   return toUser(row);
 }
 
@@ -203,6 +214,7 @@ export async function dbCreateTenant(
     operatingHoursEnd: number;
   }
 ): Promise<Tenant | null> {
+  console.debug('[db] dbCreateTenant', { name: data.name, subdomain: data.subdomain });
   const { data: row, error } = await sb
     .from('tenants')
     .insert({
@@ -219,12 +231,18 @@ export async function dbCreateTenant(
     return null;
   }
   if (!row) return null;
+  console.debug('[db] dbCreateTenant OK', { id: row.id });
   return toTenant(row);
 }
 
 export async function dbGetTenant(sb: SupabaseClient, tenantId: string): Promise<Tenant | null> {
+  console.debug('[db] dbGetTenant', { tenantId });
   const { data, error } = await sb.from('tenants').select('*').eq('id', tenantId).single();
-  if (error || !data) return null;
+  if (error || !data) {
+    console.debug('[db] dbGetTenant not found', { tenantId, error: error?.message });
+    return null;
+  }
+  console.debug('[db] dbGetTenant OK', { tenantId });
   return toTenant(data);
 }
 
@@ -233,20 +251,31 @@ export async function dbUpdateTenant(
   tenantId: string,
   updates: Partial<{ name: string; operatingHoursStart: number; operatingHoursEnd: number }>
 ): Promise<boolean> {
+  console.debug('[db] dbUpdateTenant', { tenantId, updates });
   const mapped: Record<string, unknown> = {};
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.operatingHoursStart !== undefined) mapped.operating_hours_start = updates.operatingHoursStart;
   if (updates.operatingHoursEnd !== undefined) mapped.operating_hours_end = updates.operatingHoursEnd;
 
   const { error } = await sb.from('tenants').update(mapped).eq('id', tenantId);
-  return !error;
+  if (error) {
+    console.error('[db] dbUpdateTenant FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbUpdateTenant OK', { tenantId });
+  return true;
 }
 
 // ── Courts ───────────────────────────────────────────────────
 
 export async function dbGetCourts(sb: SupabaseClient, tenantId: string): Promise<Court[]> {
+  console.debug('[db] dbGetCourts', { tenantId });
   const { data, error } = await sb.from('courts').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) return [];
+  if (error || !data) {
+    console.error('[db] dbGetCourts FAILED:', error?.message, error?.details);
+    return [];
+  }
+  console.debug('[db] dbGetCourts OK', { resultCount: data.length });
   return data.map(toCourt);
 }
 
@@ -254,12 +283,17 @@ export async function dbAddCourt(
   sb: SupabaseClient,
   court: { tenantId: string; name: string; hourlyRate: number }
 ): Promise<Court | null> {
+  console.debug('[db] dbAddCourt', { name: court.name, hourlyRate: court.hourlyRate });
   const { data, error } = await sb
     .from('courts')
     .insert({ tenant_id: court.tenantId, name: court.name, hourly_rate: court.hourlyRate })
     .select()
     .single();
-  if (error || !data) return null;
+  if (error || !data) {
+    console.error('[db] dbAddCourt FAILED:', error?.message, error?.details);
+    return null;
+  }
+  console.debug('[db] dbAddCourt OK', { resultCount: 1 });
   return toCourt(data);
 }
 
@@ -268,24 +302,41 @@ export async function dbUpdateCourt(
   courtId: string,
   updates: Partial<{ name: string; hourlyRate: number; isActive: boolean }>
 ): Promise<boolean> {
+  console.debug('[db] dbUpdateCourt', { courtId, updates });
   const mapped: Record<string, unknown> = {};
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.hourlyRate !== undefined) mapped.hourly_rate = updates.hourlyRate;
   if (updates.isActive !== undefined) mapped.is_active = updates.isActive;
   const { error } = await sb.from('courts').update(mapped).eq('id', courtId);
-  return !error;
+  if (error) {
+    console.error('[db] dbUpdateCourt FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbUpdateCourt OK', { courtId });
+  return true;
 }
 
 export async function dbRemoveCourt(sb: SupabaseClient, courtId: string): Promise<boolean> {
+  console.debug('[db] dbRemoveCourt', { courtId });
   const { error } = await sb.from('courts').delete().eq('id', courtId);
-  return !error;
+  if (error) {
+    console.error('[db] dbRemoveCourt FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbRemoveCourt OK', { courtId });
+  return true;
 }
 
 // ── Items ────────────────────────────────────────────────────
 
 export async function dbGetItems(sb: SupabaseClient, tenantId: string): Promise<Item[]> {
+  console.debug('[db] dbGetItems', { tenantId });
   const { data, error } = await sb.from('items').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) return [];
+  if (error || !data) {
+    console.error('[db] dbGetItems FAILED:', error?.message, error?.details);
+    return [];
+  }
+  console.debug('[db] dbGetItems OK', { resultCount: data.length });
   return data.map(toItem);
 }
 
@@ -293,12 +344,17 @@ export async function dbAddItem(
   sb: SupabaseClient,
   item: { tenantId: string; name: string; price: number; type: ItemType }
 ): Promise<Item | null> {
+  console.debug('[db] dbAddItem', { name: item.name, type: item.type });
   const { data, error } = await sb
     .from('items')
     .insert({ tenant_id: item.tenantId, name: item.name, price: item.price, type: item.type })
     .select()
     .single();
-  if (error || !data) return null;
+  if (error || !data) {
+    console.error('[db] dbAddItem FAILED:', error?.message, error?.details);
+    return null;
+  }
+  console.debug('[db] dbAddItem OK', { resultCount: 1 });
   return toItem(data);
 }
 
@@ -307,24 +363,41 @@ export async function dbUpdateItem(
   itemId: string,
   updates: Partial<{ name: string; price: number; isActive: boolean }>
 ): Promise<boolean> {
+  console.debug('[db] dbUpdateItem', { itemId });
   const mapped: Record<string, unknown> = {};
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.price !== undefined) mapped.price = updates.price;
   if (updates.isActive !== undefined) mapped.is_active = updates.isActive;
   const { error } = await sb.from('items').update(mapped).eq('id', itemId);
-  return !error;
+  if (error) {
+    console.error('[db] dbUpdateItem FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbUpdateItem OK', { itemId });
+  return true;
 }
 
 export async function dbRemoveItem(sb: SupabaseClient, itemId: string): Promise<boolean> {
+  console.debug('[db] dbRemoveItem', { itemId });
   const { error } = await sb.from('items').delete().eq('id', itemId);
-  return !error;
+  if (error) {
+    console.error('[db] dbRemoveItem FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbRemoveItem OK', { itemId });
+  return true;
 }
 
 // ── Members ──────────────────────────────────────────────────
 
 export async function dbGetMembers(sb: SupabaseClient, tenantId: string): Promise<Member[]> {
+  console.debug('[db] dbGetMembers', { tenantId });
   const { data, error } = await sb.from('members').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) return [];
+  if (error || !data) {
+    console.error('[db] dbGetMembers FAILED:', error?.message, error?.details);
+    return [];
+  }
+  console.debug('[db] dbGetMembers OK', { resultCount: data.length });
   return data.map(toMember);
 }
 
@@ -332,6 +405,7 @@ export async function dbAddMember(
   sb: SupabaseClient,
   m: { tenantId: string; firstName: string; lastName: string; phone: string; email: string; tier: MemberTier }
 ): Promise<Member | null> {
+  console.debug('[db] dbAddMember', { firstName: m.firstName, lastName: m.lastName });
   const { data, error } = await sb
     .from('members')
     .insert({
@@ -344,7 +418,11 @@ export async function dbAddMember(
     })
     .select()
     .single();
-  if (error || !data) return null;
+  if (error || !data) {
+    console.error('[db] dbAddMember FAILED:', error?.message, error?.details);
+    return null;
+  }
+  console.debug('[db] dbAddMember OK', { resultCount: 1 });
   return toMember(data);
 }
 
@@ -353,6 +431,7 @@ export async function dbUpdateMember(
   memberId: string,
   updates: Partial<Member>
 ): Promise<boolean> {
+  console.debug('[db] dbUpdateMember', { memberId, updates });
   const mapped: Record<string, unknown> = {};
   if (updates.firstName !== undefined) mapped.first_name = updates.firstName;
   if (updates.lastName !== undefined) mapped.last_name = updates.lastName;
@@ -363,12 +442,18 @@ export async function dbUpdateMember(
   if (updates.totalNoShows !== undefined) mapped.total_no_shows = updates.totalNoShows;
   if (updates.lastVisit !== undefined) mapped.last_visit = updates.lastVisit;
   const { error } = await sb.from('members').update(mapped).eq('id', memberId);
-  return !error;
+  if (error) {
+    console.error('[db] dbUpdateMember FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbUpdateMember OK', { memberId });
+  return true;
 }
 
 // ── Bookings ─────────────────────────────────────────────────
 
 export async function dbGetBookings(sb: SupabaseClient, tenantId: string): Promise<Booking[]> {
+  console.debug('[db] dbGetBookings', { tenantId });
   const { data: rows, error } = await sb
     .from('bookings')
     .select('*')
@@ -376,7 +461,10 @@ export async function dbGetBookings(sb: SupabaseClient, tenantId: string): Promi
     .order('date', { ascending: false })
     .order('start_hour');
 
-  if (error || !rows) return [];
+  if (error || !rows) {
+    console.error('[db] dbGetBookings FAILED:', error?.message, error?.details);
+    return [];
+  }
 
   const bookingIds = rows.map((r) => r.id);
   const { data: itemRows } = await sb
@@ -391,6 +479,7 @@ export async function dbGetBookings(sb: SupabaseClient, tenantId: string): Promi
     itemsByBooking[bid].push(toBookingItem(ir));
   }
 
+  console.debug('[db] dbGetBookings OK', { bookingCount: rows.length, itemsCount: (itemRows ?? []).length });
   return rows.map((r) => toBooking(r, itemsByBooking[r.id] ?? []));
 }
 
@@ -398,6 +487,7 @@ export async function dbCreateBooking(
   sb: SupabaseClient,
   b: Omit<Booking, 'id' | 'createdAt'>
 ): Promise<Booking | null> {
+  console.debug('[db] dbCreateBooking', { courtId: b.courtId, date: b.date, startHour: b.startHour, memberName: b.memberName });
   const { data: row, error } = await sb
     .from('bookings')
     .insert({
@@ -418,7 +508,10 @@ export async function dbCreateBooking(
     .select()
     .single();
 
-  if (error || !row) return null;
+  if (error || !row) {
+    console.error('[db] dbCreateBooking FAILED:', error?.message, error?.details);
+    return null;
+  }
 
   // Insert booking items
   if (b.items.length > 0) {
@@ -434,6 +527,7 @@ export async function dbCreateBooking(
     );
   }
 
+  console.debug('[db] dbCreateBooking OK', { bookingId: row.id, itemsInserted: b.items.length });
   return toBooking(row, b.items);
 }
 
@@ -442,8 +536,14 @@ export async function dbUpdateBookingStatus(
   bookingId: string,
   status: BookingStatus
 ): Promise<boolean> {
+  console.debug('[db] dbUpdateBookingStatus', { bookingId, status });
   const { error } = await sb.from('bookings').update({ status }).eq('id', bookingId);
-  return !error;
+  if (error) {
+    console.error('[db] dbUpdateBookingStatus FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbUpdateBookingStatus OK', { bookingId });
+  return true;
 }
 
 export async function dbRescheduleBooking(
@@ -452,18 +552,29 @@ export async function dbRescheduleBooking(
   date: string,
   startHour: number
 ): Promise<boolean> {
+  console.debug('[db] dbRescheduleBooking', { bookingId, date, startHour });
   const { error } = await sb
     .from('bookings')
     .update({ date, start_hour: startHour })
     .eq('id', bookingId);
-  return !error;
+  if (error) {
+    console.error('[db] dbRescheduleBooking FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbRescheduleBooking OK', { bookingId });
+  return true;
 }
 
 // ── Users (list for tenant) ──────────────────────────────────
 
 export async function dbGetUsers(sb: SupabaseClient, tenantId: string): Promise<User[]> {
+  console.debug('[db] dbGetUsers', { tenantId });
   const { data, error } = await sb.from('users').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) return [];
+  if (error || !data) {
+    console.error('[db] dbGetUsers FAILED:', error?.message, error?.details);
+    return [];
+  }
+  console.debug('[db] dbGetUsers OK', { resultCount: data.length });
   return data.map(toUser);
 }
 
@@ -479,9 +590,13 @@ export interface TenantData {
 }
 
 export async function dbHydrateTenant(sb: SupabaseClient, tenantId: string): Promise<TenantData | null> {
+  console.debug('[db] dbHydrateTenant', { tenantId });
   return withTenant(sb, tenantId, async () => {
     const tenant = await dbGetTenant(sb, tenantId);
-    if (!tenant) return null;
+    if (!tenant) {
+      console.debug('[db] dbHydrateTenant tenant not found', { tenantId });
+      return null;
+    }
 
     const [users, courts, items, members, bookings] = await Promise.all([
       dbGetUsers(sb, tenantId),
@@ -491,6 +606,7 @@ export async function dbHydrateTenant(sb: SupabaseClient, tenantId: string): Pro
       dbGetBookings(sb, tenantId),
     ]);
 
+    console.debug('[db] dbHydrateTenant OK', { users: users.length, courts: courts.length, items: items.length, members: members.length, bookings: bookings.length });
     return { tenant, users, courts, items, members, bookings };
   });
 }

@@ -10,10 +10,16 @@ import {
 } from '@/lib/db';
 
 /** Fire a Supabase call if configured. Log errors but never block the UI. */
-function fireAndForget(fn: () => Promise<unknown>) {
+function fireAndForget(label: string, fn: () => Promise<unknown>) {
   const sb = getSupabase();
-  if (!sb) return;
-  fn().catch((err) => console.error('[store] Supabase sync error:', err));
+  if (!sb) {
+    console.debug('[store] %s skipped (no Supabase)', label);
+    return;
+  }
+  console.debug('[store] %s -> sending to Supabase', label);
+  fn()
+    .then(() => console.debug('[store] %s -> Supabase OK', label))
+    .catch((err) => console.error('[store] %s -> Supabase FAILED:', label, err));
 }
 
 const EMPTY_TENANT: Tenant = {
@@ -115,6 +121,7 @@ export const useStore = create<AppState>()((set, get) => ({
   bookings: [],
 
   login: (username, password) => {
+    console.debug('[store] login', { username });
     const user = get().users.find(
       (u) => u.username === username && u.password === password && u.isActive
     );
@@ -126,6 +133,7 @@ export const useStore = create<AppState>()((set, get) => ({
   },
 
   logout: () => {
+    console.debug('[store] logout');
     set({
       currentUser: null,
       isOnboarded: false,
@@ -139,6 +147,7 @@ export const useStore = create<AppState>()((set, get) => ({
   },
 
   createUser: (data) => {
+    console.debug('[store] createUser', { username: data.username, role: data.role });
     const id = `user-${generateId()}`;
     const tenantId = get().tenant.id;
     const user: User = {
@@ -150,7 +159,7 @@ export const useStore = create<AppState>()((set, get) => ({
     };
     set((state) => ({ users: [...state.users, user] }));
 
-    fireAndForget(async () => {
+    fireAndForget('createUser', async () => {
       const sb = getSupabase()!;
       await dbCreateUser(sb, tenantId, data);
     });
@@ -159,6 +168,7 @@ export const useStore = create<AppState>()((set, get) => ({
   },
 
   createBooking: (bookingData) => {
+    console.debug('[store] createBooking', { courtId: bookingData.courtId, date: bookingData.date, startHour: bookingData.startHour, memberName: bookingData.memberName });
     const id = `booking-${generateId()}`;
     const booking: Booking = {
       ...bookingData, id,
@@ -176,7 +186,7 @@ export const useStore = create<AppState>()((set, get) => ({
       }
     }
 
-    fireAndForget(async () => {
+    fireAndForget('createBooking', async () => {
       const sb = getSupabase()!;
       await dbCreateBooking(sb, bookingData);
     });
@@ -185,6 +195,7 @@ export const useStore = create<AppState>()((set, get) => ({
   },
 
   updateBookingStatus: (bookingId, status) => {
+    console.debug('[store] updateBookingStatus', { bookingId, status });
     set((state) => ({
       bookings: state.bookings.map((b) =>
         b.id !== bookingId ? b : { ...b, status }
@@ -203,30 +214,33 @@ export const useStore = create<AppState>()((set, get) => ({
       }
     }
 
-    fireAndForget(async () => {
+    fireAndForget('updateBookingStatus', async () => {
       const sb = getSupabase()!;
       await dbUpdateBookingStatus(sb, bookingId, status);
     });
   },
 
   cancelBooking: (bookingId) => {
+    console.debug('[store] cancelBooking', { bookingId });
     get().updateBookingStatus(bookingId, 'cancelled');
   },
 
   rescheduleBooking: (bookingId, date, startHour) => {
+    console.debug('[store] rescheduleBooking', { bookingId, date, startHour });
     set((state) => ({
       bookings: state.bookings.map((b) =>
         b.id === bookingId ? { ...b, date, startHour } : b
       ),
     }));
 
-    fireAndForget(async () => {
+    fireAndForget('rescheduleBooking', async () => {
       const sb = getSupabase()!;
       await dbRescheduleBooking(sb, bookingId, date, startHour);
     });
   },
 
   addMember: (memberData) => {
+    console.debug('[store] addMember', { firstName: memberData.firstName, lastName: memberData.lastName });
     const id = `member-${generateId()}`;
     const member: Member = {
       ...memberData, id,
@@ -236,7 +250,7 @@ export const useStore = create<AppState>()((set, get) => ({
     };
     set((state) => ({ members: [...state.members, member] }));
 
-    fireAndForget(async () => {
+    fireAndForget('addMember', async () => {
       const sb = getSupabase()!;
       await dbAddMember(sb, {
         tenantId: memberData.tenantId,
@@ -252,19 +266,21 @@ export const useStore = create<AppState>()((set, get) => ({
   },
 
   updateMember: (memberId, updates) => {
+    console.debug('[store] updateMember', { memberId, updates });
     set((state) => ({
       members: state.members.map((m) =>
         m.id === memberId ? { ...m, ...updates } : m
       ),
     }));
 
-    fireAndForget(async () => {
+    fireAndForget('updateMember', async () => {
       const sb = getSupabase()!;
       await dbUpdateMember(sb, memberId, updates);
     });
   },
 
   addCourt: (courtData) => {
+    console.debug('[store] addCourt', { name: courtData.name, hourlyRate: courtData.hourlyRate });
     const id = `court-${generateId()}`;
     const court: Court = { ...courtData, id };
     set((state) => ({
@@ -272,7 +288,7 @@ export const useStore = create<AppState>()((set, get) => ({
       tenant: { ...state.tenant, courtCount: state.courts.length + 1 },
     }));
 
-    fireAndForget(async () => {
+    fireAndForget('addCourt', async () => {
       const sb = getSupabase()!;
       await dbAddCourt(sb, { tenantId: courtData.tenantId, name: courtData.name, hourlyRate: courtData.hourlyRate });
     });
@@ -281,36 +297,39 @@ export const useStore = create<AppState>()((set, get) => ({
   },
 
   updateCourt: (courtId, updates) => {
+    console.debug('[store] updateCourt', { courtId, updates });
     set((state) => ({
       courts: state.courts.map((c) =>
         c.id === courtId ? { ...c, ...updates } : c
       ),
     }));
 
-    fireAndForget(async () => {
+    fireAndForget('updateCourt', async () => {
       const sb = getSupabase()!;
       await dbUpdateCourt(sb, courtId, updates);
     });
   },
 
   removeCourt: (courtId) => {
+    console.debug('[store] removeCourt', { courtId });
     set((state) => ({
       courts: state.courts.filter((c) => c.id !== courtId),
       tenant: { ...state.tenant, courtCount: state.courts.length - 1 },
     }));
 
-    fireAndForget(async () => {
+    fireAndForget('removeCourt', async () => {
       const sb = getSupabase()!;
       await dbRemoveCourt(sb, courtId);
     });
   },
 
   addItem: (itemData) => {
+    console.debug('[store] addItem', { name: itemData.name, price: itemData.price, type: itemData.type });
     const id = `item-${generateId()}`;
     const item: Item = { ...itemData, id };
     set((state) => ({ items: [...state.items, item] }));
 
-    fireAndForget(async () => {
+    fireAndForget('addItem', async () => {
       const sb = getSupabase()!;
       await dbAddItem(sb, { tenantId: itemData.tenantId, name: itemData.name, price: itemData.price, type: itemData.type });
     });
@@ -319,40 +338,44 @@ export const useStore = create<AppState>()((set, get) => ({
   },
 
   updateItem: (itemId, updates) => {
+    console.debug('[store] updateItem', { itemId, updates });
     set((state) => ({
       items: state.items.map((i) =>
         i.id === itemId ? { ...i, ...updates } : i
       ),
     }));
 
-    fireAndForget(async () => {
+    fireAndForget('updateItem', async () => {
       const sb = getSupabase()!;
       await dbUpdateItem(sb, itemId, updates);
     });
   },
 
   removeItem: (itemId) => {
+    console.debug('[store] removeItem', { itemId });
     set((state) => ({
       items: state.items.filter((i) => i.id !== itemId),
     }));
 
-    fireAndForget(async () => {
+    fireAndForget('removeItem', async () => {
       const sb = getSupabase()!;
       await dbRemoveItem(sb, itemId);
     });
   },
 
   updateTenant: (updates) => {
+    console.debug('[store] updateTenant', updates);
     const tenantId = get().tenant.id;
     set((state) => ({ tenant: { ...state.tenant, ...updates } }));
 
-    fireAndForget(async () => {
+    fireAndForget('updateTenant', async () => {
       const sb = getSupabase()!;
       await dbUpdateTenant(sb, tenantId, updates);
     });
   },
 
   setupTenant: (data) => {
+    console.debug('[store] setupTenant', { name: data.name, subdomain: data.subdomain, courts: data.courts.length, items: data.items.length });
     const tenantId = `tenant-${generateId()}`;
     const tenant: Tenant = {
       id: tenantId, name: data.name, subdomain: data.subdomain,
@@ -385,11 +408,15 @@ export const useStore = create<AppState>()((set, get) => ({
   },
 
   // Sync actions
-  setOnline: (online) => set({ isOnline: online }),
+  setOnline: (online) => {
+    console.debug('[store] setOnline', { online });
+    set({ isOnline: online });
+  },
   setPendingSync: (count) => set({ pendingSync: count }),
   setLastSynced: (ts) => set({ lastSyncedAt: ts }),
 
   hydrateFromRemote: (data) => {
+    console.debug('[store] hydrateFromRemote', { tenant: data.tenant.name, users: data.users.length, courts: data.courts.length, items: data.items.length, members: data.members.length, bookings: data.bookings.length });
     set({
       isOnboarded: true,
       tenant: data.tenant, users: data.users,
