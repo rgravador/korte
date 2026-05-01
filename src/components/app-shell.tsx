@@ -198,6 +198,47 @@ function Sidebar() {
   );
 }
 
+/* ── Refresh Button ── */
+function RefreshButton() {
+  const refreshFromServer = useStore((s) => s.refreshFromServer);
+  const lastSyncedAt = useStore((s) => s.lastSyncedAt);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshFromServer();
+    setRefreshing(false);
+  };
+
+  const lastSyncLabel = lastSyncedAt
+    ? new Date(lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : null;
+
+  return (
+    <button
+      onClick={handleRefresh}
+      disabled={refreshing}
+      className="flex items-center gap-1.5 text-ink-3 hover:text-ink-2 transition-colors"
+      aria-label="Refresh data"
+      title={lastSyncLabel ? `Last synced: ${lastSyncLabel}` : 'Refresh data'}
+    >
+      <svg
+        className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`}
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path d="M2 8a6 6 0 0110.5-4M14 8a6 6 0 01-10.5 4" strokeLinecap="round" />
+        <path d="M12 1v3.5h-3.5M4 15v-3.5h3.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {lastSyncLabel && (
+        <span className="text-[10px] font-medium">{lastSyncLabel}</span>
+      )}
+    </button>
+  );
+}
+
 /* ── Mobile Header ── */
 function MobileHeader() {
   const { isOnline, pendingSync } = useStore();
@@ -220,7 +261,10 @@ function MobileHeader() {
           </span>
         )}
       </div>
-      <UserMenu />
+      <div className="flex items-center gap-3">
+        <RefreshButton />
+        <UserMenu />
+      </div>
     </div>
   );
 }
