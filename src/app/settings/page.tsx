@@ -34,7 +34,8 @@ export default function SettingsPage() {
   const [hoursRanges, setHoursRanges] = useState<TimeRange[]>(() => getTimeRanges(tenant));
 
   const [showAddCourt, setShowAddCourt] = useState(false);
-  const [newCourtName, setNewCourtName] = useState('');
+  const nextCourtNumber = courts.length + 1;
+  const [newCourtName, setNewCourtName] = useState(`Court ${nextCourtNumber}`);
   const [newCourtRate, setNewCourtRate] = useState('');
 
   const [showAddItem, setShowAddItem] = useState(false);
@@ -56,7 +57,6 @@ export default function SettingsPage() {
   const handleAddCourt = () => {
     if (!newCourtName.trim() || !newCourtRate) return;
     addCourt({ tenantId: tenant.id, name: newCourtName.trim(), hourlyRate: Number(newCourtRate), isActive: true });
-    setNewCourtName('');
     setNewCourtRate('');
     setShowAddCourt(false);
   };
@@ -140,7 +140,7 @@ export default function SettingsPage() {
               </div>
             </div>
           ) : (
-            <button onClick={() => setShowAddCourt(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-2.5 rounded-[16px] text-xs">
+            <button onClick={() => { setNewCourtName(`Court ${courts.length + 1}`); setShowAddCourt(true); }} className="w-full mt-2 border border-dashed border-line text-ink-3 py-2.5 rounded-[16px] text-xs">
               + Add court
             </button>
           )}

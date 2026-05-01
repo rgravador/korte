@@ -23,8 +23,8 @@ const STATS = [
 export default function HomePage() {
   const { currentUser, hydrateFromRemote } = useStore();
   const router = useRouter();
-  const [username, setUsername] = useState('rgravador');
-  const [password, setPassword] = useState('Just1234!');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -296,7 +296,7 @@ export default function HomePage() {
 
 function UserIcon() {
   return (
-    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
       <circle cx="10" cy="7" r="4" />
       <path d="M2 18a8 8 0 0116 0" />
     </svg>
@@ -305,7 +305,7 @@ function UserIcon() {
 
 function LockIcon() {
   return (
-    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
       <rect x="4" y="9" width="12" height="8" rx="2" />
       <path d="M7 9V6a3 3 0 016 0v3" />
     </svg>
@@ -314,7 +314,7 @@ function LockIcon() {
 
 function EyeIcon() {
   return (
-    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
       <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" />
       <circle cx="10" cy="10" r="3" />
     </svg>
@@ -323,7 +323,7 @@ function EyeIcon() {
 
 function EyeOffIcon() {
   return (
-    <svg className="w-4.5 h-4.5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
       <path d="M1 10s3.5-6 9-6c1.5 0 2.9.4 4.1 1M19 10s-1.4 2.4-3.7 4M7.6 14.4A9.5 9.5 0 011 10" />
       <path d="M12.4 12.4A3 3 0 017.6 7.6" />
       <path d="M2 2l16 16" strokeLinecap="round" />
