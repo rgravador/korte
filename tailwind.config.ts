@@ -22,6 +22,15 @@ const config: Config = {
         'ink-4': '#94A3B8',
         line: '#E2E8F0',
         'line-2': '#F1F5F9',
+        navy: {
+          900: '#070d1a',
+          800: '#0b1527',
+          700: '#0f1d35',
+          600: '#152244',
+          500: '#1a2d55',
+        },
+        gold: '#F5A623',
+        'gold-soft': '#FFC857',
         signal: '#10B981',
         'signal-soft': '#D1FAE5',
         'signal-text': '#065F46',
@@ -35,7 +44,9 @@ const config: Config = {
         'pending-text': '#C2410C',
       },
       fontFamily: {
-        sans: ['Inter', 'var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        sans: ['var(--font-nunito)', 'Nunito', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['var(--font-quicksand)', 'Quicksand', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        serif: ['var(--font-fraunces)', 'Fraunces', 'Georgia', 'serif'],
       },
       borderRadius: {
         card: '16px',

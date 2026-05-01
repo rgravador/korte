@@ -9,7 +9,7 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ReactNode;
-  roles: UserRole[]; // which roles can see this item
+  roles: UserRole[];
 }
 
 const ALL_ROLES: UserRole[] = ['system_admin', 'tenant_admin', 'tenant_staff'];
@@ -93,7 +93,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-line shadow-card items-center z-50 max-w-lg mx-auto grid"
+      className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-sm border-t border-line/60 z-50 max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto grid items-center"
       style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
     >
       {visibleItems.map((item) => {
@@ -103,15 +103,15 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-0.5 relative focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-              isActive ? 'text-primary' : 'text-ink-3'
+            className={`flex flex-col items-center gap-0.5 relative transition-colors ${
+              isActive ? 'text-primary' : 'text-ink-4 hover:text-ink-3'
             }`}
           >
             {isActive && (
               <span className="absolute top-0 w-7 h-[3px] rounded-full bg-primary" />
             )}
             {item.icon}
-            <span className="text-[11px] font-medium">
+            <span className="text-[10px] font-medium">
               {item.label}
             </span>
           </Link>

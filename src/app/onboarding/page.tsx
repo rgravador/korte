@@ -3,8 +3,9 @@
 import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ItemType } from '@/lib/types';
+import { ItemType, TimeRange } from '@/lib/types';
 import { apiRegister, apiHydrate } from '@/lib/api';
+import { OperatingHoursEditor } from '@/components/operating-hours-editor';
 
 type Step = 'welcome' | 'facility' | 'courts' | 'items' | 'review';
 
@@ -44,8 +45,7 @@ export default function OnboardingPage() {
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerUsername, setOwnerUsername] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
-  const [hoursStart, setHoursStart] = useState(6);
-  const [hoursEnd, setHoursEnd] = useState(22);
+  const [hoursRanges, setHoursRanges] = useState<TimeRange[]>([{ start: 6, end: 22 }]);
 
   // Courts
   const [courts, setCourts] = useState<{ name: string; hourlyRate: number }[]>([
@@ -117,11 +117,12 @@ export default function OnboardingPage() {
   const handleFinish = async () => {
     // Register via API route (server-side, uses service_role key)
     console.debug('[onboarding] Registering via API...');
+    const sorted = [...hoursRanges].sort((a, b) => a.start - b.start);
     const result = await apiRegister({
       name: facilityName,
       subdomain,
-      operatingHoursStart: hoursStart,
-      operatingHoursEnd: hoursEnd,
+      operatingHoursStart: sorted[0].start,
+      operatingHoursEnd: sorted[sorted.length - 1].end,
       ownerName,
       ownerEmail,
       ownerUsername,
@@ -147,8 +148,8 @@ export default function OnboardingPage() {
       name: facilityName,
       ownerName, ownerEmail, ownerUsername, ownerPassword,
       subdomain,
-      operatingHoursStart: hoursStart,
-      operatingHoursEnd: hoursEnd,
+      operatingHoursStart: sorted[0].start,
+      operatingHoursEnd: sorted[sorted.length - 1].end,
       courts,
       items: allItems,
     });
@@ -157,7 +158,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
+    <div className="app-shell">
       <div className="px-5 pt-8 pb-12">
 
         {/* Welcome */}
@@ -169,7 +170,7 @@ export default function OnboardingPage() {
 
             <h1 className="font-sans font-bold text-4xl leading-tight tracking-tight mb-3">
               Set up your<br />
-              <span className="text-primary font-bold">pickleball facility.</span>
+              <span className="text-primary font-serif italic">pickleball facility.</span>
             </h1>
 
             <p className="text-ink-2 text-sm mb-2 max-w-[32ch]">
@@ -197,7 +198,7 @@ export default function OnboardingPage() {
             <StepIndicator current={0} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Your <span className="text-primary font-bold">facility.</span>
+              Your <span className="text-primary font-serif italic">facility.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-6">
               Step 1 of 4 · Basic info
@@ -272,32 +273,8 @@ export default function OnboardingPage() {
 
               <div className="h-px bg-line my-1" />
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-sans text-xs text-ink-3 block mb-1.5">Opens at</label>
-                  <select
-                    value={hoursStart}
-                    onChange={(e) => setHoursStart(Number(e.target.value))}
-                    className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                  >
-                    {Array.from({ length: 18 }, (_, i) => i + 4).map((h) => (
-                      <option key={h} value={h}>{h}:00</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="font-sans text-xs text-ink-3 block mb-1.5">Closes at</label>
-                  <select
-                    value={hoursEnd}
-                    onChange={(e) => setHoursEnd(Number(e.target.value))}
-                    className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                  >
-                    {Array.from({ length: 18 }, (_, i) => i + 7).map((h) => (
-                      <option key={h} value={h}>{h}:00</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+              <div className="text-xs text-ink-3 mb-1.5">Operating hours</div>
+              <OperatingHoursEditor ranges={hoursRanges} onChange={setHoursRanges} />
             </div>
 
             <div className="flex gap-3 mt-8">
@@ -324,7 +301,7 @@ export default function OnboardingPage() {
             <StepIndicator current={1} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Your <span className="text-primary font-bold">courts.</span>
+              Your <span className="text-primary font-serif italic">courts.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-6">
               Step 2 of 4 · How many pickleball courts?
@@ -394,7 +371,7 @@ export default function OnboardingPage() {
             <StepIndicator current={2} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Rentals & <span className="text-primary font-bold">extras.</span>
+              Rentals & <span className="text-primary font-serif italic">extras.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-2">
               Step 3 of 4 · Equipment and items to sell
@@ -526,7 +503,7 @@ export default function OnboardingPage() {
             <StepIndicator current={3} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Ready to <span className="text-primary font-bold">launch.</span>
+              Ready to <span className="text-primary font-serif italic">launch.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-6">
               Step 4 of 4 · Review your setup
@@ -537,7 +514,7 @@ export default function OnboardingPage() {
               <div className="font-sans text-xs font-semibold text-ink-3 mb-2">Facility</div>
               <div className="font-sans text-lg font-semibold mb-1">{facilityName}</div>
               <div className="font-sans text-xs text-ink-3">
-                {subdomain}.courtbooks.app · {hoursStart}:00&ndash;{hoursEnd}:00
+                {subdomain}.courtbooks.app
               </div>
               <div className="font-sans text-xs text-ink-3 mt-1">
                 Owner: {ownerName} · {ownerEmail}

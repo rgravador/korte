@@ -26,7 +26,7 @@ function ConfirmedContent() {
 
   if (!booking) {
     return (
-      <div className="min-h-screen bg-surface-2 max-w-lg mx-auto flex flex-col items-center justify-center px-5">
+      <div className="app-shell flex flex-col items-center justify-center px-5">
         <div className="font-sans text-xs text-ink-3 mb-4">Booking not found</div>
         <button
           onClick={() => router.push('/booking/new')}
@@ -41,7 +41,7 @@ function ConfirmedContent() {
   const court = courts.find((c) => c.id === booking.courtId);
 
   return (
-    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
+    <div className="app-shell">
       <div className="px-5 pt-10 pb-8 flex flex-col items-center">
         {/* Green checkmark */}
         <div className="w-16 h-16 rounded-full bg-signal/10 flex items-center justify-center mb-4">
@@ -147,7 +147,7 @@ export default function BookingConfirmedPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-surface-2 max-w-lg mx-auto flex items-center justify-center">
+        <div className="app-shell flex items-center justify-center">
           <div className="font-sans text-xs text-ink-3">Loading...</div>
         </div>
       }

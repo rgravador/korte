@@ -18,14 +18,41 @@ export interface User {
   createdAt: string;
 }
 
+export interface TimeRange {
+  start: number; // 24h format, e.g. 6
+  end: number;   // 24h format, e.g. 12
+}
+
 export interface Tenant {
   id: string;
   name: string;
   subdomain: string;
   courtCount: number;
-  operatingHoursStart: number; // 24h format, e.g. 6
-  operatingHoursEnd: number;   // 24h format, e.g. 22
+  operatingHoursStart: number; // 24h format, e.g. 6 — legacy, used as fallback
+  operatingHoursEnd: number;   // 24h format, e.g. 22 — legacy, used as fallback
+  operatingHoursRanges?: TimeRange[]; // multiple open windows, e.g. [{start:6,end:12},{start:14,end:22}]
   createdAt: string;
+}
+
+/** Get all operating hours as a flat sorted array from a tenant's ranges or legacy fields. */
+export function getOperatingHours(tenant: Tenant): number[] {
+  const ranges = tenant.operatingHoursRanges?.length
+    ? tenant.operatingHoursRanges
+    : [{ start: tenant.operatingHoursStart, end: tenant.operatingHoursEnd }];
+
+  const hoursSet = new Set<number>();
+  for (const range of ranges) {
+    for (let h = range.start; h < range.end; h++) {
+      hoursSet.add(h);
+    }
+  }
+  return Array.from(hoursSet).sort((a, b) => a - b);
+}
+
+/** Get the time ranges from a tenant (ranges if set, otherwise single range from legacy fields). */
+export function getTimeRanges(tenant: Tenant): TimeRange[] {
+  if (tenant.operatingHoursRanges?.length) return tenant.operatingHoursRanges;
+  return [{ start: tenant.operatingHoursStart, end: tenant.operatingHoursEnd }];
 }
 
 export interface Court {

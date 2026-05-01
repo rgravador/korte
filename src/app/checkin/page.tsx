@@ -49,7 +49,7 @@ export default function CheckinPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
+    <div className="app-shell">
       <div className="px-5 pt-4 pb-20">
         {/* Staff header */}
         <div className="flex justify-between items-center mb-4">
@@ -62,7 +62,7 @@ export default function CheckinPage() {
         </div>
 
         <h1 className="font-sans font-light text-2xl tracking-tight mb-1">
-          Check-<span className="text-primary font-bold">in.</span>
+          Check-<span className="text-primary font-serif italic">in.</span>
         </h1>
         <p className="font-sans text-xs text-ink-3 mb-4">
           {new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })} · {expectedCount} expected today
@@ -157,7 +157,7 @@ export default function CheckinPage() {
       </div>
 
       {/* Staff bottom nav */}
-      <nav aria-label="Staff navigation" className="fixed bottom-0 left-0 right-0 h-16 bg-white shadow-card border-t border-line grid grid-cols-4 items-center z-50 max-w-lg mx-auto">
+      <nav aria-label="Staff navigation" className="fixed bottom-0 left-0 right-0 h-16 bg-white shadow-card border-t border-line grid grid-cols-4 items-center z-50 max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto">
         <div className="flex flex-col items-center gap-0.5 text-primary relative">
           <span className="absolute top-0 w-7 h-0.5 bg-primary" />
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">

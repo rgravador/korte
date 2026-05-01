@@ -7,7 +7,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import {
   User, Tenant, Court, Item, Member,
-  Booking, BookingItem, BookingStatus, ItemType, UserRole, MemberTier,
+  Booking, BookingItem, BookingStatus, ItemType, UserRole, MemberTier, TimeRange,
 } from './types';
 
 // ── Row ↔ App mappers ────────────────────────────────────────
@@ -34,6 +34,7 @@ function toTenant(r: Record<string, unknown>): Tenant {
     courtCount: r.court_count as number,
     operatingHoursStart: r.operating_hours_start as number,
     operatingHoursEnd: r.operating_hours_end as number,
+    operatingHoursRanges: r.operating_hours_ranges as TimeRange[] | undefined,
     createdAt: r.created_at as string,
   };
 }
@@ -230,13 +231,14 @@ export async function dbGetTenant(sb: SupabaseClient, tenantId: string): Promise
 export async function dbUpdateTenant(
   sb: SupabaseClient,
   tenantId: string,
-  updates: Partial<{ name: string; operatingHoursStart: number; operatingHoursEnd: number }>
+  updates: Partial<{ name: string; operatingHoursStart: number; operatingHoursEnd: number; operatingHoursRanges: TimeRange[] }>
 ): Promise<boolean> {
   console.debug('[db] dbUpdateTenant', { tenantId, updates });
   const mapped: Record<string, unknown> = {};
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.operatingHoursStart !== undefined) mapped.operating_hours_start = updates.operatingHoursStart;
   if (updates.operatingHoursEnd !== undefined) mapped.operating_hours_end = updates.operatingHoursEnd;
+  if (updates.operatingHoursRanges !== undefined) mapped.operating_hours_ranges = updates.operatingHoursRanges;
 
   const { error } = await sb.from('tenants').update(mapped).eq('id', tenantId);
   if (error) {

@@ -21,3 +21,18 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Legacy app-shell for pages not yet migrated to AppShell component */
+.app-shell {
+  @apply min-h-screen bg-surface-2 w-full max-w-lg mx-auto;
+}
+@media (min-width: 768px) {
+  .app-shell {
+    @apply max-w-2xl;
+  }
+}
+@media (min-width: 1024px) {
+  .app-shell {
+    @apply max-w-3xl;
+  }
+}

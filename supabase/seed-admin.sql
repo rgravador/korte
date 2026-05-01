@@ -17,12 +17,12 @@ VALUES (
 ON CONFLICT (subdomain) DO NOTHING;
 
 -- 2. Create system_admin user
--- Password: admin123 (hashed with bcrypt via pgcrypto)
+-- Password: Just1234! (hashed with bcrypt via pgcrypto)
 INSERT INTO users (tenant_id, username, password_hash, role, display_name, email)
 VALUES (
   '00000000-0000-0000-0000-000000000001',
   'admin',
-  crypt('admin123', gen_salt('bf', 10)),
+  crypt('Just1234!', gen_salt('bf', 10)),
   'system_admin',
   'System Admin',
   'admin@courtbooks.app'

@@ -1,7 +1,7 @@
 'use client';
 
-import { Header } from '@/components/header';
-import { BottomNav } from '@/components/bottom-nav';
+
+import { AppShell } from '@/components/app-shell';
 import { useStore } from '@/store';
 import { useMemo, useState } from 'react';
 
@@ -102,11 +102,8 @@ export default function ReportsPage() {
   const lastY = 60 - (lastPoint / maxSpark) * 50;
 
   return (
-    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
-      <div className="px-5 pt-4 pb-20">
-        <Header />
-
-        <h1 className="font-sans font-light text-2xl tracking-tight mb-1">Reports</h1>
+    <AppShell>
+        <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-1 text-ink">Reports</h1>
 
         {/* Period selector */}
         <div className="flex gap-1.5 mb-4 mt-3">
@@ -114,7 +111,7 @@ export default function ReportsPage() {
             <button
               key={p.label}
               onClick={() => setActivePeriod(i)}
-              className={`px-2.5 py-1 border rounded-full font-sans text-xs ${
+              className={`px-2.5 py-1 border rounded-full text-xs ${
                 i === activePeriod
                   ? 'bg-primary text-white border-primary'
                   : 'border-line text-ink-2'
@@ -198,14 +195,13 @@ export default function ReportsPage() {
         </div>
 
         {/* Day labels */}
-        <div className="flex justify-between font-sans text-xs text-ink-3 mt-1.5 pl-6">
+        <div className="flex justify-between text-xs text-ink-3 mt-1.5 pl-6">
           {DAYS_OF_WEEK.map((d, i) => (
             <span key={i}>{d}</span>
           ))}
         </div>
-      </div>
 
-      <BottomNav />
-    </div>
+      
+    </AppShell>
   );
 }

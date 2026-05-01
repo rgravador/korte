@@ -1,19 +1,28 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
-import { Inter } from "next/font/google";
+import { Nunito, Quicksand, Fraunces } from "next/font/google";
 import "./globals.css";
 import { SyncProvider } from "@/components/sync-provider";
+import { InstallPrompt } from "@/components/install-prompt";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+const nunito = Nunito({
+  subsets: ["latin"],
+  variable: "--font-nunito",
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
-const inter = Inter({
+const quicksand = Quicksand({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-quicksand",
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -43,9 +52,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${geistSans.variable} antialiased`}
+        className={`${nunito.variable} ${quicksand.variable} ${fraunces.variable} font-sans antialiased`}
       >
         <SyncProvider>{children}</SyncProvider>
+        <InstallPrompt />
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 'use client';
 
-import { Header } from '@/components/header';
-import { BottomNav } from '@/components/bottom-nav';
+
+import { AppShell } from '@/components/app-shell';
 import { StatusTag } from '@/components/status-tag';
 import { useStore } from '@/store';
 import { useMemo, useState } from 'react';
@@ -84,7 +84,7 @@ function MemberDetailSheet({
         <div className="w-10 h-1 bg-line rounded-full mx-auto mb-4" />
 
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-surface-3 border border-line flex items-center justify-center font-sans text-xs font-medium text-ink-2 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-surface-3 border border-line flex items-center justify-center text-xs font-medium text-ink-2 shrink-0">
             {getInitials(member.firstName, member.lastName)}
           </div>
           <div className="flex-1">
@@ -96,7 +96,7 @@ function MemberDetailSheet({
             </p>
           </div>
           <span
-            className={`px-2 py-0.5 rounded-full font-sans text-xs ${
+            className={`px-2 py-0.5 rounded-full text-xs ${
               member.tier === 'vip'
                 ? 'bg-primary-soft text-primary-deep'
                 : 'bg-surface-3 text-ink-3'
@@ -150,14 +150,14 @@ function MemberDetailSheet({
             })}
           </div>
         ) : (
-          <div className="text-center py-6 text-ink-3 font-sans text-xs">
+          <div className="text-center py-6 text-ink-3 text-xs">
             No bookings yet
           </div>
         )}
 
         <button
           onClick={onClose}
-          className="w-full border border-line text-ink-3 py-3 rounded-lg font-sans text-xs font-medium mt-2"
+          className="w-full border border-line text-ink-3 py-3 rounded-lg text-xs font-medium mt-2"
         >
           Close
         </button>
@@ -210,14 +210,14 @@ function AddMemberSheet({
               placeholder="First name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="bg-surface-3 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+              className="bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
             />
             <input
               type="text"
               placeholder="Last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="bg-surface-3 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+              className="bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
           <input
@@ -225,14 +225,14 @@ function AddMemberSheet({
             placeholder="Phone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -240,7 +240,7 @@ function AddMemberSheet({
         <div className="flex gap-2 mb-5">
           <button
             onClick={() => setTier('regular')}
-            className={`px-4 py-1.5 rounded-full font-sans text-xs transition-colors ${
+            className={`px-4 py-1.5 rounded-full text-xs transition-colors ${
               tier === 'regular'
                 ? 'bg-primary text-white'
                 : 'bg-surface-3 text-ink-3'
@@ -250,7 +250,7 @@ function AddMemberSheet({
           </button>
           <button
             onClick={() => setTier('vip')}
-            className={`px-4 py-1.5 rounded-full font-sans text-xs transition-colors ${
+            className={`px-4 py-1.5 rounded-full text-xs transition-colors ${
               tier === 'vip'
                 ? 'bg-primary text-white'
                 : 'bg-surface-3 text-ink-3'
@@ -264,7 +264,7 @@ function AddMemberSheet({
           <button
             onClick={handleSubmit}
             disabled={!isValid}
-            className={`flex-1 py-3 rounded-xl font-sans text-xs font-medium transition-colors ${
+            className={`flex-1 py-3 rounded-xl text-xs font-medium transition-colors ${
               isValid
                 ? 'bg-primary text-white'
                 : 'bg-line text-ink-4 cursor-not-allowed'
@@ -274,7 +274,7 @@ function AddMemberSheet({
           </button>
           <button
             onClick={onClose}
-            className="flex-1 border border-line text-ink-3 py-3 rounded-xl font-sans text-xs font-medium"
+            className="flex-1 border border-line text-ink-3 py-3 rounded-xl text-xs font-medium"
           >
             Cancel
           </button>
@@ -325,11 +325,8 @@ export default function MembersPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-surface-2 max-w-lg mx-auto">
-      <div className="px-5 pt-4 pb-20">
-        <Header />
-
-        <h1 className="font-sans font-light text-2xl tracking-tight mb-1">Members</h1>
+    <AppShell>
+        <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-1 text-ink">Members</h1>
         <p className="font-sans text-xs text-ink-3 mb-4">
           {activeCount} active · {lapsedCount} lapsed
         </p>
@@ -352,7 +349,7 @@ export default function MembersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search members"
-            className="w-full bg-surface-3 rounded-xl pl-9 pr-3 py-2.5 font-sans text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+            className="w-full bg-surface-3 rounded-xl pl-9 pr-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -362,7 +359,7 @@ export default function MembersPage() {
             <button
               key={chip.key}
               onClick={() => setActiveFilter(chip.key)}
-              className={`px-3 py-1 rounded-full font-sans text-xs transition-colors ${
+              className={`px-3 py-1 rounded-full text-xs transition-colors ${
                 activeFilter === chip.key
                   ? 'bg-primary text-white'
                   : 'bg-surface-3 text-ink-3'
@@ -381,7 +378,7 @@ export default function MembersPage() {
               onClick={() => setSelectedMember(member)}
               className="w-full grid grid-cols-[32px_1fr_auto] gap-2.5 items-center py-2.5 border-b border-line-2 text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-surface-3 border border-line flex items-center justify-center font-sans text-xs font-medium text-ink-2">
+              <div className="w-8 h-8 rounded-full bg-surface-3 border border-line flex items-center justify-center text-xs font-medium text-ink-2">
                 {getInitials(member.firstName, member.lastName)}
               </div>
               <div>
@@ -399,12 +396,11 @@ export default function MembersPage() {
           ))}
 
           {filteredMembers.length === 0 && (
-            <div className="text-center py-8 text-ink-3 font-sans text-xs">
+            <div className="text-center py-8 text-ink-3 text-xs">
               No members found
             </div>
           )}
         </div>
-      </div>
 
       {/* FAB */}
       <button
@@ -417,7 +413,7 @@ export default function MembersPage() {
         </svg>
       </button>
 
-      <BottomNav />
+      
 
       {selectedMember && (
         <MemberDetailSheet
@@ -429,6 +425,6 @@ export default function MembersPage() {
       {showAddSheet && (
         <AddMemberSheet onClose={() => setShowAddSheet(false)} />
       )}
-    </div>
+    </AppShell>
   );
 }
