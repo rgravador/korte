@@ -114,36 +114,58 @@ export default function OnboardingPage() {
     ...customItems,
   ];
 
-  const handleFinish = async () => {
-    // Register via API route (server-side, uses service_role key)
-    console.debug('[onboarding] Registering via API...');
-    const sorted = [...hoursRanges].sort((a, b) => a.start - b.start);
-    const result = await apiRegister({
-      name: facilityName,
-      subdomain,
-      operatingHoursStart: sorted[0].start,
-      operatingHoursEnd: sorted[sorted.length - 1].end,
-      ownerName,
-      ownerEmail,
-      ownerUsername,
-      ownerPassword,
-      courts,
-      items: allItems,
-    });
+  const [registering, setRegistering] = useState(false);
+  const [registerError, setRegisterError] = useState('');
 
-    if (result?.tenant && result?.user) {
-      console.debug('[onboarding] API OK, hydrating...');
-      const data = await apiHydrate(result.tenant.id);
-      if (data) {
-        hydrateFromRemote(data);
+  const handleFinish = async () => {
+    setRegistering(true);
+    setRegisterError('');
+
+    const sorted = [...hoursRanges].sort((a, b) => a.start - b.start);
+
+    try {
+      console.debug('[onboarding] Registering via API...');
+      const result = await apiRegister({
+        name: facilityName,
+        subdomain,
+        operatingHoursStart: sorted[0].start,
+        operatingHoursEnd: sorted[sorted.length - 1].end,
+        ownerName,
+        ownerEmail,
+        ownerUsername,
+        ownerPassword,
+        courts,
+        items: allItems,
+      });
+
+      if (result?.tenant && result?.user) {
+        console.debug('[onboarding] API OK, hydrating...');
+        const data = await apiHydrate(result.tenant.id);
+        if (data) {
+          hydrateFromRemote(data);
+          useStore.setState({ currentUser: result.user, isOnboarded: true });
+          router.push('/dashboard');
+          return;
+        }
+        // Hydrate failed but tenant was created — still navigate
         useStore.setState({ currentUser: result.user, isOnboarded: true });
         router.push('/dashboard');
         return;
       }
-    }
 
-    // Fallback: local-only setup if API fails
-    console.warn('[onboarding] API failed, falling back to local');
+      // API returned null — show error with option to retry or go offline
+      console.error('[onboarding] API registration failed');
+      setRegisterError('Could not save to server. You can retry or continue offline (data will only be on this device).');
+    } catch (err) {
+      console.error('[onboarding] Registration error:', err);
+      setRegisterError('Network error. Check your connection and try again, or continue offline.');
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleContinueOffline = () => {
+    const sorted = [...hoursRanges].sort((a, b) => a.start - b.start);
     setupTenant({
       name: facilityName,
       ownerName, ownerEmail, ownerUsername, ownerPassword,
@@ -153,7 +175,6 @@ export default function OnboardingPage() {
       courts,
       items: allItems,
     });
-
     router.push('/dashboard');
   };
 
@@ -554,17 +575,31 @@ export default function OnboardingPage() {
               )}
             </div>
 
+            {registerError && (
+              <div className="bg-warn/10 border border-warn/30 rounded-xl p-3 mb-4">
+                <p className="text-xs text-warn mb-3">{registerError}</p>
+                <button
+                  onClick={handleContinueOffline}
+                  className="text-xs text-ink-3 font-medium underline"
+                >
+                  Continue offline
+                </button>
+              </div>
+            )}
+
             <button
               onClick={handleFinish}
-              className="w-full bg-primary text-white py-4 rounded-xl font-sans text-sm font-medium flex justify-between items-center px-5"
+              disabled={registering}
+              className="w-full bg-primary text-white py-4 rounded-xl font-sans text-sm font-medium flex justify-between items-center px-5 disabled:opacity-50"
             >
-              <span>Launch {facilityName || 'your facility'}</span>
-              <span className="font-sans">&rarr;</span>
+              <span>{registering ? 'Creating...' : `Launch ${facilityName || 'your facility'}`}</span>
+              {!registering && <span className="font-sans">&rarr;</span>}
             </button>
 
             <button
               onClick={() => setStep('items')}
-              className="w-full mt-3 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
+              disabled={registering}
+              className="w-full mt-3 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-50"
             >
               Back
             </button>
