@@ -15,6 +15,11 @@ export function getServerSupabase(): SupabaseClient {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceRoleKey) {
+    console.error('[supabase-server] MISSING ENV VARS', {
+      SUPABASE_URL: url ? 'SET' : 'MISSING',
+      SUPABASE_SERVICE_ROLE_KEY: serviceRoleKey ? 'SET' : 'MISSING',
+      NODE_ENV: process.env.NODE_ENV,
+    });
     throw new Error(
       'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. ' +
       'These are required for API routes.'
