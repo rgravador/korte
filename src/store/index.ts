@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { User, Tenant, Court, Item, Member, Booking, BookingStatus, ItemType, UserRole } from '@/lib/types';
+import { User, Tenant, Court, Item, Member, Booking, BookingStatus, UserRole } from '@/lib/types';
 import {
   apiCreateBooking, apiUpdateBookingStatus, apiRescheduleBooking,
   apiAddMember, apiUpdateMember,

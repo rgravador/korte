@@ -273,17 +273,18 @@ function AddMemberSheet({
         <div className="flex gap-2">
           <button
             onClick={handleSubmit}
-            disabled={!isValid}
+            disabled={!isValid || saving}
             className={`flex-1 py-3 rounded-xl text-xs font-medium transition-colors ${
-              isValid
+              isValid && !saving
                 ? 'bg-primary text-white'
                 : 'bg-line text-ink-4 cursor-not-allowed'
             }`}
           >
-            Add Member
+            {saving ? 'Saving...' : 'Add Member'}
           </button>
           <button
             onClick={onClose}
+            disabled={saving}
             className="flex-1 border border-line text-ink-3 py-3 rounded-xl text-xs font-medium"
           >
             Cancel
