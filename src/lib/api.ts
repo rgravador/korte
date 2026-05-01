@@ -179,6 +179,11 @@ export async function apiUpdateTenant(tenantId: string, updates: Partial<Tenant>
 
 // ── Users ────────────────────────────────────────────────────
 
+export async function apiCheckUsername(username: string): Promise<boolean> {
+  const result = await fetchApi<{ available: boolean }>(`/api/users?username=${encodeURIComponent(username)}`);
+  return result?.available ?? false;
+}
+
 export async function apiCreateUser(data: {
   tenantId: string; username: string; password: string; role: UserRole; displayName: string; email: string;
 }): Promise<User | null> {

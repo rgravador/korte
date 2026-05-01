@@ -6,6 +6,7 @@ import { useStore } from '@/store';
 import { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Booking, BookingStatus, getOperatingHours } from '@/lib/types';
+import { toast } from '@/components/toast';
 
 function formatHour(hour: number): string {
   const h = hour % 12 || 12;
@@ -150,9 +151,13 @@ export default function DashboardPage() {
   );
   const utilization = totalSlots > 0 ? Math.round((bookedSlots / totalSlots) * 100) : 0;
 
-  const handleStatusChange = (bookingId: string, status: BookingStatus) => {
-    updateBookingStatus(bookingId, status);
-    setSelectedBooking(null);
+  const handleStatusChange = async (bookingId: string, status: BookingStatus) => {
+    try {
+      await updateBookingStatus(bookingId, status);
+      setSelectedBooking(null);
+    } catch {
+      toast.error('Could not update booking. Please check your connection and try again.');
+    }
   };
 
   return (

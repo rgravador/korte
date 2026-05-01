@@ -5,8 +5,10 @@ import { AppShell } from '@/components/app-shell';
 import { useStore } from '@/store';
 import { useState } from 'react';
 import { ItemType, TimeRange, getTimeRanges } from '@/lib/types';
+import { toast } from '@/components/toast';
 import Link from 'next/link';
 import { OperatingHoursEditor, OperatingHoursDisplay } from '@/components/operating-hours-editor';
+import { UsernameInput } from '@/components/username-input';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -43,31 +45,43 @@ export default function SettingsPage() {
   const [newItemPrice, setNewItemPrice] = useState('');
   const [newItemType, setNewItemType] = useState<ItemType>('rental');
 
-  const handleSaveFacility = () => {
+  const handleSaveFacility = async () => {
     const sorted = [...hoursRanges].sort((a, b) => a.start - b.start);
-    updateTenant({
-      name: facilityName,
-      operatingHoursStart: sorted[0].start,
-      operatingHoursEnd: sorted[sorted.length - 1].end,
-      operatingHoursRanges: sorted,
-    });
-    setEditingFacility(false);
+    try {
+      await updateTenant({
+        name: facilityName,
+        operatingHoursStart: sorted[0].start,
+        operatingHoursEnd: sorted[sorted.length - 1].end,
+        operatingHoursRanges: sorted,
+      });
+      setEditingFacility(false);
+    } catch {
+      toast.error('Could not save facility settings. Please check your connection.');
+    }
   };
 
-  const handleAddCourt = () => {
+  const handleAddCourt = async () => {
     if (!newCourtName.trim() || !newCourtRate) return;
-    addCourt({ tenantId: tenant.id, name: newCourtName.trim(), hourlyRate: Number(newCourtRate), isActive: true });
-    setNewCourtRate('');
-    setShowAddCourt(false);
+    try {
+      await addCourt({ tenantId: tenant.id, name: newCourtName.trim(), hourlyRate: Number(newCourtRate), isActive: true });
+      setNewCourtRate('');
+      setShowAddCourt(false);
+    } catch {
+      toast.error('Could not add court. Please check your connection and try again.');
+    }
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     if (!newItemName.trim() || !newItemPrice) return;
-    addItem({ tenantId: tenant.id, name: newItemName.trim(), price: Number(newItemPrice), type: newItemType, isActive: true });
-    setNewItemName('');
-    setNewItemPrice('');
-    setNewItemType('rental');
-    setShowAddItem(false);
+    try {
+      await addItem({ tenantId: tenant.id, name: newItemName.trim(), price: Number(newItemPrice), type: newItemType, isActive: true });
+      setNewItemName('');
+      setNewItemPrice('');
+      setNewItemType('rental');
+      setShowAddItem(false);
+    } catch {
+      toast.error('Could not add item. Please check your connection and try again.');
+    }
   };
 
   return (
@@ -230,8 +244,12 @@ export default function SettingsPage() {
             <div className="bg-white rounded-[16px] shadow-card p-3 mt-2 space-y-2">
               <input type="text" placeholder="Display name" value={staffDisplayName} onChange={(e) => setStaffDisplayName(e.target.value)}
                 className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-              <input type="text" placeholder="Username" value={staffUsername} onChange={(e) => setStaffUsername(e.target.value)}
-                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              <UsernameInput
+                value={staffUsername}
+                onChange={setStaffUsername}
+                placeholder="Username"
+                className="bg-surface-3 rounded-xl px-3 py-2 pr-10 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              />
               <input type="email" placeholder="Email" value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)}
                 className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
               <input type="text" placeholder="Password" value={staffPassword} onChange={(e) => setStaffPassword(e.target.value)}

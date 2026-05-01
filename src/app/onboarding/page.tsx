@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { ItemType, TimeRange } from '@/lib/types';
 import { apiRegister, apiHydrate } from '@/lib/api';
 import { OperatingHoursEditor } from '@/components/operating-hours-editor';
+import { UsernameInput } from '@/components/username-input';
 
 type Step = 'welcome' | 'facility' | 'courts' | 'items' | 'review';
 
@@ -34,7 +35,7 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 }
 
 export default function OnboardingPage() {
-  const { setupTenant, isOnboarded, currentUser, hydrateFromRemote } = useStore();
+  const { isOnboarded, currentUser, hydrateFromRemote } = useStore();
   const router = useRouter();
 
   const [step, setStep] = useState<Step>('welcome');
@@ -45,6 +46,7 @@ export default function OnboardingPage() {
   const [ownerEmail, setOwnerEmail] = useState('');
   const [ownerUsername, setOwnerUsername] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [hoursRanges, setHoursRanges] = useState<TimeRange[]>([{ start: 6, end: 22 }]);
 
   // Courts
@@ -153,29 +155,14 @@ export default function OnboardingPage() {
         return;
       }
 
-      // API returned null — show error with option to retry or go offline
       console.error('[onboarding] API registration failed');
-      setRegisterError('Could not save to server. You can retry or continue offline (data will only be on this device).');
+      setRegisterError('Could not save to server. Check your connection and try again.');
     } catch (err) {
       console.error('[onboarding] Registration error:', err);
-      setRegisterError('Network error. Check your connection and try again, or continue offline.');
+      setRegisterError('Network error. Check your connection and try again.');
     } finally {
       setRegistering(false);
     }
-  };
-
-  const handleContinueOffline = () => {
-    const sorted = [...hoursRanges].sort((a, b) => a.start - b.start);
-    setupTenant({
-      name: facilityName,
-      ownerName, ownerEmail, ownerUsername, ownerPassword,
-      subdomain,
-      operatingHoursStart: sorted[0].start,
-      operatingHoursEnd: sorted[sorted.length - 1].end,
-      courts,
-      items: allItems,
-    });
-    router.push('/dashboard');
   };
 
   return (
@@ -270,26 +257,45 @@ export default function OnboardingPage() {
 
               <div>
                 <label className="font-sans text-xs text-ink-3 block mb-1.5">Username</label>
-                <input
-                  type="text"
-                  placeholder="e.g. marco"
+                <UsernameInput
                   value={ownerUsername}
-                  onChange={(e) => setOwnerUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                  autoComplete="username"
-                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  onChange={setOwnerUsername}
+                  placeholder="e.g. marco"
+                  className="bg-white rounded-xl px-4 py-3 pr-10 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
                 <label className="font-sans text-xs text-ink-3 block mb-1.5">Password</label>
-                <input
-                  type="password"
-                  placeholder="Min 6 characters"
-                  value={ownerPassword}
-                  onChange={(e) => setOwnerPassword(e.target.value)}
-                  autoComplete="new-password"
-                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Min 6 characters"
+                    value={ownerPassword}
+                    onChange={(e) => setOwnerPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className="w-full bg-white rounded-xl px-4 py-3 pr-12 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-3 hover:text-ink-2 transition-colors"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
+                        <path d="M1 10s3.5-6 9-6c1.5 0 2.9.4 4.1 1M19 10s-1.4 2.4-3.7 4M7.6 14.4A9.5 9.5 0 011 10" />
+                        <path d="M12.4 12.4A3 3 0 017.6 7.6" />
+                        <path d="M2 2l16 16" strokeLinecap="round" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth={1.5}>
+                        <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z" />
+                        <circle cx="10" cy="10" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="h-px bg-line my-1" />
@@ -577,13 +583,7 @@ export default function OnboardingPage() {
 
             {registerError && (
               <div className="bg-warn/10 border border-warn/30 rounded-xl p-3 mb-4">
-                <p className="text-xs text-warn mb-3">{registerError}</p>
-                <button
-                  onClick={handleContinueOffline}
-                  className="text-xs text-ink-3 font-medium underline"
-                >
-                  Continue offline
-                </button>
+                <p className="text-xs text-warn">{registerError}</p>
               </div>
             )}
 

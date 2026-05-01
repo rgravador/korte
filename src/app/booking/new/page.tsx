@@ -4,6 +4,7 @@ import { useStore } from '@/store';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState, Suspense } from 'react';
 import { BookingItem, getOperatingHours } from '@/lib/types';
+import { toast } from '@/components/toast';
 
 function formatHour(hour: number): string {
   const h = hour % 12 || 12;
@@ -170,7 +171,9 @@ function NewBookingForm() {
     setIsWalkIn(false);
   };
 
-  const handleConfirm = () => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleConfirm = async () => {
     const validationErrors: string[] = [];
 
     if (!selectedCourtId) validationErrors.push('Select a court');
@@ -187,6 +190,9 @@ function NewBookingForm() {
       return;
     }
 
+    setSubmitting(true);
+    setErrors([]);
+
     const bookingItems: BookingItem[] = activeItems
       .filter((item) => (itemQuantities[item.id] ?? 0) > 0)
       .map((item) => ({
@@ -197,35 +203,40 @@ function NewBookingForm() {
         quantity: itemQuantities[item.id],
       }));
 
-    // Create one booking per consecutive block
-    const blocks = groupConsecutive(selectedHours);
-    let lastId = '';
+    try {
+      const blocks = groupConsecutive(selectedHours);
+      let lastId = '';
 
-    for (const block of blocks) {
-      const blockDuration = block.length * 60;
-      const blockCourtFee = (selectedCourt?.hourlyRate ?? 0) * block.length;
-      // Distribute items only to the first block
-      const isFirstBlock = block === blocks[0];
+      for (const block of blocks) {
+        const blockDuration = block.length * 60;
+        const blockCourtFee = (selectedCourt?.hourlyRate ?? 0) * block.length;
+        const isFirstBlock = block === blocks[0];
 
-      lastId = createBooking({
-        tenantId: tenant.id,
-        courtId: selectedCourtId,
-        memberId: selectedMemberId,
-        memberName: memberDisplayName ?? 'Walk-in',
-        date: selectedDate,
-        startHour: block[0],
-        durationMinutes: blockDuration,
-        status: 'confirmed',
-        courtFee: blockCourtFee,
-        items: isFirstBlock ? bookingItems : [],
-        itemsTotal: isFirstBlock ? itemsTotal : 0,
-        total: blockCourtFee + (isFirstBlock ? itemsTotal : 0),
-        isRecurring: false,
-        notes: blocks.length > 1 ? `Part of multi-block booking (${totalHours}h total)` : '',
-      });
+        lastId = await createBooking({
+          tenantId: tenant.id,
+          courtId: selectedCourtId,
+          memberId: selectedMemberId,
+          memberName: memberDisplayName ?? 'Walk-in',
+          date: selectedDate,
+          startHour: block[0],
+          durationMinutes: blockDuration,
+          status: 'confirmed',
+          courtFee: blockCourtFee,
+          items: isFirstBlock ? bookingItems : [],
+          itemsTotal: isFirstBlock ? itemsTotal : 0,
+          total: blockCourtFee + (isFirstBlock ? itemsTotal : 0),
+          isRecurring: false,
+          notes: blocks.length > 1 ? `Part of multi-block booking (${totalHours}h total)` : '',
+        });
+      }
+
+      router.push(`/booking/confirmed?id=${lastId}`);
+    } catch (err) {
+      console.error('[booking] confirm failed:', err);
+      toast.error('Could not save booking. Please check your connection and try again.');
+      setErrors(['Could not save booking. Please check your connection and try again.']);
+      setSubmitting(false);
     }
-
-    router.push(`/booking/confirmed?id=${lastId}`);
   };
 
   return (
@@ -539,16 +550,18 @@ function NewBookingForm() {
         {/* F) Confirm Button */}
         <button
           onClick={handleConfirm}
-          disabled={!canSubmit}
+          disabled={!canSubmit || submitting}
           className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors ${
-            canSubmit
+            canSubmit && !submitting
               ? 'bg-primary text-white hover:bg-primary-deep'
               : 'bg-line text-ink-4 cursor-not-allowed'
           }`}
         >
-          {selectedHours.length > 1
-            ? `Confirm Booking (${totalHours} hrs)`
-            : 'Confirm Booking'}
+          {submitting
+            ? 'Saving...'
+            : selectedHours.length > 1
+              ? `Confirm Booking (${totalHours} hrs)`
+              : 'Confirm Booking'}
         </button>
       </div>
     </div>

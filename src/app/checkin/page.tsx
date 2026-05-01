@@ -3,7 +3,7 @@
 import { useStore } from '@/store';
 import { StatusTag } from '@/components/status-tag';
 import { useMemo, useState } from 'react';
-
+import { toast } from '@/components/toast';
 import Link from 'next/link';
 
 export default function CheckinPage() {
@@ -36,16 +36,24 @@ export default function CheckinPage() {
     const scanTarget = todayBookings.find(
       (b) => b.status === 'confirmed' || b.status === 'pending'
     );
-    setTimeout(() => {
+    setTimeout(async () => {
       if (scanTarget) {
-        updateBookingStatus(scanTarget.id, 'checked_in');
+        try {
+          await updateBookingStatus(scanTarget.id, 'checked_in');
+        } catch {
+          toast.error('Could not check in. Please check your connection and try again.');
+        }
       }
       setScanActive(false);
     }, 1500);
   };
 
-  const handleCheckIn = (bookingId: string) => {
-    updateBookingStatus(bookingId, 'checked_in');
+  const handleCheckIn = async (bookingId: string) => {
+    try {
+      await updateBookingStatus(bookingId, 'checked_in');
+    } catch {
+      toast.error('Could not check in. Please check your connection and try again.');
+    }
   };
 
   return (

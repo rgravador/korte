@@ -6,6 +6,7 @@ import { StatusTag } from '@/components/status-tag';
 import { useStore } from '@/store';
 import { useMemo, useState } from 'react';
 import { Member, MemberTier } from '@/lib/types';
+import { toast } from '@/components/toast';
 
 const LAPSED_THRESHOLD_DAYS = 21;
 
@@ -180,17 +181,26 @@ function AddMemberSheet({
 
   const isValid = firstName.trim() !== '' && lastName.trim() !== '';
 
-  const handleSubmit = () => {
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async () => {
     if (!isValid) return;
-    addMember({
-      tenantId: tenant.id,
-      firstName: firstName.trim(),
-      lastName: lastName.trim(),
-      phone: phone.trim(),
-      email: email.trim(),
-      tier,
-    });
-    onClose();
+    setSaving(true);
+    try {
+      await addMember({
+        tenantId: tenant.id,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        tier,
+      });
+      onClose();
+    } catch {
+      toast.error('Could not add member. Please check your connection and try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

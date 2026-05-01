@@ -3,6 +3,7 @@ import { Nunito, Quicksand, Fraunces } from "next/font/google";
 import "./globals.css";
 import { SyncProvider } from "@/components/sync-provider";
 import { InstallPrompt } from "@/components/install-prompt";
+import { ToastContainer } from "@/components/toast";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -56,6 +57,7 @@ export default function RootLayout({
       >
         <SyncProvider>{children}</SyncProvider>
         <InstallPrompt />
+        <ToastContainer />
       </body>
     </html>
   );
