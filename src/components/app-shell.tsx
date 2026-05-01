@@ -107,14 +107,14 @@ function UserMenu() {
       <button
         onClick={() => setShowMenu(!showMenu)}
         aria-label="User menu"
-        className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-semibold"
+        className="w-8 h-8 rounded-full bg-navy-700 text-gold flex items-center justify-center text-[10px] font-semibold"
       >
         {initials}
       </button>
       {showMenu && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-          <div role="menu" className="absolute right-0 lg:left-0 lg:right-auto lg:bottom-full lg:mb-2 top-10 lg:top-auto bg-white rounded-xl border border-line shadow-dropdown z-50 w-52 overflow-hidden">
+          <div role="menu" className="absolute right-0 lg:left-0 lg:right-auto lg:bottom-full lg:mb-2 top-10 lg:top-auto bg-surface rounded-xl border border-line shadow-dropdown z-50 w-52 overflow-hidden">
             <div className="px-3.5 py-3 border-b border-line-2">
               <div className="font-display font-semibold text-sm text-ink">{currentUser?.displayName}</div>
               <div className="text-xs text-ink-3 mt-0.5 capitalize">{currentUser?.role.replace('_', ' ')}</div>
@@ -148,18 +148,18 @@ function Sidebar() {
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(role));
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-56 bg-white border-r border-line/60 z-40 flex flex-col">
+    <aside className="fixed left-0 top-0 bottom-0 w-56 bg-navy-800 z-40 flex flex-col">
       {/* Brand */}
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-2.5">
           <Image src="/logos/logo-no-bg.png" alt="Court Books" width={36} height={36} className="w-9 h-9" />
           <div>
-            <span className="font-display font-semibold text-base tracking-tight text-ink block leading-tight">Court Books</span>
+            <span className="font-display font-semibold text-base tracking-tight text-white block leading-tight">Court Books</span>
             {!isOnline && (
-              <span className="text-[9px] font-medium text-warn-text">Offline</span>
+              <span className="text-[9px] font-medium text-warn">Offline</span>
             )}
             {isOnline && pendingSync > 0 && (
-              <span className="text-[9px] font-medium text-primary-deep">Syncing {pendingSync}</span>
+              <span className="text-[9px] font-medium text-gold">Syncing {pendingSync}</span>
             )}
           </div>
         </div>
@@ -175,8 +175,8 @@ function Sidebar() {
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-primary-faint text-primary'
-                  : 'text-ink-3 hover:bg-surface-2 hover:text-ink-2'
+                  ? 'bg-gold/15 text-gold'
+                  : 'text-white/50 hover:bg-white/5 hover:text-white/80'
               }`}
             >
               {item.icon}
@@ -187,11 +187,11 @@ function Sidebar() {
       </nav>
 
       {/* User */}
-      <div className="px-4 py-4 border-t border-line/60 flex items-center gap-3">
+      <div className="px-4 py-4 border-t border-white/10 flex items-center gap-3">
         <UserMenu />
         <div className="min-w-0">
-          <div className="text-xs font-medium text-ink truncate">{currentUser?.displayName}</div>
-          <div className="text-[10px] text-ink-3 capitalize truncate">{currentUser?.role.replace('_', ' ')}</div>
+          <div className="text-xs font-medium text-white truncate">{currentUser?.displayName}</div>
+          <div className="text-[10px] text-white/40 capitalize truncate">{currentUser?.role.replace('_', ' ')}</div>
         </div>
       </div>
     </aside>
@@ -236,7 +236,7 @@ function MobileBottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-sm border-t border-line/60 z-50 grid items-center lg:hidden"
+      className="fixed bottom-0 left-0 right-0 h-[72px] bg-surface border-t border-line shadow-[0_-2px_10px_rgba(0,0,0,0.3)] z-50 grid items-center lg:hidden pb-safe"
       style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
     >
       {visibleItems.map((item) => {
@@ -245,15 +245,12 @@ function MobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-0.5 relative transition-colors ${
-              isActive ? 'text-primary' : 'text-ink-4 hover:text-ink-3'
+            className={`flex flex-col items-center justify-center gap-1 py-2 transition-colors ${
+              isActive ? 'text-primary-deep' : 'text-ink-3 hover:text-ink-2'
             }`}
           >
-            {isActive && (
-              <span className="absolute top-0 w-7 h-[3px] rounded-full bg-primary" />
-            )}
             {item.icon}
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <span className={`text-[11px] ${isActive ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
           </Link>
         );
       })}

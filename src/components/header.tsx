@@ -53,7 +53,7 @@ export function Header() {
         {showMenu && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-            <div role="menu" className="absolute right-0 top-10 bg-white rounded-xl border border-line shadow-dropdown z-50 w-52 overflow-hidden">
+            <div role="menu" className="absolute right-0 top-10 bg-surface rounded-xl border border-line shadow-dropdown z-50 w-52 overflow-hidden">
               <div className="px-3.5 py-3 border-b border-line-2">
                 <div className="font-display font-semibold text-sm text-ink">{currentUser?.displayName}</div>
                 <div className="text-xs text-ink-3 mt-0.5 capitalize">{currentUser?.role.replace('_', ' ')}</div>

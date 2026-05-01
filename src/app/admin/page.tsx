@@ -86,7 +86,7 @@ export default function AdminPage() {
         </p>
 
         {/* Search */}
-        <div className="flex items-center gap-2 bg-white rounded-lg px-3 py-2.5 border border-line mb-4">
+        <div className="flex items-center gap-2 bg-surface rounded-lg px-3 py-2.5 border border-line mb-4">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <circle cx="7" cy="7" r="5" />
             <path d="m11 11 4 4" />
@@ -111,7 +111,7 @@ export default function AdminPage() {
         ) : (
           <div className="space-y-2">
             {filtered.map((tenant) => (
-              <div key={tenant.id} className="bg-white rounded-[16px] shadow-card p-4">
+              <div key={tenant.id} className="bg-surface rounded-[16px] shadow-card p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <div className="font-medium text-sm">{tenant.name}</div>

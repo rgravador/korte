@@ -4,8 +4,8 @@
   "description": "Pickleball court booking for your facilities",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F8FAFC",
-  "theme_color": "#F8FAFC",
+  "background_color": "#0A1628",
+  "theme_color": "#0A1628",
   "orientation": "portrait",
   "icons": [
     {

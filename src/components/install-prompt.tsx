@@ -81,7 +81,7 @@ export function InstallPrompt() {
 
       {/* Prompt */}
       <div className="fixed inset-x-4 bottom-4 z-[101] sm:inset-x-auto sm:bottom-6 sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-sm">
-        <div className="bg-white rounded-2xl shadow-dropdown p-5">
+        <div className="bg-surface rounded-2xl shadow-dropdown p-5">
           {/* App info */}
           <div className="flex items-center gap-3.5 mb-4">
             <Image

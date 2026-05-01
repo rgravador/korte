@@ -31,7 +31,7 @@ function BookingDetailSheet({
     <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]" />
       <div
-        className="relative bg-white shadow-sheet rounded-t-2xl w-full max-w-lg md:max-w-xl p-5 md:p-6 pb-8"
+        className="relative bg-surface shadow-sheet rounded-t-2xl w-full max-w-lg md:max-w-xl p-5 md:p-6 pb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-line rounded-full mx-auto mb-5" />
@@ -178,7 +178,7 @@ export default function DashboardPage() {
             { label: 'No-shows', value: noShowCount },
             { label: 'Utilization', value: `${utilization}%` },
           ].map(({ label, value }) => (
-            <div key={label} className="bg-white shadow-card rounded-xl p-3 md:p-4">
+            <div key={label} className="bg-surface shadow-card rounded-xl p-3 md:p-4">
               <div className="text-[10px] md:text-xs font-medium text-ink-3 uppercase tracking-wider mb-1.5">{label}</div>
               <div className="font-display text-2xl md:text-3xl font-bold leading-none text-ink">{value}</div>
             </div>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
           <span className="text-[10px] md:text-xs font-medium text-ink-4">{todayCount} bookings</span>
         </div>
 
-        <div className="bg-white rounded-xl shadow-card overflow-hidden">
+        <div className="bg-surface rounded-xl shadow-card overflow-hidden">
           {todayBookings.map((booking, index) => {
             const court = courts.find((c) => c.id === booking.courtId);
             const hasItems = booking.items.length > 0;

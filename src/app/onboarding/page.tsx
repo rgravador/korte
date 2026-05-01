@@ -220,7 +220,7 @@ export default function OnboardingPage() {
                   placeholder="e.g. QC Pickle Hub"
                   value={facilityName}
                   onChange={(e) => setFacilityName(e.target.value)}
-                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
                 {subdomain && (
                   <p className="font-sans text-xs text-ink-3 mt-1.5">
@@ -236,7 +236,7 @@ export default function OnboardingPage() {
                   placeholder="e.g. Marco Reyes"
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
-                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -247,7 +247,7 @@ export default function OnboardingPage() {
                   placeholder="marco@qcpicklehub.com"
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
-                  className="w-full bg-white rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -261,7 +261,7 @@ export default function OnboardingPage() {
                   value={ownerUsername}
                   onChange={setOwnerUsername}
                   placeholder="e.g. marco"
-                  className="bg-white rounded-xl px-4 py-3 pr-10 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="bg-surface rounded-xl px-4 py-3 pr-10 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -274,7 +274,7 @@ export default function OnboardingPage() {
                     value={ownerPassword}
                     onChange={(e) => setOwnerPassword(e.target.value)}
                     autoComplete="new-password"
-                    className="w-full bg-white rounded-xl px-4 py-3 pr-12 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="w-full bg-surface rounded-xl px-4 py-3 pr-12 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -336,7 +336,7 @@ export default function OnboardingPage() {
 
             <div className="space-y-2">
               {courts.map((court, index) => (
-                <div key={index} className="bg-white rounded-[16px] shadow-card p-3 flex gap-2 items-end">
+                <div key={index} className="bg-surface rounded-[16px] shadow-card p-3 flex gap-2 items-end">
                   <div className="flex-1">
                     <label className="font-sans text-xs text-ink-3 block mb-1">Name</label>
                     <input
@@ -415,7 +415,7 @@ export default function OnboardingPage() {
                   <button
                     key={index}
                     onClick={() => toggleSuggestedItem(index)}
-                    className={`w-full bg-white rounded-[16px] shadow-card p-3 flex justify-between items-center text-left transition-colors ${
+                    className={`w-full bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center text-left transition-colors ${
                       isSelected ? 'ring-1 ring-primary' : ''
                     }`}
                   >
@@ -447,7 +447,7 @@ export default function OnboardingPage() {
                 <div className="font-sans text-xs text-ink-3 mb-2">Your items</div>
                 <div className="space-y-1.5 mb-4">
                   {customItems.map((item, index) => (
-                    <div key={index} className="bg-white rounded-[16px] shadow-card p-3 flex justify-between items-center">
+                    <div key={index} className="bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center">
                       <div>
                         <div className="font-medium text-sm">{item.name}</div>
                         <div className="font-sans text-xs text-ink-3">₱{item.price} · {item.type}</div>
@@ -465,7 +465,7 @@ export default function OnboardingPage() {
             )}
 
             {showAddCustom ? (
-              <div className="bg-white rounded-[16px] shadow-card p-3 space-y-2 mb-4">
+              <div className="bg-surface rounded-[16px] shadow-card p-3 space-y-2 mb-4">
                 <input
                   type="text"
                   placeholder="Item name"
@@ -537,7 +537,7 @@ export default function OnboardingPage() {
             </p>
 
             {/* Facility summary */}
-            <div className="bg-white rounded-[16px] shadow-card p-4 mb-3">
+            <div className="bg-surface rounded-[16px] shadow-card p-4 mb-3">
               <div className="font-sans text-xs font-semibold text-ink-3 mb-2">Facility</div>
               <div className="font-sans text-lg font-semibold mb-1">{facilityName}</div>
               <div className="font-sans text-xs text-ink-3">
@@ -552,7 +552,7 @@ export default function OnboardingPage() {
             </div>
 
             {/* Courts summary */}
-            <div className="bg-white rounded-[16px] shadow-card p-4 mb-3">
+            <div className="bg-surface rounded-[16px] shadow-card p-4 mb-3">
               <div className="font-sans text-xs font-semibold text-ink-3 mb-2">
                 {courts.length} Court{courts.length !== 1 ? 's' : ''}
               </div>
@@ -565,7 +565,7 @@ export default function OnboardingPage() {
             </div>
 
             {/* Items summary */}
-            <div className="bg-white rounded-[16px] shadow-card p-4 mb-6">
+            <div className="bg-surface rounded-[16px] shadow-card p-4 mb-6">
               <div className="font-sans text-xs font-semibold text-ink-3 mb-2">
                 {allItems.length} Item{allItems.length !== 1 ? 's' : ''}
               </div>

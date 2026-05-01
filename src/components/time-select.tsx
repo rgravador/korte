@@ -29,7 +29,7 @@ export function TimeSelect({ value, onChange, min = 0, max = 24, label, classNam
       <select
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className={`w-full bg-white rounded-xl px-3 py-2.5 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer ${className}`}
+        className={`w-full bg-surface rounded-xl px-3 py-2.5 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer ${className}`}
       >
         {options.map((h) => (
           <option key={h} value={h}>

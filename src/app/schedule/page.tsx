@@ -169,7 +169,7 @@ export default function SchedulePage() {
               className={`flex-1 flex flex-col items-center py-2 rounded-xl transition-colors ${
                 isActive
                   ? 'bg-primary text-white shadow-sm'
-                  : 'bg-white text-ink border border-line/60 hover:border-primary/30'
+                  : 'bg-surface text-ink border border-line/60 hover:border-primary/30'
               }`}
             >
               <span className="text-[11px] font-medium">{day.dayAbbr}</span>
@@ -187,7 +187,7 @@ export default function SchedulePage() {
           min={todayStr}
           onChange={(e) => { setSelectedDate(e.target.value); setSelection(null); }}
           aria-label="Select date"
-          className="bg-white rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="bg-surface rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
         <span className="font-display font-semibold text-lg tracking-tight text-ink">
           {formatSelectedDate(selectedDate)}
@@ -214,7 +214,7 @@ export default function SchedulePage() {
 
       {/* Time-by-court grid */}
       <div className="overflow-x-auto mb-4">
-        <div className="bg-white rounded-xl shadow-card overflow-hidden border border-line-2 min-w-[320px]">
+        <div className="bg-surface rounded-xl shadow-card overflow-hidden border border-line-2 min-w-[320px]">
           {/* Grid header */}
           <div
             className="grid border-b border-line-2 bg-surface-2"
@@ -266,7 +266,7 @@ export default function SchedulePage() {
                   cellClass += ' bg-primary-soft ring-2 ring-primary ring-inset';
                   content = <span className="text-xs font-semibold text-primary">✓</span>;
                 } else {
-                  cellClass += ' bg-white text-ink-4 hover:bg-primary-faint';
+                  cellClass += ' bg-surface text-ink-4 hover:bg-primary-faint';
                   content = <span className="text-xs">&mdash;</span>;
                 }
 
@@ -296,17 +296,17 @@ export default function SchedulePage() {
           <span className="text-xs text-ink-3">Recurring</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm border border-line bg-white" />
+          <div className="w-3 h-3 rounded-sm border border-line bg-surface" />
           <span className="text-xs text-ink-3">Open</span>
         </div>
       </div>
 
       {/* Selection action bar */}
       {selection && selection.hours.length > 0 && (
-        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-ink rounded-2xl shadow-dropdown px-5 py-3 flex items-center gap-4">
-          <div className="text-white text-sm">
+        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface rounded-2xl shadow-dropdown border border-line px-5 py-3 flex items-center gap-4">
+          <div className="text-ink text-sm">
             <span className="font-display font-bold">{selection.hours.length}h</span>
-            <span className="text-white/60 ml-1.5">
+            <span className="text-ink-3 ml-1.5">
               {courts.find((c) => c.id === selection.courtId)?.name}
             </span>
           </div>
@@ -318,7 +318,7 @@ export default function SchedulePage() {
           </button>
           <button
             onClick={handleClearSelection}
-            className="text-white/50 hover:text-white text-xs font-medium transition-colors"
+            className="text-ink-3 hover:text-ink text-xs font-medium transition-colors"
           >
             Cancel
           </button>
@@ -344,7 +344,7 @@ export default function SchedulePage() {
         >
           <div className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]" />
           <div
-            className="relative bg-white shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8"
+            className="relative bg-surface shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-line rounded-full mx-auto mb-5" />

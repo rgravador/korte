@@ -5,7 +5,7 @@ import { AppShell } from '@/components/app-shell';
 import { StatusTag } from '@/components/status-tag';
 import { useStore } from '@/store';
 import { useMemo, useState } from 'react';
-import { Member, MemberTier } from '@/lib/types';
+import { Member } from '@/lib/types';
 import { toast } from '@/components/toast';
 
 const LAPSED_THRESHOLD_DAYS = 21;
@@ -79,7 +79,7 @@ function MemberDetailSheet({
     <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
-        className="relative bg-white shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8 max-h-[85vh] overflow-y-auto"
+        className="relative bg-surface shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8 max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-line rounded-full mx-auto mb-4" />
@@ -173,27 +173,27 @@ function AddMemberSheet({
   onClose: () => void;
 }) {
   const { addMember, tenant } = useStore();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [tier, setTier] = useState<MemberTier>('regular');
 
-  const isValid = firstName.trim() !== '' && lastName.trim() !== '';
+  const isValid = fullName.trim().length >= 2;
 
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async () => {
     if (!isValid) return;
     setSaving(true);
+    const parts = fullName.trim().split(/\s+/);
+    const firstName = parts[0];
+    const lastName = parts.slice(1).join(' ') || '';
     try {
       await addMember({
         tenantId: tenant.id,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
+        firstName,
+        lastName,
         phone: phone.trim(),
-        email: email.trim(),
-        tier,
+        email: '',
+        tier: 'regular',
       });
       onClose();
     } catch {
@@ -207,67 +207,27 @@ function AddMemberSheet({
     <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
       <div
-        className="relative bg-white shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8"
+        className="relative bg-surface shadow-sheet rounded-t-2xl w-full max-w-lg p-5 pb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-line rounded-full mx-auto mb-4" />
-        <h3 className="font-sans text-xl font-light mb-4">Add Member</h3>
+        <h3 className="font-display text-lg font-semibold mb-4 text-ink">Add Member</h3>
 
-        <div className="space-y-3 mb-4">
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="text"
-              placeholder="First name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
-            />
-            <input
-              type="text"
-              placeholder="Last name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
+        <div className="space-y-3 mb-5">
+          <input
+            type="text"
+            placeholder="Full name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+          />
           <input
             type="tel"
-            placeholder="Phone"
+            placeholder="Phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-
-        <div className="font-sans text-xs text-ink-3 mb-2">Tier</div>
-        <div className="flex gap-2 mb-5">
-          <button
-            onClick={() => setTier('regular')}
-            className={`px-4 py-1.5 rounded-full text-xs transition-colors ${
-              tier === 'regular'
-                ? 'bg-primary text-white'
-                : 'bg-surface-3 text-ink-3'
-            }`}
-          >
-            Regular
-          </button>
-          <button
-            onClick={() => setTier('vip')}
-            className={`px-4 py-1.5 rounded-full text-xs transition-colors ${
-              tier === 'vip'
-                ? 'bg-primary text-white'
-                : 'bg-surface-3 text-ink-3'
-            }`}
-          >
-            VIP
-          </button>
         </div>
 
         <div className="flex gap-2">

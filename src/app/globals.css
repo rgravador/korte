@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #F8FAFC;
-  --foreground: #0F172A;
+  --background: #0A1628;
+  --foreground: #F0F2F5;
 }
 
 body {
@@ -28,6 +28,11 @@ body {
 }
 .animate-slide-up {
   animation: slide-up 0.2s ease-out;
+}
+
+/* Safe area for iOS home indicator */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Legacy app-shell for pages not yet migrated to AppShell component */

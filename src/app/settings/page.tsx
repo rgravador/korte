@@ -91,7 +91,7 @@ export default function SettingsPage() {
         {/* Facility */}
         <Section title="Facility">
           {editingFacility ? (
-            <div className="bg-white rounded-[16px] shadow-card p-3 space-y-3">
+            <div className="bg-surface rounded-[16px] shadow-card p-3 space-y-3">
               <div>
                 <label className="font-sans text-xs text-ink-3 block mb-1">Name</label>
                 <input type="text" value={facilityName} onChange={(e) => setFacilityName(e.target.value)}
@@ -104,7 +104,7 @@ export default function SettingsPage() {
               </div>
             </div>
           ) : (
-            <button onClick={() => setEditingFacility(true)} className="w-full bg-white rounded-[16px] shadow-card p-3 text-left">
+            <button onClick={() => setEditingFacility(true)} className="w-full bg-surface rounded-[16px] shadow-card p-3 text-left">
               <div className="font-medium text-sm">{tenant.name}</div>
               <div className="text-xs text-ink-3 mt-0.5">
                 <OperatingHoursDisplay ranges={getTimeRanges(tenant)} /> · {tenant.courtCount} courts
@@ -117,7 +117,7 @@ export default function SettingsPage() {
         <Section title="Courts">
           <div className="space-y-1.5">
             {courts.map((court) => (
-              <div key={court.id} className="bg-white rounded-[16px] shadow-card p-3 flex justify-between items-center">
+              <div key={court.id} className="bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center">
                 <div>
                   <div className="font-medium text-sm">{court.name}</div>
                   <div className="font-sans text-xs text-ink-3">₱{court.hourlyRate}/hr</div>
@@ -143,7 +143,7 @@ export default function SettingsPage() {
           </div>
 
           {showAddCourt ? (
-            <div className="bg-white rounded-[16px] shadow-card p-3 mt-2 space-y-2">
+            <div className="bg-surface rounded-[16px] shadow-card p-3 mt-2 space-y-2">
               <input type="text" placeholder="Court name" value={newCourtName} onChange={(e) => setNewCourtName(e.target.value)}
                 className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
               <input type="number" placeholder="Hourly rate (₱)" value={newCourtRate} onChange={(e) => setNewCourtRate(e.target.value)}
@@ -164,7 +164,7 @@ export default function SettingsPage() {
         <Section title="Item catalog">
           <div className="space-y-1.5">
             {items.map((item) => (
-              <div key={item.id} className="bg-white rounded-[16px] shadow-card p-3 flex justify-between items-center">
+              <div key={item.id} className="bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center">
                 <div>
                   <div className="font-medium text-sm">{item.name}</div>
                   <div className="font-sans text-xs text-ink-3">
@@ -192,7 +192,7 @@ export default function SettingsPage() {
           </div>
 
           {showAddItem ? (
-            <div className="bg-white rounded-[16px] shadow-card p-3 mt-2 space-y-2">
+            <div className="bg-surface rounded-[16px] shadow-card p-3 mt-2 space-y-2">
               <input type="text" placeholder="Item name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
                 className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
               <input type="number" placeholder="Price (₱)" value={newItemPrice} onChange={(e) => setNewItemPrice(e.target.value)}
@@ -224,7 +224,7 @@ export default function SettingsPage() {
         <Section title="Staff accounts">
           <div className="space-y-1.5">
             {tenantUsers.map((user) => (
-              <div key={user.id} className="bg-white rounded-[16px] shadow-card p-3 flex justify-between items-center">
+              <div key={user.id} className="bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center">
                 <div>
                   <div className="font-medium text-sm">{user.displayName}</div>
                   <div className="font-sans text-xs text-ink-3">
@@ -241,7 +241,7 @@ export default function SettingsPage() {
           </div>
 
           {showAddStaff ? (
-            <div className="bg-white rounded-[16px] shadow-card p-3 mt-2 space-y-2">
+            <div className="bg-surface rounded-[16px] shadow-card p-3 mt-2 space-y-2">
               <input type="text" placeholder="Display name" value={staffDisplayName} onChange={(e) => setStaffDisplayName(e.target.value)}
                 className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
               <UsernameInput
@@ -270,7 +270,7 @@ export default function SettingsPage() {
             </button>
           )}
 
-          <Link href="/checkin" className="w-full bg-white rounded-[16px] shadow-card p-3 flex justify-between items-center mt-2 block">
+          <Link href="/checkin" className="w-full bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center mt-2 block">
             <div>
               <div className="font-medium text-sm">Staff Check-in View</div>
               <div className="font-sans text-xs text-ink-3">QR scanner and arrival list</div>
@@ -281,7 +281,7 @@ export default function SettingsPage() {
 
         {/* Connection */}
         <Section title="Connection">
-          <div className="bg-white rounded-[16px] shadow-card p-3 space-y-2">
+          <div className="bg-surface rounded-[16px] shadow-card p-3 space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm">Server</span>
               <span className="font-sans text-xs px-2 py-1 rounded bg-signal-soft text-signal-text">

@@ -112,19 +112,19 @@ export default function AdminReportsPage() {
           <>
             {/* Platform KPIs */}
             <div className="grid grid-cols-4 gap-2 mb-6">
-              <div className="bg-white rounded-[16px] shadow-card p-3">
+              <div className="bg-surface rounded-[16px] shadow-card p-3">
                 <div className="font-sans text-[11px] text-ink-3 mb-1">Tenants</div>
                 <div className="font-sans text-2xl leading-none">{stats.totals.tenants}</div>
               </div>
-              <div className="bg-white rounded-[16px] shadow-card p-3">
+              <div className="bg-surface rounded-[16px] shadow-card p-3">
                 <div className="font-sans text-[11px] text-ink-3 mb-1">Bookings</div>
                 <div className="font-sans text-2xl leading-none">{stats.totals.bookings}</div>
               </div>
-              <div className="bg-white rounded-[16px] shadow-card p-3">
+              <div className="bg-surface rounded-[16px] shadow-card p-3">
                 <div className="font-sans text-[11px] text-ink-3 mb-1">Members</div>
                 <div className="font-sans text-2xl leading-none">{stats.totals.members}</div>
               </div>
-              <div className="bg-white rounded-[16px] shadow-card p-3">
+              <div className="bg-surface rounded-[16px] shadow-card p-3">
                 <div className="font-sans text-[11px] text-ink-3 mb-1">Users</div>
                 <div className="font-sans text-2xl leading-none">{stats.totals.users}</div>
               </div>
@@ -135,7 +135,7 @@ export default function AdminReportsPage() {
               <div className="font-sans text-xs text-ink-3 mb-2">
                 Bookings · last 30 days
               </div>
-              <div className="bg-white rounded-[16px] shadow-card p-4">
+              <div className="bg-surface rounded-[16px] shadow-card p-4">
                 <svg viewBox="0 0 280 70" className="w-full overflow-visible">
                   <defs>
                     <linearGradient id="adminSparkGrad" x1="0" y1="0" x2="0" y2="1">
@@ -156,7 +156,7 @@ export default function AdminReportsPage() {
               <div className="font-sans text-xs text-ink-3 mb-2">
                 Bookings by status
               </div>
-              <div className="bg-white rounded-[16px] shadow-card p-4 space-y-2">
+              <div className="bg-surface rounded-[16px] shadow-card p-4 space-y-2">
                 {Object.entries(stats.bookingsByStatus).map(([status, count]) => {
                   const total = stats.totals.bookings || 1;
                   const pct = Math.round((count / total) * 100);
@@ -184,7 +184,7 @@ export default function AdminReportsPage() {
                 <div className="font-sans text-xs text-ink-3 mb-2">
                   Tenant signups by month
                 </div>
-                <div className="bg-white rounded-[16px] shadow-card p-4">
+                <div className="bg-surface rounded-[16px] shadow-card p-4">
                   <div className="flex items-end gap-1" style={{ height: '80px' }}>
                     {monthLabels.map((month, i) => {
                       const val = monthValues[i];

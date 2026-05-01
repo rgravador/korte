@@ -93,7 +93,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-sm border-t border-line/60 z-50 max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto grid items-center"
+      className="fixed bottom-0 left-0 right-0 h-16 bg-surface/95 backdrop-blur-sm border-t border-line/60 z-50 max-w-lg md:max-w-2xl lg:max-w-3xl mx-auto grid items-center"
       style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}
     >
       {visibleItems.map((item) => {

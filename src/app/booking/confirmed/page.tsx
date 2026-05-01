@@ -62,7 +62,7 @@ function ConfirmedContent() {
         </p>
 
         {/* Booking details card */}
-        <div className="w-full bg-white rounded-[16px] shadow-card p-4 mb-4">
+        <div className="w-full bg-surface rounded-[16px] shadow-card p-4 mb-4">
           <div className="font-sans text-xs text-ink-3 mb-3">Details</div>
 
           <div className="space-y-1.5">
@@ -91,7 +91,7 @@ function ConfirmedContent() {
 
         {/* Items section */}
         {booking.items.length > 0 && (
-          <div className="w-full bg-white rounded-[16px] shadow-card p-4 mb-4">
+          <div className="w-full bg-surface rounded-[16px] shadow-card p-4 mb-4">
             <div className="font-sans text-xs text-ink-3 mb-3">Items</div>
             {booking.items.map((item, i) => (
               <div key={i} className="flex justify-between font-sans text-xs py-0.5">
@@ -103,7 +103,7 @@ function ConfirmedContent() {
         )}
 
         {/* Total */}
-        <div className="w-full bg-white rounded-[16px] shadow-card p-4 mb-4">
+        <div className="w-full bg-surface rounded-[16px] shadow-card p-4 mb-4">
           <div className="space-y-1">
             <div className="flex justify-between font-sans text-xs">
               <span className="text-ink-3">Court fee</span>
