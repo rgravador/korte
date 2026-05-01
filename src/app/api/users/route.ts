@@ -3,6 +3,8 @@ import { getServerSupabase } from '@/lib/supabase-server';
 import { dbCreateUser } from '@/lib/db';
 import { ok, created, badRequest, serverError } from '@/lib/api-response';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const username = req.nextUrl.searchParams.get('username');

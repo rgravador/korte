@@ -3,6 +3,8 @@ import { getServerSupabase } from '@/lib/supabase-server';
 import { dbLogin } from '@/lib/db';
 import { ok, badRequest, unauthorized, serverError } from '@/lib/api-response';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const { username, password } = await req.json();

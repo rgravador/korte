@@ -4,6 +4,8 @@ import { dbCreateBooking, dbUpdateBookingStatus, dbRescheduleBooking } from '@/l
 import { created, badRequest, serverError } from '@/lib/api-response';
 import { ok } from '@/lib/api-response';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

@@ -3,6 +3,8 @@ import { getServerSupabase } from '@/lib/supabase-server';
 import { dbHydrateTenant } from '@/lib/db';
 import { ok, badRequest, serverError } from '@/lib/api-response';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const tenantId = req.nextUrl.searchParams.get('tenantId');

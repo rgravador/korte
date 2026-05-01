@@ -3,6 +3,8 @@ import { getServerSupabase } from '@/lib/supabase-server';
 import { dbUpdateTenant } from '@/lib/db';
 import { ok, badRequest, serverError } from '@/lib/api-response';
 
+export const dynamic = 'force-dynamic';
+
 export async function PATCH(req: NextRequest) {
   try {
     const { tenantId, ...updates } = await req.json();
