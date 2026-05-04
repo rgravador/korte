@@ -80,8 +80,7 @@ function NewBookingForm() {
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [isWalkIn, setIsWalkIn] = useState(false);
   const [showWalkInForm, setShowWalkInForm] = useState(false);
-  const [walkInFirstName, setWalkInFirstName] = useState('');
-  const [walkInLastName, setWalkInLastName] = useState('');
+  const [walkInName, setWalkInName] = useState('');
   const [walkInPhone, setWalkInPhone] = useState('');
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [errors, setErrors] = useState<string[]>([]);
@@ -135,9 +134,8 @@ function NewBookingForm() {
   const courtFee = (selectedCourt?.hourlyRate ?? 0) * totalHours;
   const total = courtFee + itemsTotal;
 
-  const walkInFullName = [walkInFirstName.trim(), walkInLastName.trim()].filter(Boolean).join(' ');
   const memberDisplayName = isWalkIn
-    ? walkInFullName || 'Walk-in'
+    ? walkInName.trim() || 'Walk-in'
     : selectedMember
       ? `${selectedMember.firstName} ${selectedMember.lastName}`
       : null;
@@ -173,7 +171,7 @@ function NewBookingForm() {
   };
 
   const handleConfirmWalkIn = () => {
-    if (!walkInFirstName.trim()) return;
+    if (!walkInName.trim()) return;
     setIsWalkIn(true);
     setSelectedMemberId(null);
     setShowWalkInForm(false);
@@ -183,8 +181,7 @@ function NewBookingForm() {
   const handleClearMember = () => {
     setSelectedMemberId(null);
     setIsWalkIn(false);
-    setWalkInFirstName('');
-    setWalkInLastName('');
+    setWalkInName('');
     setWalkInPhone('');
   };
 
@@ -225,18 +222,21 @@ function NewBookingForm() {
       let memberId = selectedMemberId;
       let bookingMemberName = memberDisplayName ?? 'Walk-in';
 
-      if (isWalkIn && walkInFirstName.trim()) {
+      if (isWalkIn && walkInName.trim()) {
+        const nameParts = walkInName.trim().split(/\s+/);
+        const firstName = nameParts[0];
+        const lastName = nameParts.slice(1).join(' ');
         try {
           const newMemberId = await addMember({
-            firstName: walkInFirstName.trim(),
-            lastName: walkInLastName.trim() || '',
+            firstName,
+            lastName,
             phone: walkInPhone.trim() || '',
             email: '',
             tier: 'regular',
           });
           memberId = newMemberId;
-          bookingMemberName = walkInFullName;
-          toast.success(`${walkInFullName} added as a new member`);
+          bookingMemberName = walkInName.trim();
+          toast.success(`${walkInName.trim()} added as a new member`);
         } catch {
           // Member creation failed — continue with booking as walk-in (no member ID)
           toast.info('Booking saved, but could not create member record.');
@@ -456,22 +456,13 @@ function NewBookingForm() {
           {showWalkInForm && !isWalkIn && (
             <div className="bg-surface-2 rounded-xl p-3.5 border border-line/60 space-y-2.5">
               <div className="text-[10px] font-semibold text-ink-3 uppercase tracking-wider">Walk-in details</div>
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  value={walkInFirstName}
-                  onChange={(e) => setWalkInFirstName(e.target.value)}
-                  placeholder="First name *"
-                  className="bg-surface rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-                <input
-                  type="text"
-                  value={walkInLastName}
-                  onChange={(e) => setWalkInLastName(e.target.value)}
-                  placeholder="Last name"
-                  className="bg-surface rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
+              <input
+                type="text"
+                value={walkInName}
+                onChange={(e) => setWalkInName(e.target.value)}
+                placeholder="Full name *"
+                className="w-full bg-surface rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              />
               <input
                 type="tel"
                 value={walkInPhone}
@@ -482,9 +473,9 @@ function NewBookingForm() {
               <div className="flex gap-2">
                 <button
                   onClick={handleConfirmWalkIn}
-                  disabled={!walkInFirstName.trim()}
+                  disabled={!walkInName.trim()}
                   className={`flex-1 py-2.5 rounded-lg text-xs font-medium transition-colors ${
-                    walkInFirstName.trim()
+                    walkInName.trim()
                       ? 'bg-primary text-white'
                       : 'bg-line text-ink-4 cursor-not-allowed'
                   }`}
