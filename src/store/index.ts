@@ -16,7 +16,8 @@ const EMPTY_TENANT: Tenant = {
   id: '', name: '', subdomain: '', courtCount: 0,
   operatingHoursStart: 6, operatingHoursEnd: 22, freeTrialDays: 7,
   subscriptionStatus: 'trial', planTier: null, trialEndsAt: null,
-  currentPeriodEnd: null, adminOverride: false, createdAt: '',
+  currentPeriodEnd: null, adminOverride: false,
+  paymentMode: 'full', downpaymentPerHour: 0, createdAt: '',
 };
 
 interface AppState {
@@ -306,7 +307,7 @@ export const useStore = create<AppState>()(
         courts: state.courts,
         items: state.items,
         members: state.members,
-        bookings: state.bookings,
+        // bookings excluded — always fetched fresh from server on hydrate
         lastSyncedAt: state.lastSyncedAt,
       }),
       onRehydrateStorage: () => {

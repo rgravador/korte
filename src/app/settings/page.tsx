@@ -8,6 +8,7 @@ import { toast } from '@/components/toast';
 import Link from 'next/link';
 import { OperatingHoursEditor, OperatingHoursDisplay } from '@/components/operating-hours-editor';
 import { UsernameInput } from '@/components/username-input';
+import { apiUpdateUser } from '@/lib/api';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -304,11 +305,16 @@ function SportConfigView({
 
 /* ── Main Settings Page ── */
 export default function SettingsPage() {
-  const { tenant, sports, courts, users, currentUser, isOnline, pendingSync, lastSyncedAt, updateTenant, addSport, createUser } = useStore();
+  const { tenant, sports, courts, users, currentUser, isOnline, pendingSync, lastSyncedAt, updateTenant, addSport, createUser, refreshFromServer } = useStore();
 
   const [selectedSettingsSport, setSelectedSettingsSport] = useState<string | null>(null);
   const [editingFacility, setEditingFacility] = useState(false);
   const [facilityName, setFacilityName] = useState(tenant.name);
+
+  // Payment policy
+  const [editingPayment, setEditingPayment] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<'full' | 'downpayment'>(tenant.paymentMode);
+  const [downpaymentPerHour, setDownpaymentPerHour] = useState(String(tenant.downpaymentPerHour || ''));
 
   // Staff management
   const [showAddStaff, setShowAddStaff] = useState(false);
@@ -316,7 +322,12 @@ export default function SettingsPage() {
   const [staffPassword, setStaffPassword] = useState('');
   const [staffDisplayName, setStaffDisplayName] = useState('');
   const [staffEmail, setStaffEmail] = useState('');
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
   const tenantUsers = users.filter((u) => u.tenantId === tenant.id);
+  const isAdmin = currentUser?.role === 'tenant_admin' || currentUser?.role === 'system_admin';
 
   // Add sport
   const [showAddSport, setShowAddSport] = useState(false);
@@ -380,6 +391,86 @@ export default function SettingsPage() {
         ) : (
           <button onClick={() => setEditingFacility(true)} className="w-full bg-surface rounded-xl shadow-card p-3 text-left">
             <div className="font-medium text-sm">{tenant.name}</div>
+          </button>
+        )}
+      </Section>
+
+      {/* Payment Policy */}
+      <Section title="Payment policy">
+        {editingPayment ? (
+          <div className="bg-surface rounded-xl shadow-card p-3 space-y-3">
+            <div className="flex gap-1.5">
+              {(['full', 'downpayment'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => {
+                    setPaymentMode(mode);
+                    if (mode === 'full') setDownpaymentPerHour('');
+                  }}
+                  className={`flex-1 text-xs py-3 rounded-xl font-semibold transition-colors ${
+                    paymentMode === mode
+                      ? 'bg-primary text-white'
+                      : 'border border-line text-ink-2 hover:bg-surface-2'
+                  }`}
+                >
+                  {mode === 'full' ? 'Full payment' : 'Downpayment'}
+                </button>
+              ))}
+            </div>
+            {paymentMode === 'downpayment' && (
+              <div>
+                <label className="text-xs text-ink-3 block mb-1">Downpayment per hour (₱)</label>
+                <input
+                  type="number"
+                  value={downpaymentPerHour}
+                  onChange={(e) => setDownpaymentPerHour(e.target.value)}
+                  placeholder="e.g. 100"
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                />
+                <p className="text-xs text-ink-3 mt-1.5">Remaining balance is collected at check-in.</p>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  try {
+                    await updateTenant({
+                      paymentMode,
+                      downpaymentPerHour: paymentMode === 'full' ? 0 : Number(downpaymentPerHour) || 0,
+                    });
+                    setEditingPayment(false);
+                    toast.success('Payment policy updated');
+                  } catch {
+                    toast.error('Could not update payment policy.');
+                  }
+                }}
+                className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setPaymentMode(tenant.paymentMode);
+                  setDownpaymentPerHour(String(tenant.downpaymentPerHour || ''));
+                  setEditingPayment(false);
+                }}
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={() => setEditingPayment(true)} className="w-full bg-surface rounded-xl shadow-card p-3 text-left">
+            <div className="font-medium text-sm">
+              {tenant.paymentMode === 'full' ? 'Full payment' : `Downpayment — ₱${tenant.downpaymentPerHour}/hr`}
+            </div>
+            <div className="text-xs text-ink-3 mt-1">
+              {tenant.paymentMode === 'full'
+                ? 'Full amount collected before confirming'
+                : 'Balance collected at check-in'}
+            </div>
+            <div className="text-xs text-ink-3 mt-1.5">Tap to edit payment policy</div>
           </button>
         )}
       </Section>
@@ -477,55 +568,94 @@ export default function SettingsPage() {
       <Section title="Staff accounts">
         <div className="space-y-1.5">
           {tenantUsers.map((user) => (
-            <div key={user.id} className="bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
-              <div>
-                <div className="font-medium text-sm">{user.displayName}</div>
-                <div className="text-xs text-ink-3">@{user.username} · {user.role.replace('_', ' ')}</div>
+            editingUserId === user.id && isAdmin ? (
+              <div key={user.id} className="bg-surface rounded-xl shadow-card p-3 space-y-2">
+                <div className="text-xs text-ink-3 mb-1">@{user.username} · {user.role === 'tenant_admin' ? 'Admin' : 'Staff'}</div>
+                <input type="text" placeholder="Display name" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)}
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                <input type="email" placeholder="Email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)}
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                <input type="text" placeholder="New password (leave blank to keep)" value={editPassword} onChange={(e) => setEditPassword(e.target.value)}
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                <div className="flex gap-2">
+                  <button onClick={async () => {
+                    const updates: { userId: string; displayName?: string; email?: string; password?: string } = { userId: user.id };
+                    if (editDisplayName.trim() && editDisplayName.trim() !== user.displayName) updates.displayName = editDisplayName.trim();
+                    if (editEmail.trim() !== user.email) updates.email = editEmail.trim();
+                    if (editPassword.trim()) updates.password = editPassword.trim();
+                    if (Object.keys(updates).length > 1) {
+                      try {
+                        const success = await apiUpdateUser(updates);
+                        if (success) {
+                          toast.success('Staff updated');
+                          await refreshFromServer();
+                        } else {
+                          toast.error('Could not update staff.');
+                        }
+                      } catch { toast.error('Could not update staff.'); }
+                    }
+                    setEditingUserId(null);
+                    setEditPassword('');
+                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
+                  <button onClick={() => { setEditingUserId(null); setEditPassword(''); }} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+                </div>
               </div>
-              <span className={`text-xs px-2 py-1 rounded ${user.role === 'tenant_admin' ? 'bg-primary-soft text-primary-deep' : 'bg-signal-soft text-signal-text'}`}>
-                {user.role === 'tenant_admin' ? 'Admin' : 'Staff'}
-              </span>
-            </div>
+            ) : (
+              <button
+                key={user.id}
+                onClick={() => {
+                  if (!isAdmin) return;
+                  setEditingUserId(user.id);
+                  setEditDisplayName(user.displayName);
+                  setEditEmail(user.email);
+                  setEditPassword('');
+                }}
+                className={`w-full bg-surface rounded-xl shadow-card p-3 flex justify-between items-center text-left ${isAdmin ? 'hover:bg-surface-3 transition-colors' : ''}`}
+              >
+                <div>
+                  <div className="font-medium text-sm">{user.displayName}</div>
+                  <div className="text-xs text-ink-3">@{user.username} · {user.role.replace('_', ' ')}</div>
+                </div>
+                <span className={`text-xs px-2 py-1 rounded ${user.role === 'tenant_admin' ? 'bg-primary-soft text-primary-deep' : 'bg-signal-soft text-signal-text'}`}>
+                  {user.role === 'tenant_admin' ? 'Admin' : 'Staff'}
+                </span>
+              </button>
+            )
           ))}
         </div>
 
-        {showAddStaff ? (
-          <div className="bg-surface rounded-xl shadow-card p-3 mt-2 space-y-2">
-            <input type="text" placeholder="Display name" value={staffDisplayName} onChange={(e) => setStaffDisplayName(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-            <UsernameInput
-              value={staffUsername}
-              onChange={setStaffUsername}
-              placeholder="Username"
-              className="bg-surface-3 rounded-xl px-3 py-2 pr-10 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-            <input type="email" placeholder="Email" value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-            <input type="text" placeholder="Password" value={staffPassword} onChange={(e) => setStaffPassword(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-            <div className="flex gap-2">
-              <button onClick={() => {
-                if (!staffUsername.trim() || !staffPassword.trim() || !staffDisplayName.trim()) return;
-                createUser({ username: staffUsername.trim(), password: staffPassword.trim(), role: 'tenant_staff', displayName: staffDisplayName.trim(), email: staffEmail.trim() });
-                setStaffUsername(''); setStaffPassword(''); setStaffDisplayName(''); setStaffEmail('');
-                setShowAddStaff(false);
-              }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Add Staff</button>
-              <button onClick={() => setShowAddStaff(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+        {isAdmin && (
+          showAddStaff ? (
+            <div className="bg-surface rounded-xl shadow-card p-3 mt-2 space-y-2">
+              <input type="text" placeholder="Display name" value={staffDisplayName} onChange={(e) => setStaffDisplayName(e.target.value)}
+                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              <UsernameInput
+                value={staffUsername}
+                onChange={setStaffUsername}
+                placeholder="Username"
+                className="bg-surface-3 rounded-xl px-3 py-2 pr-10 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+              <input type="email" placeholder="Email" value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)}
+                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              <input type="text" placeholder="Password" value={staffPassword} onChange={(e) => setStaffPassword(e.target.value)}
+                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              <div className="flex gap-2">
+                <button onClick={() => {
+                  if (!staffUsername.trim() || !staffPassword.trim() || !staffDisplayName.trim()) return;
+                  createUser({ username: staffUsername.trim(), password: staffPassword.trim(), role: 'tenant_staff', displayName: staffDisplayName.trim(), email: staffEmail.trim() });
+                  setStaffUsername(''); setStaffPassword(''); setStaffDisplayName(''); setStaffEmail('');
+                  setShowAddStaff(false);
+                }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Add Staff</button>
+                <button onClick={() => setShowAddStaff(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <button onClick={() => setShowAddStaff(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
-            + Add staff member
-          </button>
+          ) : (
+            <button onClick={() => setShowAddStaff(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
+              + Add staff member
+            </button>
+          )
         )}
 
-        <Link href="/checkin" className="w-full bg-surface rounded-xl shadow-card p-3 flex justify-between items-center mt-2 block">
-          <div>
-            <div className="font-medium text-sm">Staff Check-in View</div>
-            <div className="text-xs text-ink-3">QR scanner and arrival list</div>
-          </div>
-          <span className="text-ink-3">&rarr;</span>
-        </Link>
       </Section>
 
       {/* Quick links */}

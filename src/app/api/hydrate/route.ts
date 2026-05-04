@@ -19,7 +19,9 @@ export async function GET(req: NextRequest) {
     const data = await dbHydrateTenant(sb, tenantId);
     if (!data) return serverError('Failed to load tenant data. Check server logs.');
 
-    return ok(data);
+    const response = ok(data);
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
   } catch (err) {
     console.error('[api] GET /hydrate error:', err);
     return serverError();

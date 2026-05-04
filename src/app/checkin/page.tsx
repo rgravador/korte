@@ -7,7 +7,7 @@ import { toast } from '@/components/toast';
 import Link from 'next/link';
 
 export default function CheckinPage() {
-  const { bookings, courts, updateBookingStatus, currentUser } = useStore();
+  const { bookings, courts, tenant, updateBookingStatus, currentUser } = useStore();
   const [filter, setFilter] = useState<'now' | 'earlier' | 'all'>('now');
   const [scanActive, setScanActive] = useState(false);
 
@@ -53,6 +53,14 @@ export default function CheckinPage() {
       await updateBookingStatus(bookingId, 'checked_in');
     } catch {
       toast.error('Could not check in. Please check your connection and try again.');
+    }
+  };
+
+  const handleNoShow = async (bookingId: string) => {
+    try {
+      await updateBookingStatus(bookingId, 'no_show');
+    } catch {
+      toast.error('Could not mark as no-show.');
     }
   };
 
@@ -138,17 +146,36 @@ export default function CheckinPage() {
                     {booking.memberName}
                   </div>
                   <div className="font-sans text-xs text-ink-3">
-                    Pickleball · {booking.durationMinutes} min
+                    {booking.durationMinutes} min · ₱{booking.total.toLocaleString()}
                     {hasItems && ` · ${booking.items.map((i) => `${i.quantity} ${i.itemName.split(' ')[0].toLowerCase()}`).join(', ')}`}
                   </div>
+                  {canCheckIn && (
+                    <div className="font-sans text-[10px] mt-0.5">
+                      {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0 ? (
+                        <span className="text-warn">
+                          Collect ₱{Math.max(0, booking.total - tenant.downpaymentPerHour * (booking.durationMinutes / 60)).toLocaleString()} balance
+                        </span>
+                      ) : (
+                        <span className="text-signal-text">Paid in full</span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {canCheckIn ? (
-                  <button
-                    onClick={() => handleCheckIn(booking.id)}
-                    className="font-sans text-xs px-2 py-1 rounded bg-signal text-white"
-                  >
-                    Check in
-                  </button>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => handleCheckIn(booking.id)}
+                      className="font-sans text-xs px-2 py-1 rounded bg-signal text-white"
+                    >
+                      Check in
+                    </button>
+                    <button
+                      onClick={() => handleNoShow(booking.id)}
+                      className="font-sans text-[10px] px-2 py-0.5 rounded text-warn"
+                    >
+                      No-show
+                    </button>
+                  </div>
                 ) : (
                   <StatusTag status={booking.status} />
                 )}

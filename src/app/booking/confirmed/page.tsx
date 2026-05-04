@@ -19,7 +19,7 @@ function formatDate(dateStr: string): string {
 function ConfirmedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { bookings, courts } = useStore();
+  const { bookings, courts, tenant } = useStore();
 
   const bookingId = searchParams.get('id');
   const booking = bookings.find((b) => b.id === bookingId);
@@ -120,7 +120,20 @@ function ConfirmedContent() {
               <span className="text-primary font-bold">₱{booking.total.toLocaleString()}</span>
             </div>
           </div>
-          <p className="font-sans text-xs text-ink-3 mt-2">Collect at counter</p>
+          {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0 ? (
+            <div className="space-y-1 mt-2 pt-2 border-t border-line">
+              <div className="flex justify-between font-sans text-xs">
+                <span className="text-ink-3">Downpayment due now</span>
+                <span className="text-ink font-medium">₱{(tenant.downpaymentPerHour * (booking.durationMinutes / 60)).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between font-sans text-xs">
+                <span className="text-ink-3">Balance at check-in</span>
+                <span className="text-ink font-medium">₱{Math.max(0, booking.total - tenant.downpaymentPerHour * (booking.durationMinutes / 60)).toLocaleString()}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="font-sans text-xs text-ink-3 mt-2">Collect full amount at counter</p>
+          )}
         </div>
 
         {/* Action buttons */}

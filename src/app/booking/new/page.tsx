@@ -84,6 +84,7 @@ function NewBookingForm() {
   const [walkInPhone, setWalkInPhone] = useState('');
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [errors, setErrors] = useState<string[]>([]);
+  const [showPaymentPrompt, setShowPaymentPrompt] = useState(false);
 
   const selectedSport = sports.find((s) => s.id === selectedSportId) ?? null;
   const activeCourts = courts.filter((c) => c.isActive && (!selectedSportId || c.sportId === selectedSportId));
@@ -187,7 +188,7 @@ function NewBookingForm() {
 
   const [submitting, setSubmitting] = useState(false);
 
-  const handleConfirm = async () => {
+  const handleConfirmClick = () => {
     const validationErrors: string[] = [];
 
     if (!selectedCourtId) validationErrors.push('Select a court');
@@ -204,8 +205,13 @@ function NewBookingForm() {
       return;
     }
 
-    setSubmitting(true);
     setErrors([]);
+    setShowPaymentPrompt(true);
+  };
+
+  const handleConfirmPayment = async () => {
+    setShowPaymentPrompt(false);
+    setSubmitting(true);
 
     const bookingItems: BookingItem[] = activeItems
       .filter((item) => (itemQuantities[item.id] ?? 0) > 0)
@@ -633,14 +639,98 @@ function NewBookingForm() {
                 <span className="text-ink">Total</span>
                 <span className="text-primary font-display">₱{total.toLocaleString()}</span>
               </div>
+              {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0 && (
+                <>
+                  <div className="flex justify-between text-xs pt-1.5">
+                    <span className="text-ink-3">Downpayment ({totalHours}h × ₱{tenant.downpaymentPerHour})</span>
+                    <span className="text-ink font-medium">₱{(tenant.downpaymentPerHour * totalHours).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-ink-3">Balance due at check-in</span>
+                    <span className="text-ink font-medium">₱{Math.max(0, total - tenant.downpaymentPerHour * totalHours).toLocaleString()}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Payment Confirmation Modal */}
+        {showPaymentPrompt && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center px-5" onClick={() => setShowPaymentPrompt(false)}>
+            <div className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]" />
+            <div
+              className="relative bg-surface rounded-2xl shadow-sheet w-full max-w-sm p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-primary">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <path d="M2 10h20" />
+                    <path d="M6 15h4" />
+                  </svg>
+                </div>
+              </div>
+
+              <h3 className="text-center font-display font-semibold text-lg text-ink mb-1">
+                {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0
+                  ? 'Collect Downpayment'
+                  : 'Collect Payment'}
+              </h3>
+              <p className="text-center text-xs text-ink-3 mb-5">
+                {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0
+                  ? 'Please collect the downpayment from the customer before confirming.'
+                  : 'Please collect the full amount from the customer before confirming.'}
+              </p>
+
+              <div className="bg-surface-2 rounded-xl p-4 mb-5 space-y-2">
+                {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0 ? (
+                  <>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-ink-3">Total booking</span>
+                      <span className="text-ink">₱{total.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-semibold pt-2 border-t border-line/60">
+                      <span className="text-ink">Collect now</span>
+                      <span className="text-primary font-display">₱{(tenant.downpaymentPerHour * totalHours).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-ink-3">Balance at check-in</span>
+                      <span className="text-ink">₱{Math.max(0, total - tenant.downpaymentPerHour * totalHours).toLocaleString()}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between text-sm font-semibold">
+                    <span className="text-ink">Collect now</span>
+                    <span className="text-primary font-display">₱{total.toLocaleString()}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={handleConfirmPayment}
+                  className="w-full bg-primary hover:bg-primary-deep text-white py-3.5 rounded-xl text-sm font-semibold transition-colors"
+                >
+                  Payment collected
+                </button>
+                <button
+                  onClick={() => setShowPaymentPrompt(false)}
+                  className="w-full text-ink-3 py-2 text-xs font-medium"
+                >
+                  Go back
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* F) Confirm Button */}
         <button
-          onClick={handleConfirm}
-          disabled={!canSubmit || submitting}
+          onClick={handleConfirmClick}
+          disabled={!canSubmit || submitting || showPaymentPrompt}
           className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors ${
             canSubmit && !submitting
               ? 'bg-primary text-white hover:bg-primary-deep'

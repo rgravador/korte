@@ -30,6 +30,7 @@ const SECURITY_HEADERS: Record<string, string> = {
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+  'Cache-Control': 'no-store, no-cache, must-revalidate',
 };
 
 function jsonResponse(status: number, body: { data: null; error: { code: string; message: string } }) {

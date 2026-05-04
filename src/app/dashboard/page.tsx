@@ -26,7 +26,13 @@ function BookingDetailSheet({
   onClose: () => void;
   onStatusChange: (id: string, status: BookingStatus) => void;
 }) {
+  const { tenant } = useStore();
   const court = courts.find((c) => c.id === booking.courtId);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const totalHours = booking.durationMinutes / 60;
+  const isDownpayment = tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0;
+  const downpaymentAmount = isDownpayment ? tenant.downpaymentPerHour * totalHours : 0;
+  const balanceDue = isDownpayment ? Math.max(0, booking.total - downpaymentAmount) : 0;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
@@ -76,9 +82,16 @@ function BookingDetailSheet({
           </div>
         )}
 
-        <p className="text-xs text-ink-3 mb-4">Collect payment at counter</p>
+        {isDownpayment ? (
+          <div className="text-xs text-ink-3 mb-4 space-y-0.5">
+            <div>Downpayment collected: ₱{downpaymentAmount.toLocaleString()}</div>
+            {balanceDue > 0 && <div className="text-warn">Balance to collect at check-in: ₱{balanceDue.toLocaleString()}</div>}
+          </div>
+        ) : (
+          <p className="text-xs text-signal-text mb-4">Payment collected</p>
+        )}
 
-        <div className="flex gap-2">
+        {!confirmingCancel && <div className="flex gap-2">
           {booking.status === 'pending' && (
             <button
               onClick={() => onStatusChange(booking.id, 'confirmed')}
@@ -104,14 +117,38 @@ function BookingDetailSheet({
                 No-show
               </button>
               <button
-                onClick={() => onStatusChange(booking.id, 'cancelled')}
+                onClick={() => setConfirmingCancel(true)}
                 className="flex-1 border border-line text-ink-3 py-3 rounded-xl text-xs font-medium hover:bg-surface-2 transition-colors"
               >
                 Cancel
               </button>
             </>
           )}
-        </div>
+        </div>}
+
+        {confirmingCancel && (
+          <div className="mt-4 bg-warn/5 border border-warn/20 rounded-xl p-4">
+            <div className="text-xs font-semibold text-ink mb-1">Cancel this booking?</div>
+            <p className="text-[11px] text-ink-3 mb-3">
+              This will cancel {booking.memberName}&apos;s booking for {court?.name} at {formatHour(booking.startHour)}.
+              This action cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => onStatusChange(booking.id, 'cancelled')}
+                className="flex-1 bg-warn text-white py-3 rounded-xl text-xs font-semibold transition-colors"
+              >
+                Yes, cancel booking
+              </button>
+              <button
+                onClick={() => setConfirmingCancel(false)}
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors"
+              >
+                Keep booking
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -212,7 +249,7 @@ export default function DashboardPage() {
                 key={booking.id}
                 onClick={() => setSelectedBooking(booking)}
                 aria-label={`${booking.memberName} at ${formatHour(booking.startHour)}, ${booking.status.replace('_', ' ')}`}
-                className={`w-full grid grid-cols-[44px_1fr_auto] md:grid-cols-[56px_1fr_auto] gap-3 items-center py-3 md:py-3.5 px-3.5 md:px-4 text-left hover:bg-surface-2/50 transition-colors ${
+                className={`w-full grid grid-cols-[64px_1fr_auto] md:grid-cols-[80px_1fr_auto] gap-3 items-center py-3 md:py-3.5 px-3.5 md:px-4 text-left hover:bg-surface-2/50 transition-colors ${
                   !isLast ? 'border-b border-line-2' : ''
                 }`}
               >

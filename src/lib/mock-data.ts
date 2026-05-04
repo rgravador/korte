@@ -44,6 +44,8 @@ export const seedTenant: Tenant = {
   trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   currentPeriodEnd: null,
   adminOverride: false,
+  paymentMode: 'full',
+  downpaymentPerHour: 0,
   createdAt: '2026-03-01T00:00:00Z',
 };
 

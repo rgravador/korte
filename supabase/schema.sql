@@ -80,6 +80,9 @@ CREATE TABLE tenants (
   trial_ends_at  TIMESTAMPTZ,
   current_period_end TIMESTAMPTZ,
   admin_override BOOLEAN NOT NULL DEFAULT false,
+  payment_mode   TEXT NOT NULL DEFAULT 'full'
+    CHECK (payment_mode IN ('full', 'downpayment')),
+  downpayment_per_hour NUMERIC(10,2) NOT NULL DEFAULT 0,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

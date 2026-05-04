@@ -42,6 +42,8 @@ function toTenant(r: Record<string, unknown>): Tenant {
     trialEndsAt: (r.trial_ends_at as string) ?? null,
     currentPeriodEnd: (r.current_period_end as string) ?? null,
     adminOverride: (r.admin_override as boolean) ?? false,
+    paymentMode: (r.payment_mode as 'full' | 'downpayment') ?? 'full',
+    downpaymentPerHour: Number(r.downpayment_per_hour ?? 0),
     createdAt: r.created_at as string,
   };
 }
@@ -210,6 +212,38 @@ export async function dbCreateUser(
   return toUser(row);
 }
 
+export async function dbUpdateUser(
+  sb: SupabaseClient,
+  userId: string,
+  tenantId: string,
+  updates: { displayName?: string; email?: string; password?: string; isActive?: boolean }
+): Promise<boolean> {
+  console.debug('[db] dbUpdateUser', { userId });
+  const mapped: Record<string, unknown> = {};
+  if (updates.displayName !== undefined) mapped.display_name = updates.displayName;
+  if (updates.email !== undefined) mapped.email = updates.email;
+  if (updates.isActive !== undefined) mapped.is_active = updates.isActive;
+
+  if (updates.password) {
+    const { data: hash, error: hashError } = await sb.rpc('hash_password', { plain: updates.password });
+    if (hashError || !hash) {
+      console.error('[db] dbUpdateUser hash_password failed:', hashError?.message);
+      return false;
+    }
+    mapped.password_hash = hash;
+  }
+
+  if (Object.keys(mapped).length === 0) return true;
+
+  const { error } = await sb.from('users').update(mapped).eq('id', userId).eq('tenant_id', tenantId);
+  if (error) {
+    console.error('[db] dbUpdateUser FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbUpdateUser OK', { userId });
+  return true;
+}
+
 // ── Tenant ───────────────────────────────────────────────────
 
 export async function dbCreateTenant(
@@ -277,6 +311,8 @@ export async function dbUpdateTenant(
     trialEndsAt: string | null;
     currentPeriodEnd: string | null;
     adminOverride: boolean;
+    paymentMode: 'full' | 'downpayment';
+    downpaymentPerHour: number;
   }>
 ): Promise<boolean> {
   console.debug('[db] dbUpdateTenant', { tenantId, updates });
@@ -291,6 +327,8 @@ export async function dbUpdateTenant(
   if (updates.trialEndsAt !== undefined) mapped.trial_ends_at = updates.trialEndsAt;
   if (updates.currentPeriodEnd !== undefined) mapped.current_period_end = updates.currentPeriodEnd;
   if (updates.adminOverride !== undefined) mapped.admin_override = updates.adminOverride;
+  if (updates.paymentMode !== undefined) mapped.payment_mode = updates.paymentMode;
+  if (updates.downpaymentPerHour !== undefined) mapped.downpayment_per_hour = updates.downpaymentPerHour;
 
   const { error } = await sb.from('tenants').update(mapped).eq('id', tenantId);
   if (error) {

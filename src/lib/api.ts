@@ -239,3 +239,13 @@ export async function apiCreateUser(data: {
     body: JSON.stringify(data),
   });
 }
+
+export async function apiUpdateUser(data: {
+  userId: string; displayName?: string; email?: string; password?: string; isActive?: boolean;
+}): Promise<boolean> {
+  const result = await fetchApi('/api/users', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+  return result !== null;
+}

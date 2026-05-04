@@ -62,6 +62,8 @@ export interface Tenant {
   trialEndsAt: string | null;       // ISO 8601 timestamp
   currentPeriodEnd: string | null;  // ISO 8601 timestamp
   adminOverride: boolean;
+  paymentMode: 'full' | 'downpayment';
+  downpaymentPerHour: number;
   createdAt: string;
 }
 

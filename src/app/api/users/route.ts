@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
 import { getServerSupabase } from '@/lib/supabase-server';
-import { dbCreateUser } from '@/lib/db';
+import { dbCreateUser, dbUpdateUser } from '@/lib/db';
 import { ok, created, badRequest, forbidden, serverError } from '@/lib/api-response';
 import { getSessionFromHeaders } from '@/lib/auth';
-import { CreateUserSchema, validateBody } from '@/lib/validation';
+import { CreateUserSchema, UpdateUserSchema, validateBody } from '@/lib/validation';
 import { enforceResourceLimit, resolvePlan } from '@/lib/subscription';
 
 export const dynamic = 'force-dynamic';
@@ -63,6 +63,27 @@ export async function POST(req: NextRequest) {
     return created(user);
   } catch (err) {
     console.error('[api] POST /users error:', err);
+    return serverError();
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const session = getSessionFromHeaders(req);
+    const body = await req.json();
+    const parsed = validateBody(UpdateUserSchema, body);
+    if ('error' in parsed) return badRequest(parsed.error);
+
+    if (session.role === 'tenant_staff') {
+      return forbidden('Staff cannot edit users');
+    }
+
+    const sb = getServerSupabase();
+    const success = await dbUpdateUser(sb, parsed.data.userId, session.tenantId, parsed.data);
+    if (!success) return serverError('Failed to update user');
+    return ok({ userId: parsed.data.userId });
+  } catch (err) {
+    console.error('[api] PATCH /users error:', err);
     return serverError();
   }
 }

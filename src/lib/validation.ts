@@ -161,6 +161,8 @@ export const UpdateTenantSchema = z.object({
   operatingHoursEnd: z.number().int().min(1).max(24).optional(),
   operatingHoursRanges: z.array(TimeRangeSchema).optional(),
   freeTrialDays: z.number().int().min(0).max(365).optional(),
+  paymentMode: z.enum(['full', 'downpayment']).optional(),
+  downpaymentPerHour: z.number().min(0).max(100000).optional(),
 });
 
 // ── Users ───────────────────────────────────────────────────
@@ -171,6 +173,14 @@ export const CreateUserSchema = z.object({
   role: z.enum(['system_admin', 'tenant_admin', 'tenant_staff']),
   displayName: z.string().min(1).max(200),
   email: z.string().email().or(z.literal('')).default(''),
+});
+
+export const UpdateUserSchema = z.object({
+  userId: z.string().uuid(),
+  displayName: z.string().min(1).max(200).optional(),
+  email: z.string().email().or(z.literal('')).optional(),
+  password: z.string().min(6).max(200).optional(),
+  isActive: z.boolean().optional(),
 });
 
 // ── Admin ───────────────────────────────────────────────────
