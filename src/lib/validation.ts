@@ -43,12 +43,6 @@ export const RegisterSchema = z.object({
     name: z.string().min(1).max(200),
     hourlyRate: z.number().min(0),
   })).optional(),
-  items: z.array(z.object({
-    name: z.string().min(1).max(200),
-    price: z.number().min(0),
-    type: z.enum(['rental', 'sale']),
-    sportId: z.string().uuid().optional(),
-  })).optional(),
 });
 
 // ── Bookings ────────────────────────────────────────────────

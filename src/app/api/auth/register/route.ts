@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { getServerSupabase } from '@/lib/supabase-server';
-import { dbCreateTenant, dbCreateUser, dbAddCourt, dbAddItem, dbAddSport } from '@/lib/db';
+import { dbCreateTenant, dbCreateUser, dbAddCourt, dbAddSport } from '@/lib/db';
 import { ok, badRequest, serverError } from '@/lib/api-response';
-import { ItemType, TimeRange } from '@/lib/types';
+import { TimeRange } from '@/lib/types';
 import { signSession, createSessionCookie } from '@/lib/auth';
 import { RegisterSchema, validateBody } from '@/lib/validation';
 
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const parsed = validateBody(RegisterSchema, body);
     if ('error' in parsed) return badRequest(parsed.error);
 
-    const { name, subdomain, operatingHoursStart, operatingHoursEnd, ownerName, ownerEmail, ownerUsername, ownerPassword, sports, courts, items } = parsed.data;
+    const { name, subdomain, operatingHoursStart, operatingHoursEnd, ownerName, ownerEmail, ownerUsername, ownerPassword, sports, courts } = parsed.data;
 
     const sb = getServerSupabase();
 
@@ -81,17 +81,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Create items
-    const defaultSportId = createdSports[0]?.id ?? '';
-    const createdItems = [];
-    for (const item of items ?? []) {
-      const created = await dbAddItem(sb, { tenantId: tenant.id, sportId: item.sportId ?? defaultSportId, name: item.name, price: item.price, type: item.type as ItemType });
-      if (created) createdItems.push(created);
-    }
-
-    // 5. Sign session cookie
+    // 4. Sign session cookie
     const token = await signSession({ userId: user.id, tenantId: tenant.id, role: 'tenant_admin' });
-    const response = ok({ tenant, user, sports: createdSports, courts: createdCourts, items: createdItems });
+    const response = ok({ tenant, user, sports: createdSports, courts: createdCourts });
     response.headers.set('Set-Cookie', createSessionCookie(token));
     return response;
   } catch (err) {

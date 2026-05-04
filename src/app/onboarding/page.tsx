@@ -3,27 +3,18 @@
 import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ItemType, TimeRange, PRESET_SPORTS } from '@/lib/types';
+import { TimeRange, PRESET_SPORTS } from '@/lib/types';
 import { apiRegister, apiHydrate } from '@/lib/api';
 import { OperatingHoursEditor } from '@/components/operating-hours-editor';
 import { UsernameInput } from '@/components/username-input';
 
-type Step = 'welcome' | 'facility' | 'sports' | 'sport-setup' | 'items' | 'review';
+type Step = 'welcome' | 'facility' | 'sports' | 'sport-setup' | 'review';
 
 interface SportSetup {
   name: string;
   operatingHoursRanges: TimeRange[];
   courts: { name: string; hourlyRate: number }[];
 }
-
-const SUGGESTED_ITEMS = [
-  { name: 'Paddle Rental', price: 100, type: 'rental' as ItemType },
-  { name: 'Shoe Rental', price: 80, type: 'rental' as ItemType },
-  { name: 'Towel Rental', price: 50, type: 'rental' as ItemType },
-  { name: 'Pickleball (Franklin X-40)', price: 250, type: 'sale' as ItemType },
-  { name: 'Grip Tape', price: 150, type: 'sale' as ItemType },
-  { name: 'Bottled Water', price: 35, type: 'sale' as ItemType },
-];
 
 function StepIndicator({ current, total }: { current: number; total: number }) {
   return (
@@ -61,14 +52,6 @@ export default function OnboardingPage() {
   // Sport setup (sequential per sport: hours + courts)
   const [sportSetups, setSportSetups] = useState<SportSetup[]>([]);
   const [currentSportSetupIndex, setCurrentSportSetupIndex] = useState(0);
-
-  // Items
-  const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
-  const [customItems, setCustomItems] = useState<{ name: string; price: number; type: ItemType }[]>([]);
-  const [showAddCustom, setShowAddCustom] = useState(false);
-  const [customName, setCustomName] = useState('');
-  const [customPrice, setCustomPrice] = useState('');
-  const [customType, setCustomType] = useState<ItemType>('rental');
 
   // Redirect if already onboarded and logged in
   useEffect(() => {
@@ -171,31 +154,6 @@ export default function OnboardingPage() {
     });
   };
 
-  // ── Items helpers ───────────────────────────────────────────
-
-  const toggleSuggestedItem = (index: number) => {
-    const next = new Set(selectedItems);
-    if (next.has(index)) {
-      next.delete(index);
-    } else {
-      next.add(index);
-    }
-    setSelectedItems(next);
-  };
-
-  const addCustomItem = () => {
-    if (!customName.trim() || !customPrice) return;
-    setCustomItems([...customItems, { name: customName.trim(), price: Number(customPrice), type: customType }]);
-    setCustomName('');
-    setCustomPrice('');
-    setShowAddCustom(false);
-  };
-
-  const allItems = [
-    ...Array.from(selectedItems).map((i) => SUGGESTED_ITEMS[i]),
-    ...customItems,
-  ];
-
   // ── Registration ────────────────────────────────────────────
 
   const [registering, setRegistering] = useState(false);
@@ -228,7 +186,6 @@ export default function OnboardingPage() {
         ownerUsername,
         ownerPassword,
         courts: sports.flatMap((s) => s.courts),
-        items: allItems,
         sports,
       });
 
@@ -295,13 +252,13 @@ export default function OnboardingPage() {
         {/* Facility Info */}
         {step === 'facility' && (
           <>
-            <StepIndicator current={0} total={5} />
+            <StepIndicator current={0} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Your <span className="text-primary font-serif italic">facility.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-6">
-              Step 1 of 5 · Basic info
+              Step 1 of 4 · Basic info
             </p>
 
             <div className="space-y-4">
@@ -412,13 +369,13 @@ export default function OnboardingPage() {
         {/* Sports Selection */}
         {step === 'sports' && (
           <>
-            <StepIndicator current={1} total={5} />
+            <StepIndicator current={1} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Your <span className="text-primary font-serif italic">sports.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-2">
-              Step 2 of 5 · Which sports does your facility offer?
+              Step 2 of 4 · Which sports does your facility offer?
             </p>
             <p className="text-ink-2 text-xs mb-5">
               Select one or more sports. You&apos;ll configure hours and courts for each one next.
@@ -512,13 +469,13 @@ export default function OnboardingPage() {
         {/* Sport Setup (sequential, per sport) */}
         {step === 'sport-setup' && currentSetup && (
           <>
-            <StepIndicator current={2} total={5} />
+            <StepIndicator current={2} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Set up <span className="text-primary font-serif italic">{currentSetup.name}.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-6">
-              Step 3 of 5 · Sport {currentSportSetupIndex + 1} of {sportSetups.length}
+              Step 3 of 4 · Sport {currentSportSetupIndex + 1} of {sportSetups.length}
             </p>
 
             {/* Operating hours for this sport */}
@@ -591,7 +548,7 @@ export default function OnboardingPage() {
                   if (currentSportSetupIndex < sportSetups.length - 1) {
                     setCurrentSportSetupIndex(currentSportSetupIndex + 1);
                   } else {
-                    setStep('items');
+                    setStep('review');
                   }
                 }}
                 className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium"
@@ -602,151 +559,16 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Items */}
-        {step === 'items' && (
-          <>
-            <StepIndicator current={3} total={5} />
-
-            <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Rentals & <span className="text-primary font-serif italic">extras.</span>
-            </h1>
-            <p className="font-sans text-xs text-ink-3 mb-2">
-              Step 4 of 5 · Equipment and items to sell
-            </p>
-            <p className="text-ink-2 text-xs mb-5">
-              Select items your facility offers. Staff can add these when creating bookings. You can always change this later.
-            </p>
-
-            <div className="font-sans text-xs text-ink-3 mb-2">Suggested items</div>
-            <div className="space-y-1.5 mb-4">
-              {SUGGESTED_ITEMS.map((item, index) => {
-                const isSelected = selectedItems.has(index);
-                return (
-                  <button
-                    key={index}
-                    onClick={() => toggleSuggestedItem(index)}
-                    className={`w-full bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center text-left transition-colors ${
-                      isSelected ? 'ring-1 ring-primary' : ''
-                    }`}
-                  >
-                    <div>
-                      <div className="font-medium text-sm">{item.name}</div>
-                      <div className="font-sans text-xs text-ink-3">
-                        &#8369;{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}
-                      </div>
-                    </div>
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-primary border-primary' : 'border-line'
-                      }`}
-                    >
-                      {isSelected && (
-                        <svg viewBox="0 0 16 16" className="w-3 h-3 text-white">
-                          <path d="M3 8l3 3 7-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Custom items */}
-            {customItems.length > 0 && (
-              <>
-                <div className="font-sans text-xs text-ink-3 mb-2">Your items</div>
-                <div className="space-y-1.5 mb-4">
-                  {customItems.map((item, index) => (
-                    <div key={index} className="bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center">
-                      <div>
-                        <div className="font-medium text-sm">{item.name}</div>
-                        <div className="font-sans text-xs text-ink-3">&#8369;{item.price} · {item.type}</div>
-                      </div>
-                      <button
-                        onClick={() => setCustomItems(customItems.filter((_, i) => i !== index))}
-                        className="text-warn font-sans text-xs"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {showAddCustom ? (
-              <div className="bg-surface rounded-[16px] shadow-card p-3 space-y-2 mb-4">
-                <input
-                  type="text"
-                  placeholder="Item name"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-                <input
-                  type="number"
-                  placeholder="Price (&#8369;)"
-                  value={customPrice}
-                  onChange={(e) => setCustomPrice(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-                <div className="flex gap-1.5">
-                  {(['rental', 'sale'] as const).map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setCustomType(t)}
-                      className={`flex-1 font-sans text-xs py-2 rounded-xl ${
-                        customType === t ? 'bg-primary text-white' : 'border border-line text-ink-2'
-                      }`}
-                    >
-                      {t === 'rental' ? 'Rental' : 'Sale'}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={addCustomItem} className="flex-1 bg-primary text-white py-2.5 rounded-xl font-sans text-xs font-medium">Add</button>
-                  <button onClick={() => setShowAddCustom(false)} className="flex-1 bg-surface-3 text-ink-2 py-2.5 rounded-xl font-sans text-xs font-medium">Cancel</button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowAddCustom(true)}
-                className="w-full border border-dashed border-line text-ink-3 py-3 rounded-[16px] font-sans text-xs mb-4"
-              >
-                + Add custom item
-              </button>
-            )}
-
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => {
-                  setCurrentSportSetupIndex(sportSetups.length - 1);
-                  setStep('sport-setup');
-                }}
-                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
-              >
-                Back
-              </button>
-              <button
-                onClick={() => setStep('review')}
-                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium"
-              >
-                Next
-              </button>
-            </div>
-          </>
-        )}
-
         {/* Review */}
         {step === 'review' && (
           <>
-            <StepIndicator current={4} total={5} />
+            <StepIndicator current={3} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Ready to <span className="text-primary font-serif italic">launch.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-6">
-              Step 5 of 5 · Review your setup
+              Step 4 of 4 · Review your setup
             </p>
 
             {/* Facility summary */}
@@ -785,21 +607,10 @@ export default function OnboardingPage() {
               </div>
             ))}
 
-            {/* Items summary */}
             <div className="bg-surface rounded-[16px] shadow-card p-4 mb-6">
-              <div className="font-sans text-xs font-semibold text-ink-3 mb-2">
-                {allItems.length} Item{allItems.length !== 1 ? 's' : ''}
+              <div className="font-sans text-xs text-ink-3">
+                You can add rental items and extras in Settings after launch.
               </div>
-              {allItems.length === 0 ? (
-                <div className="text-xs text-ink-3">No items — you can add them later in Settings</div>
-              ) : (
-                allItems.map((item, i) => (
-                  <div key={i} className="flex justify-between py-1.5 border-b border-line-2 last:border-0">
-                    <span className="text-sm">{item.name}</span>
-                    <span className="font-sans text-xs text-ink-3">&#8369;{item.price} · {item.type}</span>
-                  </div>
-                ))
-              )}
             </div>
 
             {registerError && (
@@ -818,7 +629,10 @@ export default function OnboardingPage() {
             </button>
 
             <button
-              onClick={() => setStep('items')}
+              onClick={() => {
+                setCurrentSportSetupIndex(sportSetups.length - 1);
+                setStep('sport-setup');
+              }}
               disabled={registering}
               className="w-full mt-3 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-50"
             >
