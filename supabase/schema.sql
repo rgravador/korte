@@ -46,6 +46,25 @@ DROP TABLE IF EXISTS courts CASCADE;
 DROP TABLE IF EXISTS sports CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS tenants CASCADE;
+DROP TABLE IF EXISTS plans CASCADE;
+
+CREATE TABLE plans (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name            TEXT NOT NULL,
+  slug            TEXT NOT NULL UNIQUE,
+  description     TEXT,
+  base_price      INT NOT NULL,
+  per_extra_court INT NOT NULL DEFAULT 0,
+  included_courts INT NOT NULL DEFAULT 0,
+  max_sports      INT NOT NULL DEFAULT 1,
+  max_courts      INT NOT NULL DEFAULT 5,
+  max_admins      INT NOT NULL DEFAULT 1,
+  max_staff       INT NOT NULL DEFAULT 3,
+  is_active       BOOLEAN NOT NULL DEFAULT true,
+  is_contact_only BOOLEAN NOT NULL DEFAULT false,
+  sort_order      INT NOT NULL DEFAULT 0,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
 CREATE TABLE tenants (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -55,6 +74,12 @@ CREATE TABLE tenants (
   operating_hours_start INT NOT NULL DEFAULT 6,
   operating_hours_end   INT NOT NULL DEFAULT 22,
   free_trial_days INT NOT NULL DEFAULT 7,
+  subscription_status TEXT NOT NULL DEFAULT 'trial'
+    CHECK (subscription_status IN ('trial', 'active', 'frozen')),
+  plan_tier      TEXT,
+  trial_ends_at  TIMESTAMPTZ,
+  current_period_end TIMESTAMPTZ,
+  admin_override BOOLEAN NOT NULL DEFAULT false,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -148,6 +173,8 @@ CREATE TABLE booking_items (
 -- ============================================================
 -- Indexes
 -- ============================================================
+CREATE INDEX IF NOT EXISTS idx_plans_slug            ON plans(slug);
+CREATE INDEX IF NOT EXISTS idx_plans_active          ON plans(is_active, sort_order);
 CREATE INDEX IF NOT EXISTS idx_users_tenant          ON users(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_sports_tenant         ON sports(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_courts_tenant         ON courts(tenant_id);
@@ -166,10 +193,12 @@ CREATE INDEX IF NOT EXISTS idx_booking_items_booking ON booking_items(booking_id
 -- ============================================================
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 
--- anon: read-only on tenants (subdomain lookup for login page)
+-- anon: read-only on tenants (subdomain lookup for login page) and plans (public pricing)
 GRANT SELECT ON tenants TO anon;
+GRANT SELECT ON plans TO anon;
 
 -- authenticated: standard CRUD scoped by RLS policies below
+GRANT SELECT, INSERT, UPDATE, DELETE ON plans TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON tenants       TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON users         TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON sports TO authenticated;
@@ -298,3 +327,14 @@ DROP TRIGGER IF EXISTS courts_count_trigger ON courts;
 CREATE TRIGGER courts_count_trigger
   AFTER INSERT OR UPDATE OR DELETE ON courts
   FOR EACH ROW EXECUTE FUNCTION update_court_count();
+
+-- ============================================================
+-- Seed data: default plans
+-- ============================================================
+INSERT INTO plans (name, slug, description, base_price, per_extra_court, included_courts, max_sports, max_courts, max_admins, max_staff, is_active, is_contact_only, sort_order)
+VALUES
+  ('Basic',      'basic',      'Essential plan for small venues',                  499, 0,  0, 1, 5,  1, 3, true, false, 1),
+  ('Basic Plus', 'basic_plus', 'Flexible plan with unlimited courts',             499, 50, 5, 1, 0,  1, 3, true, false, 2),
+  ('Pro',        'pro',        'Full-featured plan for growing businesses',        999, 0,  0, 3, 20, 3, 9, true, false, 3),
+  ('Max',        'max',        'Custom enterprise plan — contact us for pricing',  0,   0,  0, 0, 0,  0, 0, true, true,  4)
+ON CONFLICT (slug) DO NOTHING;

@@ -1,10 +1,35 @@
 export type UserRole = 'system_admin' | 'tenant_admin' | 'tenant_staff';
 
+/** Returns true if the role has tenant admin privileges (tenant_admin or system_admin). */
+export function isAdminRole(role: UserRole | string | undefined): boolean {
+  return role === 'tenant_admin' || role === 'system_admin';
+}
+
 export type BookingStatus = 'confirmed' | 'pending' | 'checked_in' | 'no_show' | 'cancelled';
 
 export type ItemType = 'rental' | 'sale';
 
 export type MemberTier = 'regular' | 'vip';
+
+export type SubscriptionStatus = 'trial' | 'active' | 'frozen';
+
+export interface Plan {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  basePrice: number;
+  perExtraCourt: number;
+  includedCourts: number;
+  maxSports: number;
+  maxCourts: number; // 0 = unlimited
+  maxAdmins: number;
+  maxStaff: number;
+  isActive: boolean;
+  isContactOnly: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
 
 export interface User {
   id: string;
@@ -32,6 +57,11 @@ export interface Tenant {
   operatingHoursEnd: number;   // 24h format, e.g. 22 — legacy, used as fallback
   operatingHoursRanges?: TimeRange[]; // multiple open windows — legacy, migrated to Sport
   freeTrialDays: number;
+  subscriptionStatus: SubscriptionStatus;
+  planTier: string | null;
+  trialEndsAt: string | null;       // ISO 8601 timestamp
+  currentPeriodEnd: string | null;  // ISO 8601 timestamp
+  adminOverride: boolean;
   createdAt: string;
 }
 

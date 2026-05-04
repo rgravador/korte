@@ -181,6 +181,45 @@ export const AdminUpdateTenantSchema = z.object({
   operatingHoursStart: z.number().int().min(0).max(23).optional(),
   operatingHoursEnd: z.number().int().min(1).max(24).optional(),
   freeTrialDays: z.number().int().min(0).max(365).optional(),
+  subscriptionStatus: z.enum(['trial', 'active', 'frozen']).optional(),
+  planTier: z.string().min(1).max(100).nullable().optional(),
+  currentPeriodEnd: z.string().datetime().nullable().optional(),
+  trialEndsAt: z.string().datetime().nullable().optional(),
+  adminOverride: z.boolean().optional(),
+});
+
+// ── Plans ───────────────────────────────────────────────────
+
+export const CreatePlanSchema = z.object({
+  name: z.string().min(1).max(200),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9_]+$/, 'lowercase alphanumeric and underscores only'),
+  description: z.string().max(500).nullable().optional(),
+  basePrice: z.number().int().min(0),
+  perExtraCourt: z.number().int().min(0).optional(),
+  includedCourts: z.number().int().min(0).optional(),
+  maxSports: z.number().int().min(0).optional(),
+  maxCourts: z.number().int().min(0).optional(),
+  maxAdmins: z.number().int().min(0).optional(),
+  maxStaff: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
+  isContactOnly: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).optional(),
+});
+
+export const UpdatePlanSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9_]+$/, 'lowercase alphanumeric and underscores only').optional(),
+  description: z.string().max(500).nullable().optional(),
+  basePrice: z.number().int().min(0).optional(),
+  perExtraCourt: z.number().int().min(0).optional(),
+  includedCourts: z.number().int().min(0).optional(),
+  maxSports: z.number().int().min(0).optional(),
+  maxCourts: z.number().int().min(0).optional(),
+  maxAdmins: z.number().int().min(0).optional(),
+  maxStaff: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
+  isContactOnly: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).optional(),
 });
 
 // ── Helpers ─────────────────────────────────────────────────

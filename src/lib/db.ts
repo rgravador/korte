@@ -8,6 +8,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import {
   User, Tenant, Court, Item, Member, Sport,
   Booking, BookingItem, BookingStatus, ItemType, UserRole, MemberTier, TimeRange,
+  SubscriptionStatus,
 } from './types';
 
 // ── Row ↔ App mappers ────────────────────────────────────────
@@ -36,6 +37,11 @@ function toTenant(r: Record<string, unknown>): Tenant {
     operatingHoursEnd: r.operating_hours_end as number,
     operatingHoursRanges: r.operating_hours_ranges as TimeRange[] | undefined,
     freeTrialDays: (r.free_trial_days as number) ?? 7,
+    subscriptionStatus: (r.subscription_status as SubscriptionStatus) ?? 'trial',
+    planTier: (r.plan_tier as string) ?? null,
+    trialEndsAt: (r.trial_ends_at as string) ?? null,
+    currentPeriodEnd: (r.current_period_end as string) ?? null,
+    adminOverride: (r.admin_override as boolean) ?? false,
     createdAt: r.created_at as string,
   };
 }
@@ -211,6 +217,10 @@ export async function dbCreateTenant(
   }
 ): Promise<Tenant | null> {
   console.debug('[db] dbCreateTenant', { name: data.name, subdomain: data.subdomain });
+  const now = new Date();
+  const freeTrialDays = 7;
+  const trialEndsAt = new Date(now.getTime() + freeTrialDays * 24 * 60 * 60 * 1000).toISOString();
+
   const { data: row, error } = await sb
     .from('tenants')
     .insert({
@@ -218,6 +228,8 @@ export async function dbCreateTenant(
       subdomain: data.subdomain,
       operating_hours_start: data.operatingHoursStart,
       operating_hours_end: data.operatingHoursEnd,
+      subscription_status: 'trial',
+      trial_ends_at: trialEndsAt,
     })
     .select()
     .single();
@@ -249,7 +261,18 @@ export async function dbGetTenant(sb: SupabaseClient, tenantId: string): Promise
 export async function dbUpdateTenant(
   sb: SupabaseClient,
   tenantId: string,
-  updates: Partial<{ name: string; operatingHoursStart: number; operatingHoursEnd: number; operatingHoursRanges: TimeRange[]; freeTrialDays: number }>
+  updates: Partial<{
+    name: string;
+    operatingHoursStart: number;
+    operatingHoursEnd: number;
+    operatingHoursRanges: TimeRange[];
+    freeTrialDays: number;
+    subscriptionStatus: SubscriptionStatus;
+    planTier: string | null;
+    trialEndsAt: string | null;
+    currentPeriodEnd: string | null;
+    adminOverride: boolean;
+  }>
 ): Promise<boolean> {
   console.debug('[db] dbUpdateTenant', { tenantId, updates });
   const mapped: Record<string, unknown> = {};
@@ -258,6 +281,11 @@ export async function dbUpdateTenant(
   if (updates.operatingHoursEnd !== undefined) mapped.operating_hours_end = updates.operatingHoursEnd;
   if (updates.operatingHoursRanges !== undefined) mapped.operating_hours_ranges = updates.operatingHoursRanges;
   if (updates.freeTrialDays !== undefined) mapped.free_trial_days = updates.freeTrialDays;
+  if (updates.subscriptionStatus !== undefined) mapped.subscription_status = updates.subscriptionStatus;
+  if (updates.planTier !== undefined) mapped.plan_tier = updates.planTier;
+  if (updates.trialEndsAt !== undefined) mapped.trial_ends_at = updates.trialEndsAt;
+  if (updates.currentPeriodEnd !== undefined) mapped.current_period_end = updates.currentPeriodEnd;
+  if (updates.adminOverride !== undefined) mapped.admin_override = updates.adminOverride;
 
   const { error } = await sb.from('tenants').update(mapped).eq('id', tenantId);
   if (error) {

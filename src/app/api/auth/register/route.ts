@@ -5,6 +5,7 @@ import { ok, badRequest, serverError } from '@/lib/api-response';
 import { TimeRange } from '@/lib/types';
 import { signSession, createSessionCookie } from '@/lib/auth';
 import { RegisterSchema, validateBody } from '@/lib/validation';
+import { dbGetPlanBySlug } from '@/lib/db-subscription';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,10 @@ interface SportInput {
   operatingHoursRanges: TimeRange[];
   courts: { name: string; hourlyRate: number }[];
 }
+
+// Fallback Pro limits if the plan row is missing from DB
+const FALLBACK_MAX_SPORTS = 3;
+const FALLBACK_MAX_COURTS = 20;
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,6 +28,22 @@ export async function POST(req: NextRequest) {
     const { name, subdomain, operatingHoursStart, operatingHoursEnd, ownerName, ownerEmail, ownerUsername, ownerPassword, sports, courts } = parsed.data;
 
     const sb = getServerSupabase();
+
+    // Look up Pro plan limits from DB (trial operates under Pro limits)
+    const proPlan = await dbGetPlanBySlug(sb, 'pro');
+    const maxSports = proPlan?.maxSports ?? FALLBACK_MAX_SPORTS;
+    const maxCourts = proPlan?.maxCourts ?? FALLBACK_MAX_COURTS;
+
+    if (sports && sports.length > maxSports) {
+      return badRequest(`Cannot create more than ${maxSports} sports during registration`);
+    }
+
+    const totalCourts = sports
+      ? (sports as SportInput[]).reduce((sum, s) => sum + (s.courts?.length ?? 0), 0)
+      : (courts?.length ?? 0);
+    if (maxCourts > 0 && totalCourts > maxCourts) {
+      return badRequest(`Cannot create more than ${maxCourts} courts during registration`);
+    }
 
     // 1. Create tenant — auto-suffix subdomain if taken
     let finalSubdomain = subdomain;
