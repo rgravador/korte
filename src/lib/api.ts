@@ -226,9 +226,9 @@ export async function apiBillingAccount(): Promise<BillingAccountData | null> {
 
 // ── Users ────────────────────────────────────────────────────
 
-export async function apiCheckUsername(username: string): Promise<boolean> {
+export async function apiCheckUsername(username: string): Promise<boolean | null> {
   const result = await fetchApi<{ available: boolean }>(`/api/users?username=${encodeURIComponent(username)}`);
-  return result?.available ?? false;
+  return result?.available ?? null;
 }
 
 export async function apiCreateUser(data: {

@@ -13,9 +13,11 @@ interface UsernameInputProps {
 export function UsernameInput({ value, onChange, placeholder = 'e.g. marco', className = '' }: UsernameInputProps) {
   const [status, setStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (abortRef.current) abortRef.current.abort();
 
     const trimmed = value.trim();
     if (trimmed.length < 3) {
@@ -26,16 +28,25 @@ export function UsernameInput({ value, onChange, placeholder = 'e.g. marco', cla
     setStatus('checking');
 
     debounceRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       try {
-        const available = await apiCheckUsername(trimmed);
-        setStatus(available ? 'available' : 'taken');
+        const result = await apiCheckUsername(trimmed);
+        if (controller.signal.aborted) return;
+        if (result === null) {
+          setStatus('idle');
+        } else {
+          setStatus(result ? 'available' : 'taken');
+        }
       } catch {
-        setStatus('idle');
+        if (!controller.signal.aborted) setStatus('idle');
       }
     }, 500);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortRef.current) abortRef.current.abort();
     };
   }, [value]);
 
