@@ -6,7 +6,7 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import {
-  User, Tenant, Court, Item, Member,
+  User, Tenant, Court, Item, Member, Sport,
   Booking, BookingItem, BookingStatus, ItemType, UserRole, MemberTier, TimeRange,
 } from './types';
 
@@ -43,9 +43,21 @@ function toCourt(r: Record<string, unknown>): Court {
   return {
     id: r.id as string,
     tenantId: r.tenant_id as string,
+    sportId: (r.sport_id as string) ?? '',
     name: r.name as string,
     hourlyRate: Number(r.hourly_rate),
     isActive: r.is_active as boolean,
+  };
+}
+
+function toSport(r: Record<string, unknown>): Sport {
+  return {
+    id: r.id as string,
+    tenantId: r.tenant_id as string,
+    name: r.name as string,
+    operatingHoursRanges: (r.operating_hours_ranges as TimeRange[]) ?? [],
+    isActive: r.is_active as boolean,
+    createdAt: r.created_at as string,
   };
 }
 
@@ -249,6 +261,73 @@ export async function dbUpdateTenant(
   return true;
 }
 
+// ── Sports ──────────────────────────────────────────────────
+
+export async function dbGetSports(sb: SupabaseClient, tenantId: string): Promise<Sport[]> {
+  console.debug('[db] dbGetSports', { tenantId });
+  const { data, error } = await sb.from('sports').select('*').eq('tenant_id', tenantId).order('created_at');
+  if (error || !data) {
+    console.error('[db] dbGetSports FAILED:', error?.message, error?.details);
+    return [];
+  }
+  console.debug('[db] dbGetSports OK', { resultCount: data.length });
+  return data.map(toSport);
+}
+
+export async function dbAddSport(
+  sb: SupabaseClient,
+  sport: { tenantId: string; name: string; operatingHoursRanges: TimeRange[] }
+): Promise<Sport | null> {
+  console.debug('[db] dbAddSport', { name: sport.name });
+  const { data, error } = await sb
+    .from('sports')
+    .insert({ tenant_id: sport.tenantId, name: sport.name, operating_hours_ranges: sport.operatingHoursRanges })
+    .select()
+    .single();
+  if (error || !data) {
+    console.error('[db] dbAddSport FAILED:', error?.message, error?.details);
+    return null;
+  }
+  console.debug('[db] dbAddSport OK', { id: data.id });
+  return toSport(data);
+}
+
+export async function dbUpdateSport(
+  sb: SupabaseClient,
+  sportId: string,
+  updates: Partial<{ name: string; operatingHoursRanges: TimeRange[]; isActive: boolean }>
+): Promise<boolean> {
+  console.debug('[db] dbUpdateSport', { sportId, updates });
+  const mapped: Record<string, unknown> = {};
+  if (updates.name !== undefined) mapped.name = updates.name;
+  if (updates.operatingHoursRanges !== undefined) mapped.operating_hours_ranges = updates.operatingHoursRanges;
+  if (updates.isActive !== undefined) mapped.is_active = updates.isActive;
+  const { error } = await sb.from('sports').update(mapped).eq('id', sportId);
+  if (error) {
+    console.error('[db] dbUpdateSport FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbUpdateSport OK', { sportId });
+  return true;
+}
+
+export async function dbRemoveSport(sb: SupabaseClient, sportId: string): Promise<boolean> {
+  console.debug('[db] dbRemoveSport', { sportId });
+  // Guard: check if sport has assigned courts
+  const { data: courts } = await sb.from('courts').select('id').eq('sport_id', sportId).limit(1);
+  if (courts && courts.length > 0) {
+    console.error('[db] dbRemoveSport BLOCKED: sport has assigned courts', { sportId });
+    return false;
+  }
+  const { error } = await sb.from('sports').delete().eq('id', sportId);
+  if (error) {
+    console.error('[db] dbRemoveSport FAILED:', error.message, error.details);
+    return false;
+  }
+  console.debug('[db] dbRemoveSport OK', { sportId });
+  return true;
+}
+
 // ── Courts ───────────────────────────────────────────────────
 
 export async function dbGetCourts(sb: SupabaseClient, tenantId: string): Promise<Court[]> {
@@ -264,12 +343,12 @@ export async function dbGetCourts(sb: SupabaseClient, tenantId: string): Promise
 
 export async function dbAddCourt(
   sb: SupabaseClient,
-  court: { tenantId: string; name: string; hourlyRate: number }
+  court: { tenantId: string; sportId: string; name: string; hourlyRate: number }
 ): Promise<Court | null> {
-  console.debug('[db] dbAddCourt', { name: court.name, hourlyRate: court.hourlyRate });
+  console.debug('[db] dbAddCourt', { name: court.name, hourlyRate: court.hourlyRate, sportId: court.sportId });
   const { data, error } = await sb
     .from('courts')
-    .insert({ tenant_id: court.tenantId, name: court.name, hourly_rate: court.hourlyRate })
+    .insert({ tenant_id: court.tenantId, sport_id: court.sportId, name: court.name, hourly_rate: court.hourlyRate })
     .select()
     .single();
   if (error || !data) {
@@ -566,6 +645,7 @@ export async function dbGetUsers(sb: SupabaseClient, tenantId: string): Promise<
 export interface TenantData {
   tenant: Tenant;
   users: User[];
+  sports: Sport[];
   courts: Court[];
   items: Item[];
   members: Member[];
@@ -580,14 +660,15 @@ export async function dbHydrateTenant(sb: SupabaseClient, tenantId: string): Pro
     return null;
   }
 
-  const [users, courts, items, members, bookings] = await Promise.all([
+  const [users, sports, courts, items, members, bookings] = await Promise.all([
     dbGetUsers(sb, tenantId),
+    dbGetSports(sb, tenantId),
     dbGetCourts(sb, tenantId),
     dbGetItems(sb, tenantId),
     dbGetMembers(sb, tenantId),
     dbGetBookings(sb, tenantId),
   ]);
 
-  console.debug('[db] dbHydrateTenant OK', { users: users.length, courts: courts.length, items: items.length, members: members.length, bookings: bookings.length });
-  return { tenant, users, courts, items, members, bookings };
+  console.debug('[db] dbHydrateTenant OK', { users: users.length, sports: sports.length, courts: courts.length, items: items.length, members: members.length, bookings: bookings.length });
+  return { tenant, users, sports, courts, items, members, bookings };
 }

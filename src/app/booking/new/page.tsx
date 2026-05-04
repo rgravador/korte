@@ -4,6 +4,7 @@ import { useStore } from '@/store';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState, Suspense } from 'react';
 import { BookingItem, getOperatingHours } from '@/lib/types';
+import { SportFilter } from '@/components/sport-filter';
 import { toast } from '@/components/toast';
 
 function formatHour(hour: number): string {
@@ -48,7 +49,7 @@ function formatSelectedTimes(hours: number[]): string {
 function NewBookingForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { courts, members, items, bookings, tenant, createBooking, addMember } = useStore();
+  const { courts, sports, selectedSportId, members, items, bookings, tenant, createBooking, addMember } = useStore();
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -85,7 +86,8 @@ function NewBookingForm() {
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
   const [errors, setErrors] = useState<string[]>([]);
 
-  const activeCourts = courts.filter((c) => c.isActive);
+  const selectedSport = sports.find((s) => s.id === selectedSportId) ?? null;
+  const activeCourts = courts.filter((c) => c.isActive && (!selectedSportId || c.sportId === selectedSportId));
   const activeItems = items.filter((i) => i.isActive);
   const selectedCourt = activeCourts.find((c) => c.id === selectedCourtId);
   const selectedMember = members.find((m) => m.id === selectedMemberId);
@@ -110,7 +112,7 @@ function NewBookingForm() {
     return new Set(booked);
   }, [bookings, selectedCourtId, selectedDate]);
 
-  const operatingHours = useMemo(() => getOperatingHours(tenant), [tenant]);
+  const operatingHours = useMemo(() => getOperatingHours(selectedSport ?? tenant), [selectedSport, tenant]);
 
   const filteredMembers = useMemo(() => {
     if (!memberSearch.trim()) return [];
@@ -301,6 +303,8 @@ function NewBookingForm() {
             ))}
           </div>
         )}
+
+        <SportFilter />
 
         {/* A) Court Selection */}
         <div className="mb-6">

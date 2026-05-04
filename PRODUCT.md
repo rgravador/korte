@@ -10,7 +10,7 @@ Filipino pickleball facility owners and their floor staff. Owners run 1 to 10 co
 
 ## Product Purpose
 
-Court Books replaces spreadsheets, Messenger threads, and paper logs with a single booking system built for Philippine pickleball facilities. Staff manage bookings, track members, attach equipment rentals, and monitor court utilization. Payment collection stays at the counter; the app is the record, not the register.
+Korte replaces spreadsheets, Messenger threads, and paper logs with a single booking system built for Philippine pickleball facilities. Staff manage bookings, track members, attach equipment rentals, and monitor court utilization. Payment collection stays at the counter; the app is the record, not the register.
 
 Success looks like: a facility owner opens the app with morning coffee, sees today's bookings in three seconds, and closes it. A staff member checks in a walk-in player in two taps. Neither ever needs to call for help.
 
@@ -18,14 +18,14 @@ Success looks like: a facility owner opens the app with morning coffee, sees tod
 
 **Confident, friendly, modern.**
 
-Court Books speaks with the assurance of someone who runs courts for a living. Not corporate, not startup-cute. The tone is a competent friend who happens to be good with systems. Filipino warmth without the clutter. Direct without being curt. Technical details (court IDs, hourly rates, booking counts) are presented plainly, never buried under decorative UI.
+Korte speaks with the assurance of someone who runs courts for a living. Not corporate, not startup-cute. The tone is a competent friend who happens to be good with systems. Filipino warmth without the clutter. Direct without being curt. Technical details (court IDs, hourly rates, booking counts) are presented plainly, never buried under decorative UI.
 
 ## Anti-references
 
 - **CourtReserve, Skedda, Playtomic.** North American/European booking tools: overbuilt dashboards, feature-count marketing, USD-centric pricing, desktop-first layouts squeezed into mobile viewports.
 - **Generic Bootstrap/Material admin panels.** Gray sidebars, identical card grids, blue primary buttons. No personality, no opinion. The "starter template" look.
 - **Enterprise scheduling tools (Calendly, Acuity).** Optimized for solo professionals and virtual meetings, not physical courts with walk-in traffic.
-- **Overly playful sports apps.** Neon gradients, mascot illustrations, gamification badges. Court Books serves operators, not players scrolling for fun.
+- **Overly playful sports apps.** Neon gradients, mascot illustrations, gamification badges. Korte serves operators, not players scrolling for fun.
 
 ## Design Principles
 

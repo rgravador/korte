@@ -7,6 +7,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Booking, BookingStatus, getOperatingHours } from '@/lib/types';
 import { toast } from '@/components/toast';
+import { SportFilter } from '@/components/sport-filter';
 
 function formatHour(hour: number): string {
   const h = hour % 12 || 12;
@@ -117,7 +118,7 @@ function BookingDetailSheet({
 }
 
 export default function DashboardPage() {
-  const { bookings, courts, tenant, updateBookingStatus, isOnboarded, currentUser } = useStore();
+  const { bookings, courts, sports, selectedSportId, tenant, updateBookingStatus, isOnboarded, currentUser } = useStore();
   const router = useRouter();
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
@@ -133,18 +134,25 @@ export default function DashboardPage() {
 
   const firstName = currentUser?.displayName.split(' ')[0] ?? '';
 
+  const selectedSport = sports.find((s) => s.id === selectedSportId) ?? null;
+  const sportCourtIds = useMemo(() => {
+    if (!selectedSportId) return null; // no filter — all courts
+    return new Set(courts.filter((c) => c.sportId === selectedSportId).map((c) => c.id));
+  }, [courts, selectedSportId]);
+
   const todayBookings = useMemo(
     () =>
       bookings
-        .filter((b) => b.date === today && b.status !== 'cancelled')
+        .filter((b) => b.date === today && b.status !== 'cancelled' && (!sportCourtIds || sportCourtIds.has(b.courtId)))
         .sort((a, b) => a.startHour - b.startHour),
-    [bookings, today]
+    [bookings, today, sportCourtIds]
   );
 
   const todayCount = todayBookings.length;
   const noShowCount = todayBookings.filter((b) => b.status === 'no_show').length;
 
-  const totalSlots = courts.filter((c) => c.isActive).length * getOperatingHours(tenant).length;
+  const activeSportCourts = courts.filter((c) => c.isActive && (!selectedSportId || c.sportId === selectedSportId));
+  const totalSlots = activeSportCourts.length * getOperatingHours(selectedSport ?? tenant).length;
   const bookedSlots = todayBookings.reduce(
     (acc, b) => acc + Math.ceil(b.durationMinutes / 60),
     0
@@ -162,6 +170,8 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
+      <SportFilter />
+
       {/* Greeting */}
         <h1 className="font-display font-bold text-2xl md:text-3xl leading-tight tracking-tight mb-1 text-ink">
           Good morning,<br />

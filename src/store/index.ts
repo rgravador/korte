@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { User, Tenant, Court, Item, Member, Booking, BookingStatus, UserRole } from '@/lib/types';
+import { User, Tenant, Court, Item, Member, Booking, Sport, BookingStatus, UserRole, TimeRange } from '@/lib/types';
 import {
   apiCreateBooking, apiUpdateBookingStatus, apiRescheduleBooking,
   apiAddMember, apiUpdateMember,
   apiAddCourt, apiUpdateCourt, apiRemoveCourt,
   apiAddItem, apiUpdateItem, apiRemoveItem,
+  apiAddSport, apiUpdateSport, apiRemoveSport,
   apiUpdateTenant, apiCreateUser, apiHydrate,
 } from '@/lib/api';
 import { toast } from '@/components/toast';
@@ -23,6 +24,8 @@ interface AppState {
   lastSyncedAt: string | null;
   isOnboarded: boolean;
   tenant: Tenant;
+  sports: Sport[];
+  selectedSportId: string | null;
   courts: Court[];
   items: Item[];
   members: Member[];
@@ -32,6 +35,10 @@ interface AppState {
   login: (username: string, password: string) => User | null;
   logout: () => void;
   createUser: (data: { username: string; password: string; role: UserRole; displayName: string; email: string }) => Promise<string>;
+  addSport: (data: { tenantId: string; name: string; operatingHoursRanges: TimeRange[] }) => Promise<string>;
+  updateSport: (sportId: string, updates: Partial<{ name: string; operatingHoursRanges: TimeRange[]; isActive: boolean }>) => Promise<void>;
+  removeSport: (sportId: string) => Promise<void>;
+  setSelectedSport: (sportId: string | null) => void;
   createBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => Promise<string>;
   updateBookingStatus: (bookingId: string, status: BookingStatus) => Promise<void>;
   cancelBooking: (bookingId: string) => Promise<void>;
@@ -49,7 +56,7 @@ interface AppState {
   setPendingSync: (count: number) => void;
   setLastSynced: (ts: string) => void;
   hydrateFromRemote: (data: {
-    tenant: Tenant; users: User[]; courts: Court[];
+    tenant: Tenant; users: User[]; sports: Sport[]; courts: Court[];
     items: Item[]; members: Member[]; bookings: Booking[];
   }) => void;
   refreshFromServer: () => Promise<void>;
@@ -63,6 +70,7 @@ export const useStore = create<AppState>()(
       currentUser: null, users: [],
       isOnline: true, pendingSync: 0, lastSyncedAt: null,
       isOnboarded: false, tenant: EMPTY_TENANT,
+      sports: [], selectedSportId: null,
       courts: [], items: [], members: [], bookings: [],
       _hasHydrated: false,
 
@@ -75,7 +83,7 @@ export const useStore = create<AppState>()(
 
       logout: () => {
         console.debug('[store] logout');
-        set({ currentUser: null, isOnboarded: false, users: [], tenant: EMPTY_TENANT, courts: [], items: [], members: [], bookings: [] });
+        set({ currentUser: null, isOnboarded: false, users: [], tenant: EMPTY_TENANT, sports: [], selectedSportId: null, courts: [], items: [], members: [], bookings: [] });
       },
 
       createUser: async (data) => {
@@ -85,6 +93,46 @@ export const useStore = create<AppState>()(
         if (!result) throw new Error('Failed to create user');
         set((state) => ({ users: [...state.users, result] }));
         return result.id;
+      },
+
+      addSport: async (data) => {
+        console.debug('[store] addSport', { name: data.name });
+        const result = await apiAddSport(data);
+        if (!result) throw new Error('Failed to add sport');
+        set((state) => {
+          const newSports = [...state.sports, result];
+          // Auto-select if this is the first or only sport
+          const selectedSportId = newSports.length === 1 ? result.id : state.selectedSportId;
+          return { sports: newSports, selectedSportId };
+        });
+        return result.id;
+      },
+
+      updateSport: async (sportId, updates) => {
+        console.debug('[store] updateSport', { sportId });
+        const success = await apiUpdateSport(sportId, updates);
+        if (!success) throw new Error('Failed to update sport');
+        set((state) => ({ sports: state.sports.map((s) => s.id === sportId ? { ...s, ...updates } : s) }));
+      },
+
+      removeSport: async (sportId) => {
+        console.debug('[store] removeSport', { sportId });
+        // Guard: check locally if sport has courts
+        const courtsForSport = get().courts.filter((c) => c.sportId === sportId);
+        if (courtsForSport.length > 0) throw new Error('Cannot remove sport with assigned courts');
+        const success = await apiRemoveSport(sportId);
+        if (!success) throw new Error('Failed to remove sport');
+        set((state) => {
+          const newSports = state.sports.filter((s) => s.id !== sportId);
+          const selectedSportId = state.selectedSportId === sportId
+            ? (newSports[0]?.id ?? null)
+            : state.selectedSportId;
+          return { sports: newSports, selectedSportId };
+        });
+      },
+
+      setSelectedSport: (sportId) => {
+        set({ selectedSportId: sportId });
       },
 
       createBooking: async (bookingData) => {
@@ -152,8 +200,8 @@ export const useStore = create<AppState>()(
       },
 
       addCourt: async (courtData) => {
-        console.debug('[store] addCourt', { name: courtData.name });
-        const result = await apiAddCourt({ tenantId: courtData.tenantId, name: courtData.name, hourlyRate: courtData.hourlyRate });
+        console.debug('[store] addCourt', { name: courtData.name, sportId: courtData.sportId });
+        const result = await apiAddCourt({ tenantId: courtData.tenantId, sportId: courtData.sportId, name: courtData.name, hourlyRate: courtData.hourlyRate });
         if (!result) throw new Error('Failed to add court');
         set((state) => ({ courts: [...state.courts, result], tenant: { ...state.tenant, courtCount: state.courts.length + 1 } }));
         return result.id;
@@ -208,8 +256,15 @@ export const useStore = create<AppState>()(
       setLastSynced: (ts) => set({ lastSyncedAt: ts }),
 
       hydrateFromRemote: (data) => {
-        console.debug('[store] hydrateFromRemote', { tenant: data.tenant.name, users: data.users.length, courts: data.courts.length });
-        set({ isOnboarded: true, tenant: data.tenant, users: data.users, courts: data.courts, items: data.items, members: data.members, bookings: data.bookings, lastSyncedAt: new Date().toISOString() });
+        console.debug('[store] hydrateFromRemote', { tenant: data.tenant.name, users: data.users.length, sports: (data.sports ?? []).length, courts: data.courts.length });
+        const sports = data.sports ?? [];
+        const activeSports = sports.filter((s) => s.isActive);
+        // Auto-select first sport if none selected, or if current selection is invalid
+        const currentSelected = get().selectedSportId;
+        const selectedSportId = (currentSelected && activeSports.some((s) => s.id === currentSelected))
+          ? currentSelected
+          : (activeSports[0]?.id ?? null);
+        set({ isOnboarded: true, tenant: data.tenant, users: data.users, sports, selectedSportId, courts: data.courts, items: data.items, members: data.members, bookings: data.bookings, lastSyncedAt: new Date().toISOString() });
       },
 
       refreshFromServer: async () => {
@@ -229,7 +284,7 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: 'court-books-store',
+      name: 'korte-store',
       storage: createJSONStorage(() => {
         if (isBrowser) return sessionStorage;
         return {
@@ -243,6 +298,8 @@ export const useStore = create<AppState>()(
         users: state.users,
         isOnboarded: state.isOnboarded,
         tenant: state.tenant,
+        sports: state.sports,
+        selectedSportId: state.selectedSportId,
         courts: state.courts,
         items: state.items,
         members: state.members,

@@ -42,9 +42,9 @@ export const seedTenant: Tenant = {
 };
 
 export const seedCourts: Court[] = [
-  { id: 'court-1', tenantId: TENANT_ID, name: 'Court 1', hourlyRate: 400, isActive: true },
-  { id: 'court-2', tenantId: TENANT_ID, name: 'Court 2', hourlyRate: 500, isActive: true },
-  { id: 'court-3', tenantId: TENANT_ID, name: 'Court 3', hourlyRate: 400, isActive: true },
+  { id: 'court-1', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Court 1', hourlyRate: 400, isActive: true },
+  { id: 'court-2', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Court 2', hourlyRate: 500, isActive: true },
+  { id: 'court-3', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Court 3', hourlyRate: 400, isActive: true },
 ];
 
 export const seedItems: Item[] = [

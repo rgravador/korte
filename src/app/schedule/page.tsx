@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Booking, getOperatingHours } from '@/lib/types';
 import Link from 'next/link';
+import { SportFilter } from '@/components/sport-filter';
 
 // Distinct court colors — 10 colors that are visually separable on dark backgrounds
 const COURT_COLORS = [
@@ -52,7 +53,7 @@ function formatHour(hour: number): string {
 }
 
 export default function SchedulePage() {
-  const { bookings, courts, tenant } = useStore();
+  const { bookings, courts, sports, selectedSportId, tenant } = useStore();
   const router = useRouter();
 
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -76,12 +77,18 @@ export default function SchedulePage() {
   // Multi-cell selection state
   const [selection, setSelection] = useState<{ courtId: string; hours: number[] } | null>(null);
 
-  const activeCourts = useMemo(
-    () => courts.filter((c) => c.isActive),
-    [courts]
+  // Filter courts by selected sport (if any)
+  const selectedSport = useMemo(
+    () => sports.find((s) => s.id === selectedSportId) ?? null,
+    [sports, selectedSportId]
   );
 
-  // Map court ID → color index (stable across renders)
+  const activeCourts = useMemo(
+    () => courts.filter((c) => c.isActive && (!selectedSportId || c.sportId === selectedSportId)),
+    [courts, selectedSportId]
+  );
+
+  // Court colors scoped per sport (R10) — reset index for sport-filtered courts
   const courtColorMap = useMemo(() => {
     const map: Record<string, number> = {};
     activeCourts.forEach((c, i) => { map[c.id] = i; });
@@ -100,7 +107,11 @@ export default function SchedulePage() {
   );
 
 
-  const hours = useMemo(() => getOperatingHours(tenant), [tenant]);
+  // Use selected sport's hours, or tenant fallback for single/no sport
+  const hours = useMemo(
+    () => getOperatingHours(selectedSport ?? tenant),
+    [selectedSport, tenant]
+  );
 
   const dateBookings = useMemo(
     () =>
@@ -190,6 +201,8 @@ export default function SchedulePage() {
       <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-4 text-ink">
         Schedule
       </h1>
+
+      <SportFilter />
 
       {/* Week quick-select */}
       <div className="flex gap-1.5 mb-4">

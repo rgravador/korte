@@ -152,9 +152,9 @@ function Sidebar() {
       {/* Brand */}
       <div className="px-5 pt-5 pb-4">
         <div className="flex items-center gap-2.5">
-          <Image src="/logos/logo-no-bg.png" alt="Court Books" width={36} height={36} className="w-9 h-9" />
+          <Image src="/korte/Korte-no-bg.png" alt="Korte" width={36} height={36} className="w-9 h-9" />
           <div>
-            <span className="font-display font-semibold text-base tracking-tight text-white block leading-tight">Court Books</span>
+            <span className="font-display font-semibold text-base tracking-tight text-white block leading-tight">Korte</span>
             {!isOnline && (
               <span className="text-[9px] font-medium text-warn">Offline</span>
             )}
@@ -246,9 +246,9 @@ function MobileHeader() {
   return (
     <div className="flex justify-between items-center mb-5 lg:hidden">
       <div className="flex items-center gap-2.5">
-        <Image src="/logos/logo-no-bg.png" alt="Court Books" width={32} height={32} className="w-8 h-8" />
+        <Image src="/korte/Korte-no-bg.png" alt="Korte" width={32} height={32} className="w-8 h-8" />
         <span className="font-display font-semibold text-base tracking-tight text-ink">
-          Court Books
+          Korte
         </span>
         {!isOnline && (
           <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-warn-soft text-warn-text">

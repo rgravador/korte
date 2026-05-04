@@ -30,15 +30,43 @@ export interface Tenant {
   courtCount: number;
   operatingHoursStart: number; // 24h format, e.g. 6 — legacy, used as fallback
   operatingHoursEnd: number;   // 24h format, e.g. 22 — legacy, used as fallback
-  operatingHoursRanges?: TimeRange[]; // multiple open windows, e.g. [{start:6,end:12},{start:14,end:22}]
+  operatingHoursRanges?: TimeRange[]; // multiple open windows — legacy, migrated to Sport
   createdAt: string;
 }
 
-/** Get all operating hours as a flat sorted array from a tenant's ranges or legacy fields. */
-export function getOperatingHours(tenant: Tenant): number[] {
-  const ranges = tenant.operatingHoursRanges?.length
-    ? tenant.operatingHoursRanges
-    : [{ start: tenant.operatingHoursStart, end: tenant.operatingHoursEnd }];
+export interface Sport {
+  id: string;
+  tenantId: string;
+  name: string;
+  operatingHoursRanges: TimeRange[]; // e.g. [{start:6,end:12},{start:14,end:22}]
+  isActive: boolean;
+  createdAt: string;
+}
+
+/** Preset sports available during onboarding and settings. */
+export const PRESET_SPORTS = [
+  'Pickleball',
+  'Badminton',
+  'Basketball',
+  'Tennis',
+  'Volleyball',
+  'Table Tennis',
+] as const;
+
+/** Entity that has operating hours — Sport or Tenant (backward compat). */
+type HasOperatingHours = {
+  operatingHoursRanges?: TimeRange[];
+  operatingHoursStart?: number;
+  operatingHoursEnd?: number;
+};
+
+/** Get all operating hours as a flat sorted array from a sport's or tenant's ranges. */
+export function getOperatingHours(entity: HasOperatingHours): number[] {
+  const ranges = entity.operatingHoursRanges?.length
+    ? entity.operatingHoursRanges
+    : (entity.operatingHoursStart != null && entity.operatingHoursEnd != null)
+      ? [{ start: entity.operatingHoursStart, end: entity.operatingHoursEnd }]
+      : [];
 
   const hoursSet = new Set<number>();
   for (const range of ranges) {
@@ -49,15 +77,19 @@ export function getOperatingHours(tenant: Tenant): number[] {
   return Array.from(hoursSet).sort((a, b) => a - b);
 }
 
-/** Get the time ranges from a tenant (ranges if set, otherwise single range from legacy fields). */
-export function getTimeRanges(tenant: Tenant): TimeRange[] {
-  if (tenant.operatingHoursRanges?.length) return tenant.operatingHoursRanges;
-  return [{ start: tenant.operatingHoursStart, end: tenant.operatingHoursEnd }];
+/** Get the time ranges from a sport or tenant. */
+export function getTimeRanges(entity: HasOperatingHours): TimeRange[] {
+  if (entity.operatingHoursRanges?.length) return entity.operatingHoursRanges;
+  if (entity.operatingHoursStart != null && entity.operatingHoursEnd != null) {
+    return [{ start: entity.operatingHoursStart, end: entity.operatingHoursEnd }];
+  }
+  return [];
 }
 
 export interface Court {
   id: string;
   tenantId: string;
+  sportId: string;
   name: string;
   hourlyRate: number; // in PHP (₱)
   isActive: boolean;
