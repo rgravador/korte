@@ -181,6 +181,11 @@ export const AdminUpdateTenantSchema = z.object({
   operatingHoursStart: z.number().int().min(0).max(23).optional(),
   operatingHoursEnd: z.number().int().min(1).max(24).optional(),
   freeTrialDays: z.number().int().min(0).max(365).optional(),
+  subscriptionStatus: z.enum(['trial', 'active', 'frozen']).optional(),
+  planTier: z.enum(['basic', 'pro']).nullable().optional(),
+  currentPeriodEnd: z.string().datetime().nullable().optional(),
+  trialEndsAt: z.string().datetime().nullable().optional(),
+  adminOverride: z.boolean().optional(),
 });
 
 // ── Helpers ─────────────────────────────────────────────────

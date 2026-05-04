@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getServerSupabase } from '@/lib/supabase-server';
 import { dbUpdateTenant } from '@/lib/db';
+import { dbGetTenantsNeedingAttention } from '@/lib/db-subscription';
 import { ok, badRequest, serverError } from '@/lib/api-response';
 import { AdminUpdateTenantSchema, validateBody } from '@/lib/validation';
 
@@ -60,11 +61,18 @@ export async function GET() {
       operatingHoursStart: t.operating_hours_start,
       operatingHoursEnd: t.operating_hours_end,
       freeTrialDays: t.free_trial_days ?? 7,
+      subscriptionStatus: t.subscription_status ?? 'trial',
+      planTier: t.plan_tier ?? null,
+      trialEndsAt: t.trial_ends_at ?? null,
+      currentPeriodEnd: t.current_period_end ?? null,
+      adminOverride: t.admin_override ?? false,
       createdAt: t.created_at,
       stats: stats[t.id] ?? { users: 0, bookings: 0, members: 0 },
     }));
 
-    return ok(enriched);
+    const attention = await dbGetTenantsNeedingAttention(sb);
+
+    return ok({ tenants: enriched, attention });
   } catch (err) {
     console.error('[api] GET /admin/tenants error:', err);
     return serverError();

@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Tenant, Sport, Court, Item, User } from '@/lib/types';
+import { Tenant, Sport, Court, Item, User, SubscriptionStatus, PlanTier } from '@/lib/types';
 import { toast } from '@/components/toast';
 import { OperatingHoursDisplay } from '@/components/operating-hours-editor';
 
@@ -14,8 +14,25 @@ interface TenantRow {
   subdomain: string;
   courtCount: number;
   freeTrialDays: number;
+  subscriptionStatus: SubscriptionStatus;
+  planTier: PlanTier | null;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+  adminOverride: boolean;
   createdAt: string;
   stats: { users: number; bookings: number; members: number };
+}
+
+interface AttentionItem {
+  id: string;
+  name: string;
+  subdomain: string;
+  subscriptionStatus: SubscriptionStatus;
+  planTier: PlanTier | null;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+  adminOverride: boolean;
+  attentionReason: 'trial_expiring' | 'trial_expired' | 'overdue' | 'admin_override';
 }
 
 interface TenantDetail {
@@ -30,6 +47,284 @@ interface TenantDetail {
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function formatDateShort(dateStr: string | null): string {
+  if (!dateStr) return '--';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+const STATUS_BADGE_CLASSES: Record<SubscriptionStatus, string> = {
+  active: 'bg-signal-soft text-signal-text',
+  trial: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+  frozen: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+};
+
+const STATUS_LABELS: Record<SubscriptionStatus, string> = {
+  active: 'Active',
+  trial: 'Trial',
+  frozen: 'Frozen',
+};
+
+const ATTENTION_LABELS: Record<string, string> = {
+  trial_expiring: 'Trials expiring',
+  trial_expired: 'Expired trials',
+  overdue: 'Overdue',
+  admin_override: 'Admin overrides',
+};
+
+const ATTENTION_COLORS: Record<string, string> = {
+  trial_expiring: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+  trial_expired: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  overdue: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  admin_override: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+};
+
+/* ── Attention Notifications ── */
+function AttentionSection({
+  attention,
+  onSelectTenant,
+}: {
+  attention: AttentionItem[];
+  onSelectTenant: (id: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (attention.length === 0) return null;
+
+  const grouped: Record<string, AttentionItem[]> = {};
+  for (const item of attention) {
+    const key = item.attentionReason;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(item);
+  }
+
+  return (
+    <div className="mb-5">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full bg-surface rounded-[16px] shadow-card p-4 text-left"
+      >
+        <div className="flex justify-between items-center mb-2">
+          <div className="font-medium text-sm">Needs attention</div>
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className={`w-4 h-4 text-ink-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          >
+            <path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(grouped).map(([reason, items]) => (
+            <span key={reason} className={`text-xs px-2.5 py-1 rounded-full font-medium ${ATTENTION_COLORS[reason]}`}>
+              {items.length} {ATTENTION_LABELS[reason]}
+            </span>
+          ))}
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="mt-1.5 space-y-1">
+          {attention.map((item, idx) => (
+            <button
+              key={`${item.id}-${item.attentionReason}-${idx}`}
+              onClick={() => onSelectTenant(item.id)}
+              className="w-full text-left bg-surface rounded-xl p-3 hover:bg-surface-3 transition-colors flex justify-between items-center"
+            >
+              <div>
+                <div className="font-medium text-sm">{item.name}</div>
+                <div className="text-xs text-ink-3">{item.subdomain}.courtbooks.app</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-2 py-0.5 rounded ${STATUS_BADGE_CLASSES[item.subscriptionStatus]}`}>
+                  {STATUS_LABELS[item.subscriptionStatus]}
+                </span>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${ATTENTION_COLORS[item.attentionReason]}`}>
+                  {ATTENTION_LABELS[item.attentionReason]}
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Subscription Management Controls ── */
+function SubscriptionControls({
+  tenant,
+  saving,
+  onSave,
+}: {
+  tenant: Tenant;
+  saving: boolean;
+  onSave: (updates: Record<string, unknown>) => Promise<void>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [status, setStatus] = useState<SubscriptionStatus>(tenant.subscriptionStatus);
+  const [planTier, setPlanTier] = useState<PlanTier | ''>(tenant.planTier ?? '');
+  const [periodEnd, setPeriodEnd] = useState(tenant.currentPeriodEnd ? tenant.currentPeriodEnd.slice(0, 10) : '');
+  const [trialEnd, setTrialEnd] = useState(tenant.trialEndsAt ? tenant.trialEndsAt.slice(0, 10) : '');
+  const [override, setOverride] = useState(tenant.adminOverride);
+
+  useEffect(() => {
+    setStatus(tenant.subscriptionStatus);
+    setPlanTier(tenant.planTier ?? '');
+    setPeriodEnd(tenant.currentPeriodEnd ? tenant.currentPeriodEnd.slice(0, 10) : '');
+    setTrialEnd(tenant.trialEndsAt ? tenant.trialEndsAt.slice(0, 10) : '');
+    setOverride(tenant.adminOverride);
+  }, [tenant]);
+
+  const handleSaveSubscription = async () => {
+    const updates: Record<string, unknown> = {
+      subscriptionStatus: status,
+      planTier: planTier || null,
+      currentPeriodEnd: periodEnd ? new Date(periodEnd + 'T23:59:59Z').toISOString() : null,
+      trialEndsAt: trialEnd ? new Date(trialEnd + 'T23:59:59Z').toISOString() : null,
+      adminOverride: override,
+    };
+    await onSave(updates);
+    setEditing(false);
+  };
+
+  const handleActivateSubscription = async () => {
+    const oneMonthFromNow = new Date();
+    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+
+    const updates: Record<string, unknown> = {
+      subscriptionStatus: 'active' as SubscriptionStatus,
+      planTier: planTier || 'basic',
+      currentPeriodEnd: oneMonthFromNow.toISOString(),
+      adminOverride: false,
+    };
+    await onSave(updates);
+    setStatus('active');
+    setPlanTier(planTier || 'basic');
+    setPeriodEnd(oneMonthFromNow.toISOString().slice(0, 10));
+    setOverride(false);
+  };
+
+  const resetForm = () => {
+    setStatus(tenant.subscriptionStatus);
+    setPlanTier(tenant.planTier ?? '');
+    setPeriodEnd(tenant.currentPeriodEnd ? tenant.currentPeriodEnd.slice(0, 10) : '');
+    setTrialEnd(tenant.trialEndsAt ? tenant.trialEndsAt.slice(0, 10) : '');
+    setOverride(tenant.adminOverride);
+    setEditing(false);
+  };
+
+  const selectClass = 'w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none';
+  const inputClass = 'w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary';
+
+  return (
+    <div className="mb-6">
+      <div className="text-xs font-semibold text-ink-3 mb-2">Subscription</div>
+      <div className="bg-surface rounded-[16px] shadow-card p-4">
+        {editing ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-ink-3 block mb-1">Status</label>
+              <select value={status} onChange={(e) => setStatus(e.target.value as SubscriptionStatus)} className={selectClass}>
+                <option value="trial">Trial</option>
+                <option value="active">Active</option>
+                <option value="frozen">Frozen</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-ink-3 block mb-1">Plan tier</label>
+              <select value={planTier} onChange={(e) => setPlanTier(e.target.value as PlanTier | '')} className={selectClass}>
+                <option value="">None</option>
+                <option value="basic">Basic</option>
+                <option value="pro">Pro</option>
+              </select>
+            </div>
+            {status === 'trial' && (
+              <div>
+                <label className="text-xs text-ink-3 block mb-1">Trial ends</label>
+                <input type="date" value={trialEnd} onChange={(e) => setTrialEnd(e.target.value)} className={inputClass} />
+              </div>
+            )}
+            {['active', 'frozen'].includes(status) && (
+              <div>
+                <label className="text-xs text-ink-3 block mb-1">Current period end</label>
+                <input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} className={inputClass} />
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setOverride(!override)}
+                className={`w-10 h-5 rounded-full transition-colors relative ${override ? 'bg-primary' : 'bg-surface-3 border border-line'}`}
+              >
+                <span className={`block w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-transform ${override ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </button>
+              <span className="text-xs text-ink-2">Admin override</span>
+            </div>
+            <div className="flex gap-2">
+              <button disabled={saving} onClick={handleSaveSubscription} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-xs font-medium">
+                Save
+              </button>
+              <button onClick={resetForm} className="flex-1 bg-surface-3 text-ink-2 py-2.5 rounded-xl text-xs font-medium">
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex items-center gap-2">
+                <span className={`text-xs px-2.5 py-1 rounded font-medium ${STATUS_BADGE_CLASSES[tenant.subscriptionStatus]}`}>
+                  {STATUS_LABELS[tenant.subscriptionStatus]}
+                </span>
+                {tenant.planTier && (
+                  <span className="text-xs px-2.5 py-1 rounded font-medium bg-primary-soft text-primary-deep">
+                    {tenant.planTier === 'pro' ? 'Pro' : 'Basic'}
+                  </span>
+                )}
+                {tenant.adminOverride && (
+                  <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                    Override
+                  </span>
+                )}
+              </div>
+              <button onClick={() => setEditing(true)}>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-ink-4 hover:text-ink transition-colors">
+                  <path d="M11.5 1.5l3 3-9 9H2.5v-3l9-9z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {tenant.subscriptionStatus === 'trial' && tenant.trialEndsAt && (
+                <div>
+                  <span className="text-ink-3">Trial ends:</span>{' '}
+                  <span className="font-medium">{formatDateShort(tenant.trialEndsAt)}</span>
+                </div>
+              )}
+              {tenant.currentPeriodEnd && (
+                <div>
+                  <span className="text-ink-3">Period end:</span>{' '}
+                  <span className="font-medium">{formatDateShort(tenant.currentPeriodEnd)}</span>
+                </div>
+              )}
+            </div>
+            {tenant.subscriptionStatus !== 'active' && (
+              <button
+                disabled={saving}
+                onClick={handleActivateSubscription}
+                className="mt-3 w-full bg-signal-soft text-signal-text py-2.5 rounded-xl text-xs font-medium hover:opacity-90 transition-opacity"
+              >
+                Activate subscription
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 /* ── Tenant Detail View ── */
@@ -125,6 +420,9 @@ function TenantDetailView({ tenantId, onBack }: { tenantId: string; onBack: () =
       )}
       <div className="text-xs text-ink-3 mb-5">{tenant.subdomain}.courtbooks.app · Created {formatDate(tenant.createdAt)}</div>
 
+      {/* Subscription Management */}
+      <SubscriptionControls tenant={tenant} saving={saving} onSave={handleSave} />
+
       {/* Free Trial Days */}
       <div className="mb-6">
         <div className="text-xs font-semibold text-ink-3 mb-2">Free Trial</div>
@@ -201,7 +499,7 @@ function TenantDetailView({ tenantId, onBack }: { tenantId: string; onBack: () =
                       {sportCourts.map((court) => (
                         <div key={court.id} className="flex justify-between text-xs">
                           <span className="text-ink-2">{court.name}</span>
-                          <span className="text-ink-3">₱{court.hourlyRate}/hr</span>
+                          <span className="text-ink-3">{'\u20B1'}{court.hourlyRate}/hr</span>
                         </div>
                       ))}
                     </div>
@@ -224,7 +522,7 @@ function TenantDetailView({ tenantId, onBack }: { tenantId: string; onBack: () =
               <div key={item.id} className="bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center">
                 <div>
                   <div className="font-medium text-sm">{item.name}</div>
-                  <div className="text-xs text-ink-3">₱{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}</div>
+                  <div className="text-xs text-ink-3">{'\u20B1'}{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}</div>
                 </div>
                 <span className={`text-xs px-2 py-1 rounded ${item.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}>
                   {item.isActive ? 'Active' : 'Off'}
@@ -261,6 +559,7 @@ export default function AdminPage() {
   const { currentUser } = useStore();
   const router = useRouter();
   const [tenants, setTenants] = useState<TenantRow[]>([]);
+  const [attention, setAttention] = useState<AttentionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
@@ -273,7 +572,9 @@ export default function AdminPage() {
     fetch('/api/admin/tenants')
       .then((r) => r.json())
       .then((json) => {
-        setTenants(json.data ?? []);
+        const data = json.data ?? {};
+        setTenants(data.tenants ?? []);
+        setAttention(data.attention ?? []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -332,6 +633,9 @@ export default function AdminPage() {
               {tenants.length} facilit{tenants.length === 1 ? 'y' : 'ies'} registered
             </p>
 
+            {/* Attention notifications */}
+            <AttentionSection attention={attention} onSelectTenant={setSelectedTenantId} />
+
             {/* Search */}
             <div className="flex items-center gap-2 bg-surface rounded-lg px-3 py-2.5 border border-line mb-4">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -365,7 +669,17 @@ export default function AdminPage() {
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
-                        <div className="font-medium text-sm">{tenant.name}</div>
+                        <div className="font-medium text-sm flex items-center gap-2">
+                          {tenant.name}
+                          <span className={`text-[11px] px-2 py-0.5 rounded font-medium ${STATUS_BADGE_CLASSES[tenant.subscriptionStatus]}`}>
+                            {STATUS_LABELS[tenant.subscriptionStatus]}
+                          </span>
+                          {tenant.planTier && (
+                            <span className="text-[11px] px-2 py-0.5 rounded font-medium bg-primary-soft text-primary-deep">
+                              {tenant.planTier === 'pro' ? 'Pro' : 'Basic'}
+                            </span>
+                          )}
+                        </div>
                         <div className="font-sans text-xs text-ink-3">
                           {tenant.subdomain}.courtbooks.app · {tenant.courtCount} court{tenant.courtCount !== 1 ? 's' : ''} · {tenant.freeTrialDays}d trial
                         </div>
