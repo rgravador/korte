@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-04-30T00:00:00Z",
-  "title": "Design System: Court Books",
+  "title": "Design System: Korte",
   "extensions": {
     "colorMeta": {
       "primary":       { "role": "primary",  "displayName": "Court Blue",       "canonical": "oklch(63% 0.19 260)", "tonalRamp": ["#1E3A5F", "#1D4ED8", "#2563EB", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE", "#DBEAFE", "#EFF6FF"] },
@@ -92,7 +92,7 @@
   ],
   "narrative": {
     "northStar": "The Social Court",
-    "overview": "Court Books feels like a modern social app that happens to manage courts. Think Instagram's clean surfaces, Facebook's confident blues, and the comfort of an app you open twenty times a day without friction. Bold typography, vibrant-but-soft accent colors, generous white space, and rounded surfaces that feel approachable on every tap.",
+    "overview": "Korte feels like a modern social app that happens to manage courts. Think Instagram's clean surfaces, Facebook's confident blues, and the comfort of an app you open twenty times a day without friction. Bold typography, vibrant-but-soft accent colors, generous white space, and rounded surfaces that feel approachable on every tap.",
     "keyCharacteristics": [
       "Clean white surfaces with bold blue primary accent",
       "Single sans-serif (Inter) for everything: bold for headlines, medium for labels, regular for body",

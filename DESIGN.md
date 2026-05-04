@@ -1,5 +1,5 @@
 ---
-name: Court Books
+name: Korte
 description: Pickleball court booking PWA for Philippine facilities
 colors:
   primary: "#3B82F6"
@@ -130,17 +130,17 @@ components:
     textColor: "{colors.ink-3}"
 ---
 
-# Design System: Court Books
+# Design System: Korte
 
 ## 1. Overview
 
 **Creative North Star: "The Social Court"**
 
-Court Books feels like a modern social app that happens to manage courts. Think Instagram's clean surfaces, Facebook's confident blues, and the comfort of an app you open twenty times a day without friction. Bold typography, vibrant-but-soft accent colors, generous white space, and rounded surfaces that feel approachable on every tap.
+Korte feels like a modern social app that happens to manage courts. Think Instagram's clean surfaces, Facebook's confident blues, and the comfort of an app you open twenty times a day without friction. Bold typography, vibrant-but-soft accent colors, generous white space, and rounded surfaces that feel approachable on every tap.
 
 The system is confident without being corporate. The primary blue is present and unapologetic; it carries CTAs, active states, and the brand itself. Surfaces are clean white and cool slate, never yellowed or themed to the point of fatigue. Status colors are vibrant but always paired with soft tinted backgrounds that prevent eye strain.
 
-This system rejects the North American SaaS booking template (CourtReserve, Skedda), enterprise scheduling tools (Calendly, Acuity), and overly retro or papery aesthetics. Court Books is a modern product, not a vintage ledger.
+This system rejects the North American SaaS booking template (CourtReserve, Skedda), enterprise scheduling tools (Calendly, Acuity), and overly retro or papery aesthetics. Korte is a modern product, not a vintage ledger.
 
 **Key Characteristics:**
 - Clean white surfaces with a bold blue primary accent
@@ -207,7 +207,7 @@ A modern, social-app palette. Cool slate neutrals keep the interface calm. The p
 
 ## 4. Elevation
 
-Court Books uses subtle shadows to create comfortable depth. Cards float gently above the background. Active overlays (sheets, dropdowns) cast larger shadows. The system is not flat; it has just enough lift to feel modern and touchable.
+Korte uses subtle shadows to create comfortable depth. Cards float gently above the background. Active overlays (sheets, dropdowns) cast larger shadows. The system is not flat; it has just enough lift to feel modern and touchable.
 
 ### Shadow Vocabulary
 - **Card** (`0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)`): Default card elevation. Barely there. Makes cards feel like objects, not painted rectangles.

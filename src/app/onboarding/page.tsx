@@ -316,7 +316,7 @@ export default function OnboardingPage() {
                 />
                 {subdomain && (
                   <p className="font-sans text-xs text-ink-3 mt-1.5">
-                    Your URL: <span className="text-ink">{subdomain}.courtbooks.app</span>
+                    Your URL: <span className="text-ink">{subdomain}.korte.app</span>
                   </p>
                 )}
               </div>
@@ -754,7 +754,7 @@ export default function OnboardingPage() {
               <div className="font-sans text-xs font-semibold text-ink-3 mb-2">Facility</div>
               <div className="font-sans text-lg font-semibold mb-1">{facilityName}</div>
               <div className="font-sans text-xs text-ink-3">
-                {subdomain}.courtbooks.app
+                {subdomain}.korte.app
               </div>
               <div className="font-sans text-xs text-ink-3 mt-1">
                 Owner: {ownerName} · {ownerEmail}

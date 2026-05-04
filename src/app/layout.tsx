@@ -27,13 +27,13 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Court Books",
+  title: "Korte",
   description: "Pickleball court booking for your facilities",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Court Books",
+    title: "Korte",
   },
 };
 

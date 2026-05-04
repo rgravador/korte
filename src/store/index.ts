@@ -284,7 +284,7 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: 'court-books-store',
+      name: 'korte-store',
       storage: createJSONStorage(() => {
         if (isBrowser) return sessionStorage;
         return {

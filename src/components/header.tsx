@@ -27,9 +27,9 @@ export function Header() {
   return (
     <div className="flex justify-between items-center mb-5">
       <div className="flex items-center gap-2.5">
-        <Image src="/logos/logo-no-bg.png" alt="Court Books" width={32} height={32} className="w-8 h-8" />
+        <Image src="/logos/logo-no-bg.png" alt="Korte" width={32} height={32} className="w-8 h-8" />
         <span className="font-display font-semibold text-base tracking-tight text-ink">
-          Court Books
+          Korte
         </span>
         {!isOnline && (
           <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-warn-soft text-warn-text">

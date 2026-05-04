@@ -88,9 +88,9 @@ export default function HomePage() {
           {/* Mobile brand — visible only on small screens */}
           <div className="lg:hidden mb-10">
             <div className="flex items-center gap-3">
-              <Image src="/logos/logo-no-bg.png" alt="Court Books" width={44} height={44} className="w-11 h-11" />
+              <Image src="/logos/logo-no-bg.png" alt="Korte" width={44} height={44} className="w-11 h-11" />
               <div>
-                <span className="text-white font-display font-bold text-xl tracking-tight">Court Books</span>
+                <span className="text-white font-display font-bold text-xl tracking-tight">Korte</span>
                 <span className="text-gold text-[0.6rem] font-semibold tracking-[0.25em] uppercase block">Court Booking Platform</span>
               </div>
             </div>
@@ -215,7 +215,7 @@ export default function HomePage() {
 
           {/* Copyright */}
           <p className="text-slate-600 text-xs mt-10">
-            &copy; 2026 Court Books. All rights reserved.
+            &copy; 2026 Korte. All rights reserved.
           </p>
         </div>
       </div>
@@ -229,9 +229,9 @@ export default function HomePage() {
         {/* Brand */}
         <div className="relative z-10 max-w-lg">
           <div className="flex items-center gap-5 mb-10">
-            <Image src="/logos/logo-no-bg.png" alt="Court Books" width={64} height={64} className="w-16 h-16" />
+            <Image src="/logos/logo-no-bg.png" alt="Korte" width={64} height={64} className="w-16 h-16" />
             <div>
-              <h2 className="text-white font-display font-bold text-3xl tracking-tight">Court Books</h2>
+              <h2 className="text-white font-display font-bold text-3xl tracking-tight">Korte</h2>
               <span className="text-gold text-[0.65rem] font-semibold tracking-[0.25em] uppercase">Court Booking Platform</span>
             </div>
           </div>

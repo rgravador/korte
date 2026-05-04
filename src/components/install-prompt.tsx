@@ -8,7 +8,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const DISMISSED_KEY = 'court-books-install-dismissed';
+const DISMISSED_KEY = 'korte-install-dismissed';
 const DISMISS_DURATION_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
 
 function wasDismissedRecently(): boolean {
@@ -86,20 +86,20 @@ export function InstallPrompt() {
           <div className="flex items-center gap-3.5 mb-4">
             <Image
               src="/logos/logo-no-bg.png"
-              alt="Court Books"
+              alt="Korte"
               width={52}
               height={52}
               className="w-13 h-13 rounded-xl"
             />
             <div>
-              <h3 className="font-display font-bold text-base text-ink">Court Books</h3>
+              <h3 className="font-display font-bold text-base text-ink">Korte</h3>
               <p className="text-xs text-ink-3 mt-0.5">courtbooks.app</p>
             </div>
           </div>
 
           {/* Message */}
           <p className="text-sm text-ink-2 mb-5 leading-relaxed">
-            Install Court Books for a faster, full-screen experience with offline support.
+            Install Korte for a faster, full-screen experience with offline support.
           </p>
 
           {isIOS ? (

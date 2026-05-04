@@ -1,6 +1,6 @@
 {
-  "name": "Court Books",
-  "short_name": "CourtBooks",
+  "name": "Korte",
+  "short_name": "Korte",
   "description": "Pickleball court booking for your facilities",
   "start_url": "/",
   "display": "standalone",
