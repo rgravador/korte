@@ -24,9 +24,16 @@ export async function POST(req: NextRequest) {
 
     const sb = getServerSupabase();
 
-    // 1. Create tenant
-    const tenant = await dbCreateTenant(sb, { name, subdomain, operatingHoursStart: operatingHoursStart ?? 6, operatingHoursEnd: operatingHoursEnd ?? 22 });
-    if (!tenant) return serverError('Failed to create tenant');
+    // 1. Create tenant — auto-suffix subdomain if taken
+    let finalSubdomain = subdomain;
+    let tenant = await dbCreateTenant(sb, { name, subdomain: finalSubdomain, operatingHoursStart: operatingHoursStart ?? 6, operatingHoursEnd: operatingHoursEnd ?? 22 });
+    if (!tenant) {
+      // Likely unique constraint on subdomain — retry with random suffix
+      const suffix = Math.random().toString(36).slice(2, 5);
+      finalSubdomain = `${subdomain}-${suffix}`;
+      tenant = await dbCreateTenant(sb, { name, subdomain: finalSubdomain, operatingHoursStart: operatingHoursStart ?? 6, operatingHoursEnd: operatingHoursEnd ?? 22 });
+      if (!tenant) return serverError('Failed to create tenant');
+    }
 
     // 2. Create admin user
     const user = await dbCreateUser(sb, tenant.id, {
