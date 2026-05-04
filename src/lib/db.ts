@@ -152,10 +152,15 @@ export async function dbLogin(
   }
 
   // Verify password via rpc
-  const { data: valid } = await sb.rpc('verify_password', {
+  const { data: valid, error: rpcError } = await sb.rpc('verify_password', {
     plain: password,
     hashed: data.password_hash,
   });
+
+  if (rpcError) {
+    console.error('[db] dbLogin verify_password RPC error', { username, error: rpcError.message, details: rpcError.details, hint: rpcError.hint });
+    return null;
+  }
 
   if (!valid) {
     console.debug('[db] dbLogin password verification failed', { username });

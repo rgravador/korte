@@ -280,9 +280,9 @@ CREATE OR REPLACE FUNCTION verify_password(plain TEXT, hashed TEXT) RETURNS BOOL
   SELECT hashed = crypt(plain, hashed);
 $$ LANGUAGE sql;
 
--- Password functions restricted to authenticated role only (called via service_role in API routes)
-GRANT EXECUTE ON FUNCTION hash_password(TEXT)        TO authenticated;
-GRANT EXECUTE ON FUNCTION verify_password(TEXT, TEXT) TO authenticated;
+-- Password functions granted to authenticated + service_role (API routes use service_role key)
+GRANT EXECUTE ON FUNCTION hash_password(TEXT)        TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION verify_password(TEXT, TEXT) TO authenticated, service_role;
 
 -- ============================================================
 -- Trigger: auto-update updated_at on users

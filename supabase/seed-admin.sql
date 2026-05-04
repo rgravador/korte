@@ -21,10 +21,10 @@ ON CONFLICT (subdomain) DO NOTHING;
 INSERT INTO users (tenant_id, username, password_hash, role, display_name, email)
 VALUES (
   '00000000-0000-0000-0000-000000000001',
-  'admin',
+  'rgravador',
   crypt('Just1234!', gen_salt('bf', 10)),
   'system_admin',
   'System Admin',
-  'admin@courtbooks.app'
+  'rgravador@korte.app'
 )
 ON CONFLICT (tenant_id, username) DO NOTHING;

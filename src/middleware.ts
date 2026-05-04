@@ -43,6 +43,13 @@ function jsonResponse(status: number, body: { data: null; error: { code: string;
 // ── Public routes (no auth required) ────────────────────────
 const PUBLIC_PATHS = ['/api/auth/login', '/api/auth/register'];
 
+function isPublicRoute(pathname: string, method: string): boolean {
+  if (PUBLIC_PATHS.some((p) => pathname === p)) return true;
+  // Username availability check is used during onboarding (unauthenticated)
+  if (pathname === '/api/users' && method === 'GET') return true;
+  return false;
+}
+
 // ── Freeze-exempt routes (prefix/exact match) ──────────────
 function isFreezeExempt(pathname: string): boolean {
   if (pathname.startsWith('/api/auth/')) return true;
@@ -67,7 +74,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Skip auth for public routes
-  if (PUBLIC_PATHS.some((p) => pathname === p)) {
+  if (isPublicRoute(pathname, req.method)) {
     const res = NextResponse.next();
     for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
       res.headers.set(key, value);
