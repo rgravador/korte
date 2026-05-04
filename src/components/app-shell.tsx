@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useStore } from '@/store';
 import { useState } from 'react';
 import { UserRole } from '@/lib/types';
+import { getTrialStatus, isTenantFrozen } from '@/lib/subscription';
 
 interface NavItem {
   label: string;
@@ -302,6 +303,76 @@ function MobileBottomNav() {
   );
 }
 
+/* ── Subscription Banner ── */
+function SubscriptionBanner() {
+  const tenant = useStore((s) => s.tenant);
+  const currentUser = useStore((s) => s.currentUser);
+
+  if (!currentUser || !tenant.id) return null;
+
+  const isAdmin = currentUser.role === 'tenant_admin';
+  const isFrozen = isTenantFrozen(
+    tenant.subscriptionStatus,
+    tenant.trialEndsAt,
+    tenant.currentPeriodEnd,
+  );
+  const trialStatus = getTrialStatus(tenant.trialEndsAt);
+  const isTrialWarning = tenant.subscriptionStatus === 'trial' && trialStatus.isWarning;
+
+  if (isFrozen) {
+    return (
+      <div className="rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3 mb-5">
+        <div className="flex items-center gap-2">
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-red-400 shrink-0">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
+          </svg>
+          <p className="text-sm font-medium text-red-300">
+            {isAdmin ? (
+              <>
+                Your account is frozen &mdash;{' '}
+                <Link href="/billing" className="underline underline-offset-2 hover:text-red-200 transition-colors">
+                  View billing
+                </Link>
+              </>
+            ) : (
+              'Your account is frozen — contact your admin'
+            )}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isTrialWarning) {
+    const warningText = trialStatus.daysRemaining === 0
+      ? 'Trial expires today'
+      : `Your trial ends in ${trialStatus.daysRemaining} day${trialStatus.daysRemaining === 1 ? '' : 's'}`;
+
+    return (
+      <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 px-4 py-3 mb-5">
+        <div className="flex items-center gap-2">
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-amber-400 shrink-0">
+            <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+          </svg>
+          <p className="text-sm font-medium text-amber-300">
+            {warningText}
+            {isAdmin && (
+              <>
+                {' — '}
+                <Link href="/billing" className="underline underline-offset-2 hover:text-amber-200 transition-colors">
+                  Upgrade
+                </Link>
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 /* ── App Shell ── */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -316,6 +387,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto">
           <div className="px-5 md:px-8 lg:px-10 pt-4 md:pt-6 pb-24 lg:pb-8">
             <MobileHeader />
+            <SubscriptionBanner />
             {children}
           </div>
         </div>
