@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { verifySession, COOKIE_NAME } from '@/lib/auth';
+import { dbGetTenantSubscriptionStatus } from '@/lib/db-subscription';
 
 export const config = {
   matcher: ['/api/:path*'],
@@ -40,6 +42,14 @@ function jsonResponse(status: number, body: { data: null; error: { code: string;
 
 // ── Public routes (no auth required) ────────────────────────
 const PUBLIC_PATHS = ['/api/auth/login', '/api/auth/register'];
+
+// ── Freeze-exempt routes (prefix/exact match) ──────────────
+function isFreezeExempt(pathname: string): boolean {
+  if (pathname.startsWith('/api/auth/')) return true;
+  if (pathname === '/api/hydrate') return true;
+  if (pathname.startsWith('/api/billing/')) return true;
+  return false;
+}
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -89,11 +99,69 @@ export async function middleware(req: NextRequest) {
     });
   }
 
+  // ── Freeze enforcement (read-only — no DB writes) ─────────
+  let planTier: string | null = null;
+  const isWriteMethod = req.method !== 'GET';
+
+  if (!isFreezeExempt(pathname) && isWriteMethod) {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (supabaseUrl && supabaseKey) {
+      const sb = createClient(supabaseUrl, supabaseKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      });
+
+      const sub = await dbGetTenantSubscriptionStatus(sb, session.tenantId);
+
+      if (sub) {
+        planTier = sub.planTier;
+
+        if (!sub.adminOverride) {
+          const now = Date.now();
+
+          if (sub.subscriptionStatus === 'frozen') {
+            return jsonResponse(403, {
+              data: null,
+              error: {
+                code: 'TENANT_FROZEN',
+                message: 'Your account is frozen. Please renew your subscription to continue.',
+              },
+            });
+          }
+
+          if (sub.subscriptionStatus === 'trial' && sub.trialEndsAt && new Date(sub.trialEndsAt).getTime() < now) {
+            return jsonResponse(403, {
+              data: null,
+              error: {
+                code: 'TENANT_FROZEN',
+                message: 'Your trial has expired. Please subscribe to continue.',
+              },
+            });
+          }
+
+          if (sub.subscriptionStatus === 'active' && sub.currentPeriodEnd && new Date(sub.currentPeriodEnd).getTime() < now) {
+            return jsonResponse(403, {
+              data: null,
+              error: {
+                code: 'TENANT_FROZEN',
+                message: 'Your subscription has lapsed. Please renew to continue.',
+              },
+            });
+          }
+        }
+      }
+    }
+  }
+
   // Inject session into request headers for route handlers
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set('x-user-id', session.userId);
   requestHeaders.set('x-tenant-id', session.tenantId);
   requestHeaders.set('x-user-role', session.role);
+  if (planTier) {
+    requestHeaders.set('x-plan-tier', planTier);
+  }
 
   const res = NextResponse.next({ request: { headers: requestHeaders } });
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
