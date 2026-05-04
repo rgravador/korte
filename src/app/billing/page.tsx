@@ -208,53 +208,57 @@ export default function BillingPage() {
         </div>
       </Section>
 
-      {/* Plan comparison */}
-      <Section title="Plans">
-        <div className="flex flex-col sm:flex-row gap-3">
-          {billing.planOptions.map((plan) => (
-            <PlanCard
-              key={plan.tier}
-              plan={plan}
-              isCurrentPlan={billing.planTier === plan.tier}
-            />
-          ))}
-        </div>
-        <p className="text-xs text-ink-3 mt-2">
-          Need more? Contact us for a custom Max plan with higher limits.
-        </p>
-      </Section>
-
-      {/* QR PH payment */}
-      <Section title="Payment">
-        <div className="bg-surface rounded-xl shadow-card p-4 space-y-4">
-          <p className="text-sm text-ink-2">
-            Pay via GCash, Maya, or any QR PH-enabled bank app
-          </p>
-
-          <div className="flex justify-center">
-            {qrError ? (
-              <div className="w-48 h-48 rounded-xl bg-surface-3 border border-line flex items-center justify-center">
-                <p className="text-xs text-ink-3 text-center px-4">QR code not yet available. Contact Korte for payment details.</p>
-              </div>
-            ) : (
-              <Image
-                src="/qr-ph.png"
-                alt="QR PH payment code"
-                width={192}
-                height={192}
-                className="rounded-xl border border-line"
-                onError={() => setQrError(true)}
+      {/* Plan comparison — hidden during trial */}
+      {!isTrial && (
+        <Section title="Plans">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {billing.planOptions.map((plan) => (
+              <PlanCard
+                key={plan.tier}
+                plan={plan}
+                isCurrentPlan={billing.planTier === plan.tier}
               />
-            )}
+            ))}
           </div>
+          <p className="text-xs text-ink-3 mt-2">
+            Need more? Contact us for a custom Max plan with higher limits.
+          </p>
+        </Section>
+      )}
 
-          <div className="rounded-lg bg-primary-soft/30 border border-primary/20 px-4 py-3">
+      {/* QR PH payment — hidden during trial */}
+      {!isTrial && (
+        <Section title="Payment">
+          <div className="bg-surface rounded-xl shadow-card p-4 space-y-4">
             <p className="text-sm text-ink-2">
-              After payment, contact Korte to activate your subscription.
+              Pay via GCash, Maya, or any QR PH-enabled bank app
             </p>
+
+            <div className="flex justify-center">
+              {qrError ? (
+                <div className="w-48 h-48 rounded-xl bg-surface-3 border border-line flex items-center justify-center">
+                  <p className="text-xs text-ink-3 text-center px-4">QR code not yet available. Contact Korte for payment details.</p>
+                </div>
+              ) : (
+                <Image
+                  src="/qr-ph.png"
+                  alt="QR PH payment code"
+                  width={192}
+                  height={192}
+                  className="rounded-xl border border-line"
+                  onError={() => setQrError(true)}
+                />
+              )}
+            </div>
+
+            <div className="rounded-lg bg-primary-soft/30 border border-primary/20 px-4 py-3">
+              <p className="text-sm text-ink-2">
+                After payment, contact Korte to activate your subscription.
+              </p>
+            </div>
           </div>
-        </div>
-      </Section>
+        </Section>
+      )}
     </AppShell>
   );
 }

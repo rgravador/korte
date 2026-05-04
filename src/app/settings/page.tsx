@@ -304,7 +304,7 @@ function SportConfigView({
 
 /* ── Main Settings Page ── */
 export default function SettingsPage() {
-  const { tenant, sports, courts, users, isOnline, pendingSync, lastSyncedAt, updateTenant, addSport, createUser } = useStore();
+  const { tenant, sports, courts, users, currentUser, isOnline, pendingSync, lastSyncedAt, updateTenant, addSport, createUser } = useStore();
 
   const [selectedSettingsSport, setSelectedSettingsSport] = useState<string | null>(null);
   const [editingFacility, setEditingFacility] = useState(false);
@@ -526,6 +526,28 @@ export default function SettingsPage() {
           </div>
           <span className="text-ink-3">&rarr;</span>
         </Link>
+      </Section>
+
+      {/* Quick links */}
+      <Section title="More">
+        <div className="space-y-1.5">
+          <Link href="/members" className="w-full bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
+            <div>
+              <div className="font-medium text-sm">Members</div>
+              <div className="text-xs text-ink-3">Manage your member roster</div>
+            </div>
+            <span className="text-ink-3">&rarr;</span>
+          </Link>
+          {currentUser?.role === 'tenant_admin' && (
+            <Link href="/billing" className="w-full bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
+              <div>
+                <div className="font-medium text-sm">Billing</div>
+                <div className="text-xs text-ink-3">Plan, payment, and account status</div>
+              </div>
+              <span className="text-ink-3">&rarr;</span>
+            </Link>
+          )}
+        </div>
       </Section>
 
       {/* Connection */}

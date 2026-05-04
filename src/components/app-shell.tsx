@@ -40,17 +40,6 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
-    label: 'Members',
-    href: '/members',
-    roles: ['system_admin', 'tenant_admin'],
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
-      </svg>
-    ),
-  },
-  {
     label: 'Reports',
     href: '/reports',
     roles: ['system_admin', 'tenant_admin'],
@@ -68,17 +57,6 @@ const NAV_ITEMS: NavItem[] = [
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
         <circle cx="12" cy="12" r="3" />
         <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Billing',
-    href: '/billing',
-    roles: ['tenant_admin'],
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
-        <rect x="2" y="5" width="20" height="14" rx="2" />
-        <path d="M2 10h20" />
       </svg>
     ),
   },
