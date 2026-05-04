@@ -13,7 +13,9 @@ import { toast } from '@/components/toast';
 
 const EMPTY_TENANT: Tenant = {
   id: '', name: '', subdomain: '', courtCount: 0,
-  operatingHoursStart: 6, operatingHoursEnd: 22, freeTrialDays: 7, createdAt: '',
+  operatingHoursStart: 6, operatingHoursEnd: 22, freeTrialDays: 7,
+  subscriptionStatus: 'trial', planTier: null, trialEndsAt: null,
+  currentPeriodEnd: null, adminOverride: false, createdAt: '',
 };
 
 interface AppState {

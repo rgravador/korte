@@ -22,6 +22,21 @@ export async function POST(req: NextRequest) {
 
     const { name, subdomain, operatingHoursStart, operatingHoursEnd, ownerName, ownerEmail, ownerUsername, ownerPassword, sports, courts } = parsed.data;
 
+    // Validate initial resource counts against Pro limits (trial operates under Pro limits)
+    const MAX_SPORTS = 3;
+    const MAX_COURTS = 20;
+
+    if (sports && sports.length > MAX_SPORTS) {
+      return badRequest(`Cannot create more than ${MAX_SPORTS} sports during registration`);
+    }
+
+    const totalCourts = sports
+      ? (sports as SportInput[]).reduce((sum, s) => sum + (s.courts?.length ?? 0), 0)
+      : (courts?.length ?? 0);
+    if (totalCourts > MAX_COURTS) {
+      return badRequest(`Cannot create more than ${MAX_COURTS} courts during registration`);
+    }
+
     const sb = getServerSupabase();
 
     // 1. Create tenant — auto-suffix subdomain if taken

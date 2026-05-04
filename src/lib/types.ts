@@ -6,6 +6,10 @@ export type ItemType = 'rental' | 'sale';
 
 export type MemberTier = 'regular' | 'vip';
 
+export type SubscriptionStatus = 'trial' | 'active' | 'frozen';
+
+export type PlanTier = 'basic' | 'pro';
+
 export interface User {
   id: string;
   tenantId: string;
@@ -32,6 +36,11 @@ export interface Tenant {
   operatingHoursEnd: number;   // 24h format, e.g. 22 — legacy, used as fallback
   operatingHoursRanges?: TimeRange[]; // multiple open windows — legacy, migrated to Sport
   freeTrialDays: number;
+  subscriptionStatus: SubscriptionStatus;
+  planTier: PlanTier | null;
+  trialEndsAt: string | null;       // ISO 8601 timestamp
+  currentPeriodEnd: string | null;  // ISO 8601 timestamp
+  adminOverride: boolean;
   createdAt: string;
 }
 

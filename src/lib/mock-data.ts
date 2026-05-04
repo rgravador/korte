@@ -39,6 +39,11 @@ export const seedTenant: Tenant = {
   operatingHoursStart: 6,
   operatingHoursEnd: 22,
   freeTrialDays: 7,
+  subscriptionStatus: 'trial',
+  planTier: null,
+  trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  currentPeriodEnd: null,
+  adminOverride: false,
   createdAt: '2026-03-01T00:00:00Z',
 };
 

@@ -55,6 +55,13 @@ CREATE TABLE tenants (
   operating_hours_start INT NOT NULL DEFAULT 6,
   operating_hours_end   INT NOT NULL DEFAULT 22,
   free_trial_days INT NOT NULL DEFAULT 7,
+  subscription_status TEXT NOT NULL DEFAULT 'trial'
+    CHECK (subscription_status IN ('trial', 'active', 'frozen')),
+  plan_tier      TEXT
+    CHECK (plan_tier IS NULL OR plan_tier IN ('basic', 'pro')),
+  trial_ends_at  TIMESTAMPTZ,
+  current_period_end TIMESTAMPTZ,
+  admin_override BOOLEAN NOT NULL DEFAULT false,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
