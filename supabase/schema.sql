@@ -43,6 +43,7 @@ DROP TABLE IF EXISTS bookings CASCADE;
 DROP TABLE IF EXISTS members CASCADE;
 DROP TABLE IF EXISTS items CASCADE;
 DROP TABLE IF EXISTS courts CASCADE;
+DROP TABLE IF EXISTS sports CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS tenants CASCADE;
 
@@ -53,6 +54,7 @@ CREATE TABLE tenants (
   court_count    INT NOT NULL DEFAULT 0,
   operating_hours_start INT NOT NULL DEFAULT 6,
   operating_hours_end   INT NOT NULL DEFAULT 22,
+  free_trial_days INT NOT NULL DEFAULT 7,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -70,9 +72,19 @@ CREATE TABLE users (
   UNIQUE(tenant_id, username)
 );
 
+CREATE TABLE sports (
+  id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id              UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  name                   TEXT NOT NULL,
+  operating_hours_ranges JSONB NOT NULL DEFAULT '[]'::JSONB,
+  is_active              BOOLEAN NOT NULL DEFAULT true,
+  created_at             TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE courts (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  sport_id       UUID REFERENCES sports(id) ON DELETE SET NULL,
   name           TEXT NOT NULL,
   hourly_rate    NUMERIC(10,2) NOT NULL DEFAULT 0,
   is_active      BOOLEAN NOT NULL DEFAULT true,
@@ -82,6 +94,7 @@ CREATE TABLE courts (
 CREATE TABLE items (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id      UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  sport_id       UUID REFERENCES sports(id) ON DELETE SET NULL,
   name           TEXT NOT NULL,
   price          NUMERIC(10,2) NOT NULL DEFAULT 0,
   type           item_type NOT NULL DEFAULT 'rental',
@@ -136,8 +149,11 @@ CREATE TABLE booking_items (
 -- Indexes
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_users_tenant          ON users(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_sports_tenant         ON sports(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_courts_tenant         ON courts(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_courts_sport          ON courts(sport_id);
 CREATE INDEX IF NOT EXISTS idx_items_tenant          ON items(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_items_sport           ON items(sport_id);
 CREATE INDEX IF NOT EXISTS idx_members_tenant        ON members(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_tenant       ON bookings(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_date         ON bookings(tenant_id, date);
@@ -146,25 +162,31 @@ CREATE INDEX IF NOT EXISTS idx_bookings_member       ON bookings(member_id);
 CREATE INDEX IF NOT EXISTS idx_booking_items_booking ON booking_items(booking_id);
 
 -- ============================================================
--- Grants — allow anon and authenticated roles to use tables + functions
+-- Grants — least-privilege per role
 -- ============================================================
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 
-GRANT ALL ON tenants       TO anon, authenticated;
-GRANT ALL ON users         TO anon, authenticated;
-GRANT ALL ON courts        TO anon, authenticated;
-GRANT ALL ON items         TO anon, authenticated;
-GRANT ALL ON members       TO anon, authenticated;
-GRANT ALL ON bookings      TO anon, authenticated;
-GRANT ALL ON booking_items TO anon, authenticated;
+-- anon: read-only on tenants (subdomain lookup for login page)
+GRANT SELECT ON tenants TO anon;
+
+-- authenticated: standard CRUD scoped by RLS policies below
+GRANT SELECT, INSERT, UPDATE ON tenants       TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON users         TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON sports TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON courts TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON items  TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON members        TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON bookings       TO authenticated;
+GRANT SELECT, INSERT ON booking_items          TO authenticated;
 
 -- ============================================================
--- Row-Level Security — DISABLED for prototype
--- Re-enable for production by uncommenting the ALTER TABLE and
--- CREATE POLICY statements below.
+-- Row-Level Security — tenant isolation (defense-in-depth)
+-- Primary enforcement is the JWT session in the API layer.
+-- These policies protect against direct anon/authenticated key usage.
+-- The service_role key used by API routes bypasses RLS.
 -- ============================================================
 
--- Helper functions (kept for future RLS)
+-- Helper functions
 CREATE OR REPLACE FUNCTION current_tenant_id() RETURNS UUID AS $$
   SELECT COALESCE(
     NULLIF(current_setting('app.current_tenant_id', true), ''),
@@ -179,20 +201,44 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION set_tenant_context(UUID) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION set_tenant_context(UUID) TO authenticated;
 
--- RLS DISABLED — all tables are open to anon/authenticated roles via GRANT ALL above.
--- Tenant isolation is enforced by the app layer (WHERE tenant_id = X) for now.
-ALTER TABLE tenants       DISABLE ROW LEVEL SECURITY;
-ALTER TABLE users         DISABLE ROW LEVEL SECURITY;
-ALTER TABLE courts        DISABLE ROW LEVEL SECURITY;
-ALTER TABLE items         DISABLE ROW LEVEL SECURITY;
-ALTER TABLE members       DISABLE ROW LEVEL SECURITY;
-ALTER TABLE bookings      DISABLE ROW LEVEL SECURITY;
-ALTER TABLE booking_items DISABLE ROW LEVEL SECURITY;
+-- Enable RLS on all tenant-scoped tables
+ALTER TABLE users         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sports        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE courts        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE items         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE members       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE booking_items ENABLE ROW LEVEL SECURITY;
 
--- RLS policies removed for prototype. Re-add when enabling RLS for production.
--- See git history for the full policy definitions.
+-- Tenant isolation policies (all operations scoped to current_tenant_id())
+CREATE POLICY tenant_isolation ON users
+  USING (tenant_id = current_tenant_id())
+  WITH CHECK (tenant_id = current_tenant_id());
+
+CREATE POLICY tenant_isolation ON sports
+  USING (tenant_id = current_tenant_id())
+  WITH CHECK (tenant_id = current_tenant_id());
+
+CREATE POLICY tenant_isolation ON courts
+  USING (tenant_id = current_tenant_id())
+  WITH CHECK (tenant_id = current_tenant_id());
+
+CREATE POLICY tenant_isolation ON items
+  USING (tenant_id = current_tenant_id())
+  WITH CHECK (tenant_id = current_tenant_id());
+
+CREATE POLICY tenant_isolation ON members
+  USING (tenant_id = current_tenant_id())
+  WITH CHECK (tenant_id = current_tenant_id());
+
+CREATE POLICY tenant_isolation ON bookings
+  USING (tenant_id = current_tenant_id())
+  WITH CHECK (tenant_id = current_tenant_id());
+
+CREATE POLICY tenant_isolation ON booking_items
+  USING (booking_id IN (SELECT id FROM bookings WHERE tenant_id = current_tenant_id()));
 
 -- ============================================================
 -- Helper functions: password hashing
@@ -205,8 +251,9 @@ CREATE OR REPLACE FUNCTION verify_password(plain TEXT, hashed TEXT) RETURNS BOOL
   SELECT hashed = crypt(plain, hashed);
 $$ LANGUAGE sql;
 
-GRANT EXECUTE ON FUNCTION hash_password(TEXT)        TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION verify_password(TEXT, TEXT) TO anon, authenticated;
+-- Password functions restricted to authenticated role only (called via service_role in API routes)
+GRANT EXECUTE ON FUNCTION hash_password(TEXT)        TO authenticated;
+GRANT EXECUTE ON FUNCTION verify_password(TEXT, TEXT) TO authenticated;
 
 -- ============================================================
 -- Trigger: auto-update updated_at on users

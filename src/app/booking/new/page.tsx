@@ -88,7 +88,7 @@ function NewBookingForm() {
 
   const selectedSport = sports.find((s) => s.id === selectedSportId) ?? null;
   const activeCourts = courts.filter((c) => c.isActive && (!selectedSportId || c.sportId === selectedSportId));
-  const activeItems = items.filter((i) => i.isActive);
+  const activeItems = items.filter((i) => i.isActive && (!selectedSportId || i.sportId === selectedSportId));
   const selectedCourt = activeCourts.find((c) => c.id === selectedCourtId);
   const selectedMember = members.find((m) => m.id === selectedMemberId);
 
@@ -228,7 +228,6 @@ function NewBookingForm() {
       if (isWalkIn && walkInFirstName.trim()) {
         try {
           const newMemberId = await addMember({
-            tenantId: tenant.id,
             firstName: walkInFirstName.trim(),
             lastName: walkInLastName.trim() || '',
             phone: walkInPhone.trim() || '',
@@ -253,7 +252,6 @@ function NewBookingForm() {
         const isFirstBlock = block === blocks[0];
 
         lastId = await createBooking({
-          tenantId: tenant.id,
           courtId: selectedCourtId,
           memberId,
           memberName: bookingMemberName,

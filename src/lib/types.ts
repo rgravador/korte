@@ -31,6 +31,7 @@ export interface Tenant {
   operatingHoursStart: number; // 24h format, e.g. 6 — legacy, used as fallback
   operatingHoursEnd: number;   // 24h format, e.g. 22 — legacy, used as fallback
   operatingHoursRanges?: TimeRange[]; // multiple open windows — legacy, migrated to Sport
+  freeTrialDays: number;
   createdAt: string;
 }
 
@@ -98,6 +99,7 @@ export interface Court {
 export interface Item {
   id: string;
   tenantId: string;
+  sportId: string;
   name: string;
   price: number; // in PHP (₱)
   type: ItemType;

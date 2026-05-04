@@ -44,16 +44,16 @@ export function onOnlineChange(cb: (online: boolean) => void): () => void {
 
 export type MutationType =
   | { kind: 'createBooking'; payload: Record<string, unknown> }
-  | { kind: 'updateBookingStatus'; payload: { bookingId: string; status: BookingStatus } }
-  | { kind: 'rescheduleBooking'; payload: { bookingId: string; date: string; startHour: number } }
+  | { kind: 'updateBookingStatus'; payload: { bookingId: string; tenantId: string; status: BookingStatus } }
+  | { kind: 'rescheduleBooking'; payload: { bookingId: string; tenantId: string; date: string; startHour: number } }
   | { kind: 'addMember'; payload: { tenantId: string; firstName: string; lastName: string; phone: string; email: string; tier: MemberTier } }
-  | { kind: 'updateMember'; payload: { memberId: string; updates: Record<string, unknown> } }
+  | { kind: 'updateMember'; payload: { memberId: string; tenantId: string; updates: Record<string, unknown> } }
   | { kind: 'addCourt'; payload: { tenantId: string; sportId: string; name: string; hourlyRate: number } }
-  | { kind: 'updateCourt'; payload: { courtId: string; updates: Record<string, unknown> } }
-  | { kind: 'removeCourt'; payload: { courtId: string } }
-  | { kind: 'addItem'; payload: { tenantId: string; name: string; price: number; type: ItemType } }
-  | { kind: 'updateItem'; payload: { itemId: string; updates: Record<string, unknown> } }
-  | { kind: 'removeItem'; payload: { itemId: string } }
+  | { kind: 'updateCourt'; payload: { courtId: string; tenantId: string; updates: Record<string, unknown> } }
+  | { kind: 'removeCourt'; payload: { courtId: string; tenantId: string } }
+  | { kind: 'addItem'; payload: { tenantId: string; sportId?: string; name: string; price: number; type: ItemType } }
+  | { kind: 'updateItem'; payload: { itemId: string; tenantId: string; updates: Record<string, unknown> } }
+  | { kind: 'removeItem'; payload: { itemId: string; tenantId: string } }
   | { kind: 'updateTenant'; payload: { tenantId: string; updates: Record<string, unknown> } }
   | { kind: 'createUser'; payload: { tenantId: string; username: string; password: string; role: UserRole; displayName: string; email: string } };
 
@@ -114,12 +114,12 @@ async function executeMutation(sb: ReturnType<typeof getSupabase>, mutation: Mut
       return result !== null;
     }
     case 'updateBookingStatus': {
-      const { bookingId, status } = mutation.payload;
-      return dbUpdateBookingStatus(sb, bookingId, status);
+      const { bookingId, tenantId, status } = mutation.payload;
+      return dbUpdateBookingStatus(sb, bookingId, tenantId, status);
     }
     case 'rescheduleBooking': {
-      const { bookingId, date, startHour } = mutation.payload;
-      return dbRescheduleBooking(sb, bookingId, date, startHour);
+      const { bookingId, tenantId, date, startHour } = mutation.payload;
+      return dbRescheduleBooking(sb, bookingId, tenantId, date, startHour);
     }
     case 'addMember': {
       const p = mutation.payload;
@@ -127,29 +127,29 @@ async function executeMutation(sb: ReturnType<typeof getSupabase>, mutation: Mut
       return result !== null;
     }
     case 'updateMember': {
-      const { memberId, updates } = mutation.payload;
-      return dbUpdateMember(sb, memberId, updates as never);
+      const { memberId, tenantId, updates } = mutation.payload;
+      return dbUpdateMember(sb, memberId, tenantId, updates as never);
     }
     case 'addCourt': {
       const result = await dbAddCourt(sb, mutation.payload);
       return result !== null;
     }
     case 'updateCourt': {
-      const { courtId, updates } = mutation.payload;
-      return dbUpdateCourt(sb, courtId, updates as never);
+      const { courtId, tenantId, updates } = mutation.payload;
+      return dbUpdateCourt(sb, courtId, tenantId, updates as never);
     }
     case 'removeCourt':
-      return dbRemoveCourt(sb, mutation.payload.courtId);
+      return dbRemoveCourt(sb, mutation.payload.courtId, mutation.payload.tenantId);
     case 'addItem': {
       const result = await dbAddItem(sb, mutation.payload);
       return result !== null;
     }
     case 'updateItem': {
-      const { itemId, updates } = mutation.payload;
-      return dbUpdateItem(sb, itemId, updates as never);
+      const { itemId, tenantId, updates } = mutation.payload;
+      return dbUpdateItem(sb, itemId, tenantId, updates as never);
     }
     case 'removeItem':
-      return dbRemoveItem(sb, mutation.payload.itemId);
+      return dbRemoveItem(sb, mutation.payload.itemId, mutation.payload.tenantId);
     case 'updateTenant': {
       const { tenantId, updates } = mutation.payload;
       return dbUpdateTenant(sb, tenantId, updates as never);
@@ -202,7 +202,7 @@ export async function setupTenantOnline(data: {
   ownerUsername: string;
   ownerPassword: string;
   courts: { name: string; hourlyRate: number }[];
-  items: { name: string; price: number; type: ItemType }[];
+  items: { name: string; price: number; type: ItemType; sportId?: string }[];
 }) {
   const configured = isSupabaseConfigured();
   const online = getOnlineStatus();
@@ -256,7 +256,7 @@ export async function setupTenantOnline(data: {
 
   // 4. Create items
   for (const item of data.items) {
-    const created = await dbAddItem(sb, { tenantId: tenant.id, ...item });
+    const created = await dbAddItem(sb, { tenantId: tenant.id, sportId: item.sportId, ...item });
     if (!created) console.error('[sync] Failed to create item:', item.name);
   }
 

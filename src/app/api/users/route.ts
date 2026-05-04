@@ -1,14 +1,16 @@
 import { NextRequest } from 'next/server';
 import { getServerSupabase } from '@/lib/supabase-server';
 import { dbCreateUser } from '@/lib/db';
-import { ok, created, badRequest, serverError } from '@/lib/api-response';
+import { ok, created, badRequest, forbidden, serverError } from '@/lib/api-response';
+import { getSessionFromHeaders } from '@/lib/auth';
+import { CreateUserSchema, validateBody } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
     const username = req.nextUrl.searchParams.get('username');
-    if (!username) return badRequest('Username is required');
+    if (!username || username.length > 100) return badRequest('Valid username is required');
 
     const sb = getServerSupabase();
     const { data, error } = await sb
@@ -31,11 +33,23 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { tenantId, username, password, role, displayName, email } = await req.json();
-    if (!tenantId || !username || !password) return badRequest('Missing required fields');
+    const session = getSessionFromHeaders(req);
+    const body = await req.json();
+    const parsed = validateBody(CreateUserSchema, body);
+    if ('error' in parsed) return badRequest(parsed.error);
+
+    const { role } = parsed.data;
+
+    // Role-based creation rules
+    if (session.role === 'tenant_staff') {
+      return forbidden('Staff cannot create users');
+    }
+    if (session.role === 'tenant_admin' && role !== 'tenant_staff') {
+      return forbidden('Tenant admins can only create staff accounts');
+    }
 
     const sb = getServerSupabase();
-    const user = await dbCreateUser(sb, tenantId, { username, password, role, displayName, email });
+    const user = await dbCreateUser(sb, session.tenantId, parsed.data);
     if (!user) return serverError('Failed to create user');
     return created(user);
   } catch (err) {

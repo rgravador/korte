@@ -1,6 +1,6 @@
 /**
- * Client-side API helper — calls Next.js API routes instead of Supabase directly.
- * The service_role key never leaves the server.
+ * Client-side API helper — calls Next.js API routes.
+ * Authentication is handled via httpOnly session cookies.
  */
 
 import {
@@ -15,6 +15,7 @@ interface ApiResponse<T> {
 async function fetchApi<T>(url: string, options?: RequestInit): Promise<T | null> {
   try {
     const res = await fetch(url, {
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       ...options,
     });
@@ -23,7 +24,6 @@ async function fetchApi<T>(url: string, options?: RequestInit): Promise<T | null
       console.error(`[api] ${options?.method ?? 'GET'} ${url} failed:`, json.error?.message ?? res.statusText);
       return null;
     }
-    console.debug(`[api] ${options?.method ?? 'GET'} ${url} OK`);
     return json.data;
   } catch (err) {
     console.error(`[api] ${options?.method ?? 'GET'} ${url} error:`, err);
@@ -38,6 +38,10 @@ export async function apiLogin(username: string, password: string): Promise<User
     method: 'POST',
     body: JSON.stringify({ username, password }),
   });
+}
+
+export async function apiLogout(): Promise<void> {
+  await fetchApi('/api/auth/logout', { method: 'POST' });
 }
 
 export async function apiRegister(data: {
@@ -71,13 +75,14 @@ export interface TenantData {
   bookings: Booking[];
 }
 
-export async function apiHydrate(tenantId: string): Promise<TenantData | null> {
-  return fetchApi<TenantData>(`/api/hydrate?tenantId=${encodeURIComponent(tenantId)}`);
+export async function apiHydrate(tenantId?: string): Promise<TenantData | null> {
+  const url = tenantId ? `/api/hydrate?tenantId=${encodeURIComponent(tenantId)}` : '/api/hydrate';
+  return fetchApi<TenantData>(url);
 }
 
 // ── Bookings ─────────────────────────────────────────────────
 
-export async function apiCreateBooking(booking: Omit<Booking, 'id' | 'createdAt'>): Promise<Booking | null> {
+export async function apiCreateBooking(booking: Omit<Booking, 'id' | 'createdAt' | 'tenantId'>): Promise<Booking | null> {
   return fetchApi<Booking>('/api/bookings', {
     method: 'POST',
     body: JSON.stringify(booking),
@@ -103,7 +108,7 @@ export async function apiRescheduleBooking(bookingId: string, date: string, star
 // ── Members ──────────────────────────────────────────────────
 
 export async function apiAddMember(data: {
-  tenantId: string; firstName: string; lastName: string; phone: string; email: string; tier: MemberTier;
+  firstName: string; lastName: string; phone: string; email: string; tier: MemberTier;
 }): Promise<Member | null> {
   return fetchApi<Member>('/api/members', {
     method: 'POST',
@@ -121,7 +126,7 @@ export async function apiUpdateMember(memberId: string, updates: Partial<Member>
 
 // ── Sports ──────────────────────────────────────────────────
 
-export async function apiAddSport(data: { tenantId: string; name: string; operatingHoursRanges: TimeRange[] }): Promise<Sport | null> {
+export async function apiAddSport(data: { name: string; operatingHoursRanges: TimeRange[] }): Promise<Sport | null> {
   return fetchApi<Sport>('/api/sports', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -146,7 +151,7 @@ export async function apiRemoveSport(sportId: string): Promise<boolean> {
 
 // ── Courts ───────────────────────────────────────────────────
 
-export async function apiAddCourt(data: { tenantId: string; sportId: string; name: string; hourlyRate: number }): Promise<Court | null> {
+export async function apiAddCourt(data: { sportId: string; name: string; hourlyRate: number }): Promise<Court | null> {
   return fetchApi<Court>('/api/courts', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -171,7 +176,7 @@ export async function apiRemoveCourt(courtId: string): Promise<boolean> {
 
 // ── Items ────────────────────────────────────────────────────
 
-export async function apiAddItem(data: { tenantId: string; name: string; price: number; type: ItemType }): Promise<Item | null> {
+export async function apiAddItem(data: { sportId?: string; name: string; price: number; type: ItemType }): Promise<Item | null> {
   return fetchApi<Item>('/api/items', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -196,10 +201,10 @@ export async function apiRemoveItem(itemId: string): Promise<boolean> {
 
 // ── Tenant ───────────────────────────────────────────────────
 
-export async function apiUpdateTenant(tenantId: string, updates: Partial<Tenant>): Promise<boolean> {
+export async function apiUpdateTenant(updates: Partial<Tenant>): Promise<boolean> {
   const result = await fetchApi('/api/tenants', {
     method: 'PATCH',
-    body: JSON.stringify({ tenantId, ...updates }),
+    body: JSON.stringify(updates),
   });
   return result !== null;
 }
@@ -212,7 +217,7 @@ export async function apiCheckUsername(username: string): Promise<boolean> {
 }
 
 export async function apiCreateUser(data: {
-  tenantId: string; username: string; password: string; role: UserRole; displayName: string; email: string;
+  username: string; password: string; role: UserRole; displayName: string; email: string;
 }): Promise<User | null> {
   return fetchApi<User>('/api/users', {
     method: 'POST',
