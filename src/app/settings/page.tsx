@@ -20,7 +20,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default function SettingsPage() {
-  const { tenant, courts, items, users, isOnline, pendingSync, lastSyncedAt, updateTenant, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem, createUser } = useStore();
+  const { tenant, sports, courts, items, users, isOnline, pendingSync, lastSyncedAt, updateTenant, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem, createUser } = useStore();
 
   const [editingFacility, setEditingFacility] = useState(false);
 
@@ -63,7 +63,8 @@ export default function SettingsPage() {
   const handleAddCourt = async () => {
     if (!newCourtName.trim() || !newCourtRate) return;
     try {
-      await addCourt({ tenantId: tenant.id, name: newCourtName.trim(), hourlyRate: Number(newCourtRate), isActive: true });
+      const sportId = sports[0]?.id ?? '';
+      await addCourt({ tenantId: tenant.id, sportId, name: newCourtName.trim(), hourlyRate: Number(newCourtRate), isActive: true });
       setNewCourtRate('');
       setShowAddCourt(false);
     } catch {

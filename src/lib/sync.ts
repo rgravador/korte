@@ -48,7 +48,7 @@ export type MutationType =
   | { kind: 'rescheduleBooking'; payload: { bookingId: string; date: string; startHour: number } }
   | { kind: 'addMember'; payload: { tenantId: string; firstName: string; lastName: string; phone: string; email: string; tier: MemberTier } }
   | { kind: 'updateMember'; payload: { memberId: string; updates: Record<string, unknown> } }
-  | { kind: 'addCourt'; payload: { tenantId: string; name: string; hourlyRate: number } }
+  | { kind: 'addCourt'; payload: { tenantId: string; sportId: string; name: string; hourlyRate: number } }
   | { kind: 'updateCourt'; payload: { courtId: string; updates: Record<string, unknown> } }
   | { kind: 'removeCourt'; payload: { courtId: string } }
   | { kind: 'addItem'; payload: { tenantId: string; name: string; price: number; type: ItemType } }
@@ -250,7 +250,7 @@ export async function setupTenantOnline(data: {
 
   // 3. Create courts
   for (const c of data.courts) {
-    const court = await dbAddCourt(sb, { tenantId: tenant.id, name: c.name, hourlyRate: c.hourlyRate });
+    const court = await dbAddCourt(sb, { tenantId: tenant.id, sportId: '', name: c.name, hourlyRate: c.hourlyRate });
     if (!court) console.error('[sync] Failed to create court:', c.name);
   }
 

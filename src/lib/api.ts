@@ -4,7 +4,7 @@
  */
 
 import {
-  User, Tenant, Court, Item, Member, Booking, BookingStatus, ItemType, UserRole, MemberTier,
+  User, Tenant, Court, Item, Member, Booking, Sport, BookingStatus, ItemType, UserRole, MemberTier, TimeRange,
 } from './types';
 
 interface ApiResponse<T> {
@@ -63,6 +63,7 @@ export async function apiRegister(data: {
 export interface TenantData {
   tenant: Tenant;
   users: User[];
+  sports: Sport[];
   courts: Court[];
   items: Item[];
   members: Member[];
@@ -117,9 +118,34 @@ export async function apiUpdateMember(memberId: string, updates: Partial<Member>
   return result !== null;
 }
 
+// ── Sports ──────────────────────────────────────────────────
+
+export async function apiAddSport(data: { tenantId: string; name: string; operatingHoursRanges: TimeRange[] }): Promise<Sport | null> {
+  return fetchApi<Sport>('/api/sports', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiUpdateSport(sportId: string, updates: Partial<{ name: string; operatingHoursRanges: TimeRange[]; isActive: boolean }>): Promise<boolean> {
+  const result = await fetchApi('/api/sports', {
+    method: 'PATCH',
+    body: JSON.stringify({ sportId, ...updates }),
+  });
+  return result !== null;
+}
+
+export async function apiRemoveSport(sportId: string): Promise<boolean> {
+  const result = await fetchApi('/api/sports', {
+    method: 'DELETE',
+    body: JSON.stringify({ sportId }),
+  });
+  return result !== null;
+}
+
 // ── Courts ───────────────────────────────────────────────────
 
-export async function apiAddCourt(data: { tenantId: string; name: string; hourlyRate: number }): Promise<Court | null> {
+export async function apiAddCourt(data: { tenantId: string; sportId: string; name: string; hourlyRate: number }): Promise<Court | null> {
   return fetchApi<Court>('/api/courts', {
     method: 'POST',
     body: JSON.stringify(data),
