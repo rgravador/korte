@@ -63,6 +63,13 @@ const config: Config = {
       },
     },
   },
+  safelist: [
+    // Court color classes used dynamically in schedule grid
+    { pattern: /bg-(emerald|sky|violet|rose|amber|cyan|orange|pink|lime|teal)-\d+\/(15|20|25)/ },
+    { pattern: /text-(emerald|sky|violet|rose|amber|cyan|orange|pink|lime|teal)-400/ },
+    { pattern: /border-(emerald|sky|violet|rose|amber|cyan|orange|pink|lime|teal)-500\/40/ },
+    { pattern: /bg-(emerald|sky|violet|rose|amber|cyan|orange|pink|lime|teal)-400/ },
+  ],
   plugins: [],
 };
 export default config;

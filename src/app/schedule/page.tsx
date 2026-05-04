@@ -7,6 +7,24 @@ import { useRouter } from 'next/navigation';
 import { Booking, getOperatingHours } from '@/lib/types';
 import Link from 'next/link';
 
+// Distinct court colors — 10 colors that are visually separable on dark backgrounds
+const COURT_COLORS = [
+  { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/40', dot: 'bg-emerald-400', open: 'bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25' },
+  { bg: 'bg-sky-500/20', text: 'text-sky-400', border: 'border-sky-500/40', dot: 'bg-sky-400', open: 'bg-sky-500/15 text-sky-400 hover:bg-sky-500/25' },
+  { bg: 'bg-violet-500/20', text: 'text-violet-400', border: 'border-violet-500/40', dot: 'bg-violet-400', open: 'bg-violet-500/15 text-violet-400 hover:bg-violet-500/25' },
+  { bg: 'bg-rose-500/20', text: 'text-rose-400', border: 'border-rose-500/40', dot: 'bg-rose-400', open: 'bg-rose-500/15 text-rose-400 hover:bg-rose-500/25' },
+  { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/40', dot: 'bg-amber-400', open: 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25' },
+  { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/40', dot: 'bg-cyan-400', open: 'bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25' },
+  { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/40', dot: 'bg-orange-400', open: 'bg-orange-500/15 text-orange-400 hover:bg-orange-500/25' },
+  { bg: 'bg-pink-500/20', text: 'text-pink-400', border: 'border-pink-500/40', dot: 'bg-pink-400', open: 'bg-pink-500/15 text-pink-400 hover:bg-pink-500/25' },
+  { bg: 'bg-lime-500/20', text: 'text-lime-400', border: 'border-lime-500/40', dot: 'bg-lime-400', open: 'bg-lime-500/15 text-lime-400 hover:bg-lime-500/25' },
+  { bg: 'bg-teal-500/20', text: 'text-teal-400', border: 'border-teal-500/40', dot: 'bg-teal-400', open: 'bg-teal-500/15 text-teal-400 hover:bg-teal-500/25' },
+];
+
+function getCourtColor(index: number) {
+  return COURT_COLORS[index % COURT_COLORS.length];
+}
+
 function formatSelectedDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
   const today = new Date();
@@ -63,6 +81,16 @@ export default function SchedulePage() {
     [courts]
   );
 
+  // Map court ID → color index (stable across renders)
+  const courtColorMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    activeCourts.forEach((c, i) => { map[c.id] = i; });
+    return map;
+  }, [activeCourts]);
+
+  // On mobile (< md), show one court at a time when "All" is selected and there are 3+ courts
+  const isMobileMultiCourt = courtFilter === 'all' && activeCourts.length >= 3;
+
   const filteredCourts = useMemo(
     () =>
       courtFilter === 'all'
@@ -70,6 +98,7 @@ export default function SchedulePage() {
         : activeCourts.filter((c) => c.id === courtFilter),
     [activeCourts, courtFilter]
   );
+
 
   const hours = useMemo(() => getOperatingHours(tenant), [tenant]);
 
@@ -150,6 +179,10 @@ export default function SchedulePage() {
   const isSelected = (courtId: string, hour: number) =>
     selection?.courtId === courtId && selection.hours.includes(hour);
 
+  // On desktop, always use filteredCourts. On mobile, use single court when in carousel mode.
+  // Since we can't use media queries in JS, we render the grid with filteredCourts but
+  // hide the overflow on mobile via CSS. Instead, use a simpler approach:
+  // the mobile carousel replaces the grid entirely with a single-column list view.
   const gridColCount = filteredCourts.length;
 
   return (
@@ -179,8 +212,8 @@ export default function SchedulePage() {
         })}
       </div>
 
-      {/* Controls row: date picker + court chips */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      {/* Controls row */}
+      <div className="flex flex-wrap items-center gap-3 mb-3">
         <input
           type="date"
           value={selectedDate}
@@ -192,29 +225,108 @@ export default function SchedulePage() {
         <span className="font-display font-semibold text-lg tracking-tight text-ink">
           {formatSelectedDate(selectedDate)}
         </span>
-        <div className="flex gap-1.5 ml-auto">
-          {courtChips.map((chip) => {
-            const isActive = chip.id === courtFilter;
-            return (
-              <button
-                key={chip.id}
-                onClick={() => setCourtFilter(chip.id)}
-                className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
-                  isActive
-                    ? 'bg-primary text-white'
-                    : 'bg-surface-3 text-ink-3 hover:bg-line'
-                }`}
-              >
-                {chip.label}
-              </button>
-            );
-          })}
+      </div>
+
+      {/* Court filter */}
+      <div className="flex gap-1.5 overflow-x-auto hide-scrollbar mb-4">
+        {courtChips.map((chip) => {
+          const isActive = chip.id === courtFilter;
+          return (
+            <button
+              key={chip.id}
+              onClick={() => setCourtFilter(chip.id)}
+              className={`text-xs font-medium px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
+                isActive
+                  ? 'bg-primary text-white'
+                  : 'bg-surface-3 text-ink-3 hover:bg-line'
+              }`}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Legend — court colors + status */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-2">
+        {activeCourts.map((court, i) => {
+          const color = getCourtColor(i);
+          return (
+            <div key={court.id} className="flex items-center gap-1.5">
+              <div className={`w-2.5 h-2.5 rounded-full ${color.dot}`} />
+              <span className={`text-xs font-medium ${color.text}`}>{court.name}</span>
+            </div>
+          );
+        })}
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-sm bg-surface-3" />
+          <span className="text-xs text-ink-4">Booked</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-sm bg-amber/30" />
+          <span className="text-xs text-ink-4">Recurring</span>
         </div>
       </div>
 
-      {/* Time-by-court grid */}
-      <div className="overflow-x-auto mb-4">
-        <div className="bg-surface rounded-xl shadow-card overflow-hidden border border-line-2 min-w-[320px]">
+      {/* Mobile: time-first availability view (when many courts) */}
+      {isMobileMultiCourt && (
+        <div className="md:hidden mb-4 space-y-2">
+          {hours.map((hour) => {
+            const courtStatuses = activeCourts.map((court) => {
+              const booking = bookingGrid[court.id]?.[hour];
+              const isSel = isSelected(court.id, hour);
+              return { court, booking, isSel };
+            });
+            const openCount = courtStatuses.filter((s) => !s.booking).length;
+
+            return (
+              <div key={hour} className="bg-surface rounded-xl border border-line-2 overflow-hidden">
+                {/* Hour header */}
+                <div className="flex items-center justify-between px-3.5 py-2 bg-surface-2">
+                  <span className="text-sm font-semibold text-ink">{formatHour(hour)}</span>
+                  <span className={`text-[10px] font-medium ${openCount > 0 ? 'text-signal' : 'text-ink-4'}`}>
+                    {openCount > 0 ? `${openCount} open` : 'Full'}
+                  </span>
+                </div>
+                {/* Court chips */}
+                <div className="flex flex-wrap gap-1.5 px-3 py-2.5">
+                  {courtStatuses.map(({ court, booking, isSel }) => {
+                    const isBooked = !!booking;
+                    const isRecurring = booking?.isRecurring ?? false;
+                    const color = getCourtColor(courtColorMap[court.id] ?? 0);
+
+                    return (
+                      <button
+                        key={court.id}
+                        onClick={() => handleCellTap(court.id, hour)}
+                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                          isSel
+                            ? `${color.bg} ring-1 ${color.border} ${color.text}`
+                            : isBooked && isRecurring
+                              ? 'bg-amber/20 text-amber'
+                              : isBooked
+                                ? 'bg-surface-3 text-ink-4 line-through'
+                                : color.open
+                        }`}
+                      >
+                        {court.name.replace('Court ', 'C')}
+                        {isBooked && !isRecurring && (
+                          <span className="ml-1 no-underline">{getInitials(booking.memberName)}</span>
+                        )}
+                        {isSel && <span className="ml-1">✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Desktop + mobile non-carousel: full court grid */}
+      <div className={`overflow-x-auto mb-4 ${isMobileMultiCourt ? 'hidden md:block' : ''}`}>
+        <div className="bg-surface rounded-xl shadow-card overflow-hidden border border-line-2">
           {/* Grid header */}
           <div
             className="grid border-b border-line-2 bg-surface-2"
@@ -223,14 +335,18 @@ export default function SchedulePage() {
             }}
           >
             <div className="p-2" />
-            {filteredCourts.map((court) => (
-              <div
-                key={court.id}
-                className="text-xs font-semibold text-ink-3 text-center p-2 border-l border-line-2"
-              >
-                {court.name.replace('Court ', 'C')}
-              </div>
-            ))}
+            {filteredCourts.map((court) => {
+              const color = getCourtColor(courtColorMap[court.id] ?? 0);
+              return (
+                <div
+                  key={court.id}
+                  className="text-xs font-semibold text-center p-2 border-l border-line-2 flex items-center justify-center gap-1.5"
+                >
+                  <span className={`w-2 h-2 rounded-full ${color.dot}`} />
+                  <span className={color.text}>{court.name.replace('Court ', 'C')}</span>
+                </div>
+              );
+            })}
           </div>
 
           {/* Grid rows */}
@@ -251,23 +367,24 @@ export default function SchedulePage() {
                 const isBooked = !!booking;
                 const isRecurring = booking?.isRecurring ?? false;
                 const isSel = isSelected(court.id, hour);
+                const color = getCourtColor(courtColorMap[court.id] ?? 0);
 
                 let cellClass =
                   'border-l border-line-2 p-1.5 flex items-center justify-center cursor-pointer transition-colors min-h-[36px]';
                 let content: React.ReactNode;
 
                 if (isBooked && isRecurring) {
-                  cellClass += ' bg-amber text-white';
+                  cellClass += ' bg-amber/30 text-amber';
                   content = <span className="text-xs font-semibold">Rec</span>;
                 } else if (isBooked) {
-                  cellClass += ' bg-primary text-white';
+                  cellClass += ' bg-surface-3 text-ink-3';
                   content = <span className="text-xs font-semibold">{getInitials(booking.memberName)}</span>;
                 } else if (isSel) {
-                  cellClass += ' bg-primary-soft ring-2 ring-primary ring-inset';
-                  content = <span className="text-xs font-semibold text-primary">✓</span>;
+                  cellClass += ` ${color.bg} ring-2 ${color.border} ring-inset`;
+                  content = <span className={`text-xs font-semibold ${color.text}`}>✓</span>;
                 } else {
-                  cellClass += ' bg-surface text-ink-4 hover:bg-primary-faint';
-                  content = <span className="text-xs">&mdash;</span>;
+                  cellClass += ` ${color.bg} hover:${color.bg}`;
+                  content = <span className={`text-[10px] ${color.text} opacity-60`}>&bull;</span>;
                 }
 
                 return (
@@ -285,21 +402,6 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-5">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-primary" />
-          <span className="text-xs text-ink-3">Booked</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-amber" />
-          <span className="text-xs text-ink-3">Recurring</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm border border-line bg-surface" />
-          <span className="text-xs text-ink-3">Open</span>
-        </div>
-      </div>
 
       {/* Selection action bar */}
       {selection && selection.hours.length > 0 && (
