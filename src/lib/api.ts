@@ -208,6 +208,22 @@ export async function apiUpdateTenant(updates: Partial<Tenant>): Promise<boolean
   return result !== null;
 }
 
+// ── Billing ─────────────────────────────────────────────────
+
+export interface BillingAccountData {
+  tenantName: string;
+  subscriptionStatus: string;
+  planTier: string | null;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+  trialStatus: { daysRemaining: number; isExpired: boolean; isWarning: boolean };
+  planOptions: { tier: string; name: string; price: number; limits: { sports: number; courts: number; admins: number; staff: number } }[];
+}
+
+export async function apiBillingAccount(): Promise<BillingAccountData | null> {
+  return fetchApi<BillingAccountData>('/api/billing/account');
+}
+
 // ── Users ────────────────────────────────────────────────────
 
 export async function apiCheckUsername(username: string): Promise<boolean> {

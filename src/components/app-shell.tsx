@@ -72,6 +72,17 @@ const NAV_ITEMS: NavItem[] = [
     ),
   },
   {
+    label: 'Billing',
+    href: '/billing',
+    roles: ['tenant_admin'],
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
+        <rect x="2" y="5" width="20" height="14" rx="2" />
+        <path d="M2 10h20" />
+      </svg>
+    ),
+  },
+  {
     label: 'Check-in',
     href: '/checkin',
     roles: ['tenant_staff'],
