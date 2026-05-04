@@ -4,6 +4,8 @@ import { dbGetSports, dbAddSport, dbUpdateSport, dbRemoveSport } from '@/lib/db'
 import { ok, created, badRequest, serverError } from '@/lib/api-response';
 import { getSessionFromHeaders } from '@/lib/auth';
 import { CreateSportSchema, UpdateSportSchema, DeleteSportSchema, validateBody } from '@/lib/validation';
+import { enforceResourceLimit } from '@/lib/subscription';
+import { PlanTier } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +29,10 @@ export async function POST(req: NextRequest) {
     if ('error' in parsed) return badRequest(parsed.error);
 
     const sb = getServerSupabase();
+    const planTier = (req.headers.get('x-plan-tier') as PlanTier) || null;
+    const limitResponse = await enforceResourceLimit(sb, session.tenantId, planTier, 'sports');
+    if (limitResponse) return limitResponse;
+
     const sport = await dbAddSport(sb, { tenantId: session.tenantId, ...parsed.data });
     if (!sport) return serverError('Failed to create sport');
     return created(sport);

@@ -4,6 +4,8 @@ import { dbCreateUser } from '@/lib/db';
 import { ok, created, badRequest, forbidden, serverError } from '@/lib/api-response';
 import { getSessionFromHeaders } from '@/lib/auth';
 import { CreateUserSchema, validateBody } from '@/lib/validation';
+import { enforceResourceLimit } from '@/lib/subscription';
+import { PlanTier } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +51,11 @@ export async function POST(req: NextRequest) {
     }
 
     const sb = getServerSupabase();
+    const planTier = (req.headers.get('x-plan-tier') as PlanTier) || null;
+    const resourceType = role === 'tenant_admin' ? 'admins' : 'staff';
+    const limitResponse = await enforceResourceLimit(sb, session.tenantId, planTier, resourceType);
+    if (limitResponse) return limitResponse;
+
     const user = await dbCreateUser(sb, session.tenantId, parsed.data);
     if (!user) return serverError('Failed to create user');
     return created(user);
