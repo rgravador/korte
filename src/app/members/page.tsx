@@ -172,7 +172,7 @@ function AddMemberSheet({
 }: {
   onClose: () => void;
 }) {
-  const { addMember, tenant } = useStore();
+  const { addMember } = useStore();
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
 
@@ -188,7 +188,6 @@ function AddMemberSheet({
     const lastName = parts.slice(1).join(' ') || '';
     try {
       await addMember({
-        tenantId: tenant.id,
         firstName,
         lastName,
         phone: phone.trim(),

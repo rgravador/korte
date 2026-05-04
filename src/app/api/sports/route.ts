@@ -2,16 +2,16 @@ import { NextRequest } from 'next/server';
 import { getServerSupabase } from '@/lib/supabase-server';
 import { dbGetSports, dbAddSport, dbUpdateSport, dbRemoveSport } from '@/lib/db';
 import { ok, created, badRequest, serverError } from '@/lib/api-response';
+import { getSessionFromHeaders } from '@/lib/auth';
+import { CreateSportSchema, UpdateSportSchema, DeleteSportSchema, validateBody } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const tenantId = req.nextUrl.searchParams.get('tenantId');
-    if (!tenantId) return badRequest('tenantId required');
-
+    const session = getSessionFromHeaders(req);
     const sb = getServerSupabase();
-    const sports = await dbGetSports(sb, tenantId);
+    const sports = await dbGetSports(sb, session.tenantId);
     return ok(sports);
   } catch (err) {
     console.error('[api] GET /sports error:', err);
@@ -21,11 +21,13 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { tenantId, name, operatingHoursRanges } = await req.json();
-    if (!tenantId || !name) return badRequest('tenantId and name required');
+    const session = getSessionFromHeaders(req);
+    const body = await req.json();
+    const parsed = validateBody(CreateSportSchema, body);
+    if ('error' in parsed) return badRequest(parsed.error);
 
     const sb = getServerSupabase();
-    const sport = await dbAddSport(sb, { tenantId, name, operatingHoursRanges: operatingHoursRanges ?? [] });
+    const sport = await dbAddSport(sb, { tenantId: session.tenantId, ...parsed.data });
     if (!sport) return serverError('Failed to create sport');
     return created(sport);
   } catch (err) {
@@ -36,11 +38,14 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const { sportId, ...updates } = await req.json();
-    if (!sportId) return badRequest('sportId required');
+    const session = getSessionFromHeaders(req);
+    const body = await req.json();
+    const parsed = validateBody(UpdateSportSchema, body);
+    if ('error' in parsed) return badRequest(parsed.error);
 
+    const { sportId, ...updates } = parsed.data;
     const sb = getServerSupabase();
-    const success = await dbUpdateSport(sb, sportId, updates);
+    const success = await dbUpdateSport(sb, sportId, session.tenantId, updates);
     if (!success) return serverError('Failed to update sport');
     return ok({ updated: true });
   } catch (err) {
@@ -51,11 +56,13 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const { sportId } = await req.json();
-    if (!sportId) return badRequest('sportId required');
+    const session = getSessionFromHeaders(req);
+    const body = await req.json();
+    const parsed = validateBody(DeleteSportSchema, body);
+    if ('error' in parsed) return badRequest(parsed.error);
 
     const sb = getServerSupabase();
-    const success = await dbRemoveSport(sb, sportId);
+    const success = await dbRemoveSport(sb, parsed.data.sportId, session.tenantId);
     if (!success) return badRequest('Cannot remove sport with assigned courts. Reassign or remove courts first.');
     return ok({ deleted: true });
   } catch (err) {

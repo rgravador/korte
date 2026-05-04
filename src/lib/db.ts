@@ -35,6 +35,7 @@ function toTenant(r: Record<string, unknown>): Tenant {
     operatingHoursStart: r.operating_hours_start as number,
     operatingHoursEnd: r.operating_hours_end as number,
     operatingHoursRanges: r.operating_hours_ranges as TimeRange[] | undefined,
+    freeTrialDays: (r.free_trial_days as number) ?? 7,
     createdAt: r.created_at as string,
   };
 }
@@ -65,6 +66,7 @@ function toItem(r: Record<string, unknown>): Item {
   return {
     id: r.id as string,
     tenantId: r.tenant_id as string,
+    sportId: (r.sport_id as string) ?? '',
     name: r.name as string,
     price: Number(r.price),
     type: r.type as ItemType,
@@ -231,9 +233,13 @@ export async function dbCreateTenant(
 
 export async function dbGetTenant(sb: SupabaseClient, tenantId: string): Promise<Tenant | null> {
   console.debug('[db] dbGetTenant', { tenantId });
-  const { data, error } = await sb.from('tenants').select('*').eq('id', tenantId).single();
-  if (error || !data) {
-    console.debug('[db] dbGetTenant not found', { tenantId, error: error?.message });
+  const { data, error } = await sb.from('tenants').select('*').eq('id', tenantId).maybeSingle();
+  if (error) {
+    console.error('[db] dbGetTenant FAILED:', error.message, error.details);
+    throw new Error(`dbGetTenant failed: ${error.message}`);
+  }
+  if (!data) {
+    console.debug('[db] dbGetTenant not found', { tenantId });
     return null;
   }
   console.debug('[db] dbGetTenant OK', { tenantId });
@@ -243,7 +249,7 @@ export async function dbGetTenant(sb: SupabaseClient, tenantId: string): Promise
 export async function dbUpdateTenant(
   sb: SupabaseClient,
   tenantId: string,
-  updates: Partial<{ name: string; operatingHoursStart: number; operatingHoursEnd: number; operatingHoursRanges: TimeRange[] }>
+  updates: Partial<{ name: string; operatingHoursStart: number; operatingHoursEnd: number; operatingHoursRanges: TimeRange[]; freeTrialDays: number }>
 ): Promise<boolean> {
   console.debug('[db] dbUpdateTenant', { tenantId, updates });
   const mapped: Record<string, unknown> = {};
@@ -251,6 +257,7 @@ export async function dbUpdateTenant(
   if (updates.operatingHoursStart !== undefined) mapped.operating_hours_start = updates.operatingHoursStart;
   if (updates.operatingHoursEnd !== undefined) mapped.operating_hours_end = updates.operatingHoursEnd;
   if (updates.operatingHoursRanges !== undefined) mapped.operating_hours_ranges = updates.operatingHoursRanges;
+  if (updates.freeTrialDays !== undefined) mapped.free_trial_days = updates.freeTrialDays;
 
   const { error } = await sb.from('tenants').update(mapped).eq('id', tenantId);
   if (error) {
@@ -266,12 +273,12 @@ export async function dbUpdateTenant(
 export async function dbGetSports(sb: SupabaseClient, tenantId: string): Promise<Sport[]> {
   console.debug('[db] dbGetSports', { tenantId });
   const { data, error } = await sb.from('sports').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) {
-    console.error('[db] dbGetSports FAILED:', error?.message, error?.details);
-    return [];
+  if (error) {
+    console.error('[db] dbGetSports FAILED:', error.message, error.details);
+    throw new Error(`dbGetSports failed: ${error.message}`);
   }
-  console.debug('[db] dbGetSports OK', { resultCount: data.length });
-  return data.map(toSport);
+  console.debug('[db] dbGetSports OK', { resultCount: (data ?? []).length });
+  return (data ?? []).map(toSport);
 }
 
 export async function dbAddSport(
@@ -295,14 +302,15 @@ export async function dbAddSport(
 export async function dbUpdateSport(
   sb: SupabaseClient,
   sportId: string,
+  tenantId: string,
   updates: Partial<{ name: string; operatingHoursRanges: TimeRange[]; isActive: boolean }>
 ): Promise<boolean> {
-  console.debug('[db] dbUpdateSport', { sportId, updates });
+  console.debug('[db] dbUpdateSport', { sportId, tenantId, updates });
   const mapped: Record<string, unknown> = {};
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.operatingHoursRanges !== undefined) mapped.operating_hours_ranges = updates.operatingHoursRanges;
   if (updates.isActive !== undefined) mapped.is_active = updates.isActive;
-  const { error } = await sb.from('sports').update(mapped).eq('id', sportId);
+  const { error } = await sb.from('sports').update(mapped).eq('id', sportId).eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbUpdateSport FAILED:', error.message, error.details);
     return false;
@@ -311,15 +319,14 @@ export async function dbUpdateSport(
   return true;
 }
 
-export async function dbRemoveSport(sb: SupabaseClient, sportId: string): Promise<boolean> {
-  console.debug('[db] dbRemoveSport', { sportId });
-  // Guard: check if sport has assigned courts
-  const { data: courts } = await sb.from('courts').select('id').eq('sport_id', sportId).limit(1);
+export async function dbRemoveSport(sb: SupabaseClient, sportId: string, tenantId: string): Promise<boolean> {
+  console.debug('[db] dbRemoveSport', { sportId, tenantId });
+  const { data: courts } = await sb.from('courts').select('id').eq('sport_id', sportId).eq('tenant_id', tenantId).limit(1);
   if (courts && courts.length > 0) {
     console.error('[db] dbRemoveSport BLOCKED: sport has assigned courts', { sportId });
     return false;
   }
-  const { error } = await sb.from('sports').delete().eq('id', sportId);
+  const { error } = await sb.from('sports').delete().eq('id', sportId).eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbRemoveSport FAILED:', error.message, error.details);
     return false;
@@ -333,12 +340,12 @@ export async function dbRemoveSport(sb: SupabaseClient, sportId: string): Promis
 export async function dbGetCourts(sb: SupabaseClient, tenantId: string): Promise<Court[]> {
   console.debug('[db] dbGetCourts', { tenantId });
   const { data, error } = await sb.from('courts').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) {
-    console.error('[db] dbGetCourts FAILED:', error?.message, error?.details);
-    return [];
+  if (error) {
+    console.error('[db] dbGetCourts FAILED:', error.message, error.details);
+    throw new Error(`dbGetCourts failed: ${error.message}`);
   }
-  console.debug('[db] dbGetCourts OK', { resultCount: data.length });
-  return data.map(toCourt);
+  console.debug('[db] dbGetCourts OK', { resultCount: (data ?? []).length });
+  return (data ?? []).map(toCourt);
 }
 
 export async function dbAddCourt(
@@ -362,14 +369,15 @@ export async function dbAddCourt(
 export async function dbUpdateCourt(
   sb: SupabaseClient,
   courtId: string,
+  tenantId: string,
   updates: Partial<{ name: string; hourlyRate: number; isActive: boolean }>
 ): Promise<boolean> {
-  console.debug('[db] dbUpdateCourt', { courtId, updates });
+  console.debug('[db] dbUpdateCourt', { courtId, tenantId, updates });
   const mapped: Record<string, unknown> = {};
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.hourlyRate !== undefined) mapped.hourly_rate = updates.hourlyRate;
   if (updates.isActive !== undefined) mapped.is_active = updates.isActive;
-  const { error } = await sb.from('courts').update(mapped).eq('id', courtId);
+  const { error } = await sb.from('courts').update(mapped).eq('id', courtId).eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbUpdateCourt FAILED:', error.message, error.details);
     return false;
@@ -378,9 +386,9 @@ export async function dbUpdateCourt(
   return true;
 }
 
-export async function dbRemoveCourt(sb: SupabaseClient, courtId: string): Promise<boolean> {
-  console.debug('[db] dbRemoveCourt', { courtId });
-  const { error } = await sb.from('courts').delete().eq('id', courtId);
+export async function dbRemoveCourt(sb: SupabaseClient, courtId: string, tenantId: string): Promise<boolean> {
+  console.debug('[db] dbRemoveCourt', { courtId, tenantId });
+  const { error } = await sb.from('courts').delete().eq('id', courtId).eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbRemoveCourt FAILED:', error.message, error.details);
     return false;
@@ -394,22 +402,24 @@ export async function dbRemoveCourt(sb: SupabaseClient, courtId: string): Promis
 export async function dbGetItems(sb: SupabaseClient, tenantId: string): Promise<Item[]> {
   console.debug('[db] dbGetItems', { tenantId });
   const { data, error } = await sb.from('items').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) {
-    console.error('[db] dbGetItems FAILED:', error?.message, error?.details);
-    return [];
+  if (error) {
+    console.error('[db] dbGetItems FAILED:', error.message, error.details);
+    throw new Error(`dbGetItems failed: ${error.message}`);
   }
-  console.debug('[db] dbGetItems OK', { resultCount: data.length });
-  return data.map(toItem);
+  console.debug('[db] dbGetItems OK', { resultCount: (data ?? []).length });
+  return (data ?? []).map(toItem);
 }
 
 export async function dbAddItem(
   sb: SupabaseClient,
-  item: { tenantId: string; name: string; price: number; type: ItemType }
+  item: { tenantId: string; sportId?: string; name: string; price: number; type: ItemType }
 ): Promise<Item | null> {
-  console.debug('[db] dbAddItem', { name: item.name, type: item.type });
+  console.debug('[db] dbAddItem', { name: item.name, type: item.type, sportId: item.sportId });
+  const row: Record<string, unknown> = { tenant_id: item.tenantId, name: item.name, price: item.price, type: item.type };
+  if (item.sportId) row.sport_id = item.sportId;
   const { data, error } = await sb
     .from('items')
-    .insert({ tenant_id: item.tenantId, name: item.name, price: item.price, type: item.type })
+    .insert(row)
     .select()
     .single();
   if (error || !data) {
@@ -423,14 +433,15 @@ export async function dbAddItem(
 export async function dbUpdateItem(
   sb: SupabaseClient,
   itemId: string,
+  tenantId: string,
   updates: Partial<{ name: string; price: number; isActive: boolean }>
 ): Promise<boolean> {
-  console.debug('[db] dbUpdateItem', { itemId });
+  console.debug('[db] dbUpdateItem', { itemId, tenantId });
   const mapped: Record<string, unknown> = {};
   if (updates.name !== undefined) mapped.name = updates.name;
   if (updates.price !== undefined) mapped.price = updates.price;
   if (updates.isActive !== undefined) mapped.is_active = updates.isActive;
-  const { error } = await sb.from('items').update(mapped).eq('id', itemId);
+  const { error } = await sb.from('items').update(mapped).eq('id', itemId).eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbUpdateItem FAILED:', error.message, error.details);
     return false;
@@ -439,9 +450,9 @@ export async function dbUpdateItem(
   return true;
 }
 
-export async function dbRemoveItem(sb: SupabaseClient, itemId: string): Promise<boolean> {
-  console.debug('[db] dbRemoveItem', { itemId });
-  const { error } = await sb.from('items').delete().eq('id', itemId);
+export async function dbRemoveItem(sb: SupabaseClient, itemId: string, tenantId: string): Promise<boolean> {
+  console.debug('[db] dbRemoveItem', { itemId, tenantId });
+  const { error } = await sb.from('items').delete().eq('id', itemId).eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbRemoveItem FAILED:', error.message, error.details);
     return false;
@@ -455,12 +466,12 @@ export async function dbRemoveItem(sb: SupabaseClient, itemId: string): Promise<
 export async function dbGetMembers(sb: SupabaseClient, tenantId: string): Promise<Member[]> {
   console.debug('[db] dbGetMembers', { tenantId });
   const { data, error } = await sb.from('members').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) {
-    console.error('[db] dbGetMembers FAILED:', error?.message, error?.details);
-    return [];
+  if (error) {
+    console.error('[db] dbGetMembers FAILED:', error.message, error.details);
+    throw new Error(`dbGetMembers failed: ${error.message}`);
   }
-  console.debug('[db] dbGetMembers OK', { resultCount: data.length });
-  return data.map(toMember);
+  console.debug('[db] dbGetMembers OK', { resultCount: (data ?? []).length });
+  return (data ?? []).map(toMember);
 }
 
 export async function dbAddMember(
@@ -491,9 +502,10 @@ export async function dbAddMember(
 export async function dbUpdateMember(
   sb: SupabaseClient,
   memberId: string,
+  tenantId: string,
   updates: Partial<Member>
 ): Promise<boolean> {
-  console.debug('[db] dbUpdateMember', { memberId, updates });
+  console.debug('[db] dbUpdateMember', { memberId, tenantId });
   const mapped: Record<string, unknown> = {};
   if (updates.firstName !== undefined) mapped.first_name = updates.firstName;
   if (updates.lastName !== undefined) mapped.last_name = updates.lastName;
@@ -503,7 +515,7 @@ export async function dbUpdateMember(
   if (updates.totalBookings !== undefined) mapped.total_bookings = updates.totalBookings;
   if (updates.totalNoShows !== undefined) mapped.total_no_shows = updates.totalNoShows;
   if (updates.lastVisit !== undefined) mapped.last_visit = updates.lastVisit;
-  const { error } = await sb.from('members').update(mapped).eq('id', memberId);
+  const { error } = await sb.from('members').update(mapped).eq('id', memberId).eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbUpdateMember FAILED:', error.message, error.details);
     return false;
@@ -523,16 +535,24 @@ export async function dbGetBookings(sb: SupabaseClient, tenantId: string): Promi
     .order('date', { ascending: false })
     .order('start_hour');
 
-  if (error || !rows) {
-    console.error('[db] dbGetBookings FAILED:', error?.message, error?.details);
-    return [];
+  if (error) {
+    console.error('[db] dbGetBookings FAILED:', error.message, error.details);
+    throw new Error(`dbGetBookings failed: ${error.message}`);
   }
 
-  const bookingIds = rows.map((r) => r.id);
-  const { data: itemRows } = await sb
-    .from('booking_items')
-    .select('*')
-    .in('booking_id', bookingIds);
+  const bookingIds = (rows ?? []).map((r) => r.id);
+  let itemRows: Record<string, unknown>[] = [];
+  if (bookingIds.length > 0) {
+    const { data, error: itemsError } = await sb
+      .from('booking_items')
+      .select('*')
+      .in('booking_id', bookingIds);
+    if (itemsError) {
+      console.error('[db] dbGetBookings booking_items FAILED:', itemsError.message, itemsError.details);
+      throw new Error(`dbGetBookings (items) failed: ${itemsError.message}`);
+    }
+    itemRows = data ?? [];
+  }
 
   const itemsByBooking: Record<string, BookingItem[]> = {};
   for (const ir of itemRows ?? []) {
@@ -541,8 +561,8 @@ export async function dbGetBookings(sb: SupabaseClient, tenantId: string): Promi
     itemsByBooking[bid].push(toBookingItem(ir));
   }
 
-  console.debug('[db] dbGetBookings OK', { bookingCount: rows.length, itemsCount: (itemRows ?? []).length });
-  return rows.map((r) => toBooking(r, itemsByBooking[r.id] ?? []));
+  console.debug('[db] dbGetBookings OK', { bookingCount: (rows ?? []).length, itemsCount: (itemRows ?? []).length });
+  return (rows ?? []).map((r) => toBooking(r, itemsByBooking[r.id] ?? []));
 }
 
 export async function dbCreateBooking(
@@ -596,10 +616,11 @@ export async function dbCreateBooking(
 export async function dbUpdateBookingStatus(
   sb: SupabaseClient,
   bookingId: string,
+  tenantId: string,
   status: BookingStatus
 ): Promise<boolean> {
-  console.debug('[db] dbUpdateBookingStatus', { bookingId, status });
-  const { error } = await sb.from('bookings').update({ status }).eq('id', bookingId);
+  console.debug('[db] dbUpdateBookingStatus', { bookingId, tenantId, status });
+  const { error } = await sb.from('bookings').update({ status }).eq('id', bookingId).eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbUpdateBookingStatus FAILED:', error.message, error.details);
     return false;
@@ -611,14 +632,16 @@ export async function dbUpdateBookingStatus(
 export async function dbRescheduleBooking(
   sb: SupabaseClient,
   bookingId: string,
+  tenantId: string,
   date: string,
   startHour: number
 ): Promise<boolean> {
-  console.debug('[db] dbRescheduleBooking', { bookingId, date, startHour });
+  console.debug('[db] dbRescheduleBooking', { bookingId, tenantId, date, startHour });
   const { error } = await sb
     .from('bookings')
     .update({ date, start_hour: startHour })
-    .eq('id', bookingId);
+    .eq('id', bookingId)
+    .eq('tenant_id', tenantId);
   if (error) {
     console.error('[db] dbRescheduleBooking FAILED:', error.message, error.details);
     return false;
@@ -632,12 +655,12 @@ export async function dbRescheduleBooking(
 export async function dbGetUsers(sb: SupabaseClient, tenantId: string): Promise<User[]> {
   console.debug('[db] dbGetUsers', { tenantId });
   const { data, error } = await sb.from('users').select('*').eq('tenant_id', tenantId).order('created_at');
-  if (error || !data) {
-    console.error('[db] dbGetUsers FAILED:', error?.message, error?.details);
-    return [];
+  if (error) {
+    console.error('[db] dbGetUsers FAILED:', error.message, error.details);
+    throw new Error(`dbGetUsers failed: ${error.message}`);
   }
-  console.debug('[db] dbGetUsers OK', { resultCount: data.length });
-  return data.map(toUser);
+  console.debug('[db] dbGetUsers OK', { resultCount: (data ?? []).length });
+  return (data ?? []).map(toUser);
 }
 
 // ── Full tenant hydration (single call to load everything) ───
@@ -654,21 +677,26 @@ export interface TenantData {
 
 export async function dbHydrateTenant(sb: SupabaseClient, tenantId: string): Promise<TenantData | null> {
   console.debug('[db] dbHydrateTenant', { tenantId });
-  const tenant = await dbGetTenant(sb, tenantId);
-  if (!tenant) {
-    console.debug('[db] dbHydrateTenant tenant not found', { tenantId });
+  try {
+    const tenant = await dbGetTenant(sb, tenantId);
+    if (!tenant) {
+      console.debug('[db] dbHydrateTenant tenant not found', { tenantId });
+      return null;
+    }
+
+    const [users, sports, courts, items, members, bookings] = await Promise.all([
+      dbGetUsers(sb, tenantId),
+      dbGetSports(sb, tenantId),
+      dbGetCourts(sb, tenantId),
+      dbGetItems(sb, tenantId),
+      dbGetMembers(sb, tenantId),
+      dbGetBookings(sb, tenantId),
+    ]);
+
+    console.debug('[db] dbHydrateTenant OK', { users: users.length, sports: sports.length, courts: courts.length, items: items.length, members: members.length, bookings: bookings.length });
+    return { tenant, users, sports, courts, items, members, bookings };
+  } catch (err) {
+    console.error('[db] dbHydrateTenant FAILED:', err instanceof Error ? err.message : err);
     return null;
   }
-
-  const [users, sports, courts, items, members, bookings] = await Promise.all([
-    dbGetUsers(sb, tenantId),
-    dbGetSports(sb, tenantId),
-    dbGetCourts(sb, tenantId),
-    dbGetItems(sb, tenantId),
-    dbGetMembers(sb, tenantId),
-    dbGetBookings(sb, tenantId),
-  ]);
-
-  console.debug('[db] dbHydrateTenant OK', { users: users.length, sports: sports.length, courts: courts.length, items: items.length, members: members.length, bookings: bookings.length });
-  return { tenant, users, sports, courts, items, members, bookings };
 }

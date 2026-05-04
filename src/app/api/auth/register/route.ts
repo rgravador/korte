@@ -3,6 +3,8 @@ import { getServerSupabase } from '@/lib/supabase-server';
 import { dbCreateTenant, dbCreateUser, dbAddCourt, dbAddItem, dbAddSport } from '@/lib/db';
 import { ok, badRequest, serverError } from '@/lib/api-response';
 import { ItemType, TimeRange } from '@/lib/types';
+import { signSession, createSessionCookie } from '@/lib/auth';
+import { RegisterSchema, validateBody } from '@/lib/validation';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,21 +17,18 @@ interface SportInput {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, subdomain, operatingHoursStart, operatingHoursEnd, ownerName, ownerEmail, ownerUsername, ownerPassword, sports, courts, items } = body;
+    const parsed = validateBody(RegisterSchema, body);
+    if ('error' in parsed) return badRequest(parsed.error);
 
-    if (!name || !subdomain || !ownerUsername || !ownerPassword) {
-      return badRequest('Missing required fields');
-    }
+    const { name, subdomain, operatingHoursStart, operatingHoursEnd, ownerName, ownerEmail, ownerUsername, ownerPassword, sports, courts, items } = parsed.data;
 
     const sb = getServerSupabase();
 
     // 1. Create tenant
-    console.debug('[api] register: creating tenant', name, subdomain);
-    const tenant = await dbCreateTenant(sb, { name, subdomain, operatingHoursStart, operatingHoursEnd });
+    const tenant = await dbCreateTenant(sb, { name, subdomain, operatingHoursStart: operatingHoursStart ?? 6, operatingHoursEnd: operatingHoursEnd ?? 22 });
     if (!tenant) return serverError('Failed to create tenant');
 
     // 2. Create admin user
-    console.debug('[api] register: creating admin user', ownerUsername);
     const user = await dbCreateUser(sb, tenant.id, {
       username: ownerUsername,
       password: ownerPassword,
@@ -44,7 +43,6 @@ export async function POST(req: NextRequest) {
     const createdCourts = [];
 
     if (sports && sports.length > 0) {
-      // New flow: sports with per-sport courts
       for (const sportInput of sports as SportInput[]) {
         const sport = await dbAddSport(sb, {
           tenantId: tenant.id,
@@ -60,7 +58,6 @@ export async function POST(req: NextRequest) {
         }
       }
     } else if (courts && courts.length > 0) {
-      // Legacy flow: flat courts without sport (create default "Pickleball" sport)
       const defaultSport = await dbAddSport(sb, {
         tenantId: tenant.id,
         name: 'Pickleball',
@@ -78,15 +75,18 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Create items
+    const defaultSportId = createdSports[0]?.id ?? '';
     const createdItems = [];
     for (const item of items ?? []) {
-      const created = await dbAddItem(sb, { tenantId: tenant.id, name: item.name, price: item.price, type: item.type as ItemType });
+      const created = await dbAddItem(sb, { tenantId: tenant.id, sportId: item.sportId ?? defaultSportId, name: item.name, price: item.price, type: item.type as ItemType });
       if (created) createdItems.push(created);
     }
 
-    console.debug('[api] register: complete', { tenantId: tenant.id, sports: createdSports.length, courts: createdCourts.length, items: createdItems.length });
-
-    return ok({ tenant, user, sports: createdSports, courts: createdCourts, items: createdItems });
+    // 5. Sign session cookie
+    const token = await signSession({ userId: user.id, tenantId: tenant.id, role: 'tenant_admin' });
+    const response = ok({ tenant, user, sports: createdSports, courts: createdCourts, items: createdItems });
+    response.headers.set('Set-Cookie', createSessionCookie(token));
+    return response;
   } catch (err) {
     console.error('[api] POST /auth/register error:', err);
     return serverError();

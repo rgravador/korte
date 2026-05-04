@@ -22,21 +22,38 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function SportConfigView({
   sportId,
   onBack,
+  showBack = true,
 }: {
   sportId: string;
   onBack: () => void;
+  showBack?: boolean;
 }) {
-  const { sports, courts, tenant, updateSport, removeSport, addCourt, updateCourt, removeCourt } = useStore();
+  const { sports, courts, items, updateSport, removeSport, addCourt, updateCourt, removeCourt, addItem, updateItem, removeItem } = useStore();
   const sport = sports.find((s) => s.id === sportId);
 
   const [editingName, setEditingName] = useState(false);
   const [sportName, setSportName] = useState(sport?.name ?? '');
+  const [editingHours, setEditingHours] = useState(false);
   const [hoursRanges, setHoursRanges] = useState<TimeRange[]>(sport?.operatingHoursRanges ?? [{ start: 6, end: 22 }]);
 
   const [showAddCourt, setShowAddCourt] = useState(false);
   const sportCourts = courts.filter((c) => c.sportId === sportId);
   const [newCourtName, setNewCourtName] = useState(`Court ${sportCourts.length + 1}`);
   const [newCourtRate, setNewCourtRate] = useState('');
+
+  const [editingCourtId, setEditingCourtId] = useState<string | null>(null);
+  const [editCourtName, setEditCourtName] = useState('');
+  const [editCourtRate, setEditCourtRate] = useState('');
+
+  const sportItems = items.filter((i) => i.sportId === sportId);
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [newItemName, setNewItemName] = useState('');
+  const [newItemPrice, setNewItemPrice] = useState('');
+  const [newItemType, setNewItemType] = useState<ItemType>('rental');
+
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editItemName, setEditItemName] = useState('');
+  const [editItemPrice, setEditItemPrice] = useState('');
 
   if (!sport) return null;
 
@@ -62,7 +79,7 @@ function SportConfigView({
   const handleAddCourt = async () => {
     if (!newCourtName.trim() || !newCourtRate) return;
     try {
-      await addCourt({ tenantId: tenant.id, sportId, name: newCourtName.trim(), hourlyRate: Number(newCourtRate), isActive: true });
+      await addCourt({ sportId, name: newCourtName.trim(), hourlyRate: Number(newCourtRate), isActive: true });
       setNewCourtRate('');
       setShowAddCourt(false);
     } catch {
@@ -86,12 +103,14 @@ function SportConfigView({
   return (
     <>
       {/* Back button */}
-      <button onClick={onBack} className="flex items-center gap-2 text-ink-3 hover:text-ink mb-4 transition-colors">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
-          <path d="M10 4l-4 4 4 4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <span className="text-xs font-medium">Back to Settings</span>
-      </button>
+      {showBack && (
+        <button onClick={onBack} className="flex items-center gap-2 text-ink-3 hover:text-ink mb-4 transition-colors">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+            <path d="M10 4l-4 4 4 4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="text-xs font-medium">Back to Settings</span>
+        </button>
+      )}
 
       {/* Sport name */}
       {editingName ? (
@@ -101,8 +120,8 @@ function SportConfigView({
             onChange={(e) => setSportName(e.target.value)}
             className="flex-1 bg-surface-3 rounded-xl px-3 py-2 text-lg font-display font-bold border border-line focus:outline-none focus:border-primary"
           />
-          <button onClick={handleSaveName} className="bg-primary text-white px-4 py-2 rounded-xl text-xs font-medium">Save</button>
-          <button onClick={() => { setEditingName(false); setSportName(sport.name); }} className="bg-surface-3 text-ink-3 px-4 py-2 rounded-xl text-xs font-medium">Cancel</button>
+          <button onClick={handleSaveName} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
+          <button onClick={() => { setEditingName(false); setSportName(sport.name); }} className="bg-surface-3 text-ink-3 px-4 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
         </div>
       ) : (
         <button onClick={() => setEditingName(true)} className="mb-5">
@@ -112,33 +131,72 @@ function SportConfigView({
 
       {/* Operating Hours */}
       <Section title="Operating Hours">
-        <div className="bg-surface rounded-xl shadow-card p-3 space-y-3">
-          <OperatingHoursEditor ranges={hoursRanges} onChange={setHoursRanges} />
-          <button onClick={handleSaveHours} className="w-full bg-primary text-white py-2.5 rounded-xl text-xs font-medium">
-            Save Hours
+        {editingHours ? (
+          <div className="bg-surface rounded-xl shadow-card p-3 space-y-3">
+            <OperatingHoursEditor ranges={hoursRanges} onChange={setHoursRanges} />
+            <div className="flex gap-2">
+              <button onClick={async () => { await handleSaveHours(); setEditingHours(false); }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">
+                Save Hours
+              </button>
+              <button onClick={() => { setHoursRanges(sport.operatingHoursRanges ?? [{ start: 6, end: 22 }]); setEditingHours(false); }} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={() => setEditingHours(true)} className="w-full bg-surface rounded-xl shadow-card p-3 text-left">
+            <div className="space-y-1">
+              {(sport.operatingHoursRanges ?? [{ start: 6, end: 22 }]).map((range, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="font-medium text-sm"><OperatingHoursDisplay ranges={[range]} /></span>
+                </div>
+              ))}
+            </div>
+            <div className="text-xs text-ink-3 mt-1.5">Tap to edit hours or add open windows</div>
           </button>
-        </div>
+        )}
       </Section>
 
       {/* Courts for this sport */}
       <Section title={`Courts (${sportCourts.length})`}>
         <div className="space-y-1.5">
           {sportCourts.map((court) => (
-            <div key={court.id} className="bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
-              <div>
-                <div className="font-medium text-sm">{court.name}</div>
-                <div className="text-xs text-ink-3">₱{court.hourlyRate}/hr</div>
+            editingCourtId === court.id ? (
+              <div key={court.id} className="bg-surface rounded-xl shadow-card p-3 space-y-2">
+                <input type="text" value={editCourtName} onChange={(e) => setEditCourtName(e.target.value)}
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                <input type="number" placeholder="Hourly rate (₱)" value={editCourtRate} onChange={(e) => setEditCourtRate(e.target.value)}
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                <div className="flex gap-2">
+                  <button onClick={async () => {
+                    const updates: Record<string, unknown> = {};
+                    if (editCourtName.trim() && editCourtName.trim() !== court.name) updates.name = editCourtName.trim();
+                    if (editCourtRate && Number(editCourtRate) !== court.hourlyRate) updates.hourlyRate = Number(editCourtRate);
+                    if (Object.keys(updates).length > 0) {
+                      try { await updateCourt(court.id, updates); } catch { toast.error('Could not update court.'); }
+                    }
+                    setEditingCourtId(null);
+                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
+                  <button onClick={() => setEditingCourtId(null)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => updateCourt(court.id, { isActive: !court.isActive })}
-                  className={`text-xs px-2 py-1 rounded ${court.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}
-                >
-                  {court.isActive ? 'Active' : 'Off'}
+            ) : (
+              <div key={court.id} className="bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
+                <button onClick={() => { setEditingCourtId(court.id); setEditCourtName(court.name); setEditCourtRate(String(court.hourlyRate)); }} className="text-left">
+                  <div className="font-medium text-sm">{court.name}</div>
+                  <div className="text-xs text-ink-3">₱{court.hourlyRate}/hr</div>
                 </button>
-                <button onClick={() => removeCourt(court.id)} className="text-xs px-2 py-1 rounded text-warn">Remove</button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => updateCourt(court.id, { isActive: !court.isActive })}
+                    className={`text-xs px-2 py-1 rounded ${court.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}
+                  >
+                    {court.isActive ? 'Active' : 'Off'}
+                  </button>
+                  <button onClick={() => removeCourt(court.id)} className="text-xs px-2 py-1 rounded text-warn">Remove</button>
+                </div>
               </div>
-            </div>
+            )
           ))}
         </div>
 
@@ -149,13 +207,89 @@ function SportConfigView({
             <input type="number" placeholder="Hourly rate (₱)" value={newCourtRate} onChange={(e) => setNewCourtRate(e.target.value)}
               className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             <div className="flex gap-2">
-              <button onClick={handleAddCourt} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-xs font-medium">Add Court</button>
-              <button onClick={() => setShowAddCourt(false)} className="flex-1 bg-surface-3 text-ink-2 py-2.5 rounded-xl text-xs font-medium">Cancel</button>
+              <button onClick={handleAddCourt} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Add Court</button>
+              <button onClick={() => setShowAddCourt(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
             </div>
           </div>
         ) : (
-          <button onClick={() => { setNewCourtName(`Court ${sportCourts.length + 1}`); setShowAddCourt(true); }} className="w-full mt-2 border border-dashed border-line text-ink-3 py-2.5 rounded-xl text-xs">
+          <button onClick={() => { setNewCourtName(`Court ${sportCourts.length + 1}`); setShowAddCourt(true); }} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
             + Add court
+          </button>
+        )}
+      </Section>
+
+      {/* Item catalog for this sport */}
+      <Section title={`Item catalog (${sportItems.length})`}>
+        <div className="space-y-1.5">
+          {sportItems.map((item) => (
+            editingItemId === item.id ? (
+              <div key={item.id} className="bg-surface rounded-xl shadow-card p-3 space-y-2">
+                <input type="text" value={editItemName} onChange={(e) => setEditItemName(e.target.value)}
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                <input type="number" placeholder="Price (₱)" value={editItemPrice} onChange={(e) => setEditItemPrice(e.target.value)}
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                <div className="flex gap-2">
+                  <button onClick={async () => {
+                    const updates: Record<string, unknown> = {};
+                    if (editItemName.trim() && editItemName.trim() !== item.name) updates.name = editItemName.trim();
+                    if (editItemPrice && Number(editItemPrice) !== item.price) updates.price = Number(editItemPrice);
+                    if (Object.keys(updates).length > 0) {
+                      try { await updateItem(item.id, updates); } catch { toast.error('Could not update item.'); }
+                    }
+                    setEditingItemId(null);
+                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
+                  <button onClick={() => setEditingItemId(null)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <div key={item.id} className="bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
+                <button onClick={() => { setEditingItemId(item.id); setEditItemName(item.name); setEditItemPrice(String(item.price)); }} className="text-left">
+                  <div className="font-medium text-sm">{item.name}</div>
+                  <div className="text-xs text-ink-3">₱{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}</div>
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => updateItem(item.id, { isActive: !item.isActive })}
+                    className={`text-xs px-2 py-1 rounded ${item.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}
+                  >
+                    {item.isActive ? 'Active' : 'Off'}
+                  </button>
+                  <button onClick={() => removeItem(item.id)} className="text-xs px-2 py-1 rounded text-warn">Remove</button>
+                </div>
+              </div>
+            )
+          ))}
+        </div>
+
+        {showAddItem ? (
+          <div className="bg-surface rounded-xl shadow-card p-3 mt-2 space-y-2">
+            <input type="text" placeholder="Item name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
+              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+            <input type="number" placeholder="Price (₱)" value={newItemPrice} onChange={(e) => setNewItemPrice(e.target.value)}
+              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+            <div className="flex gap-1.5">
+              {(['rental', 'sale'] as const).map((t) => (
+                <button key={t} onClick={() => setNewItemType(t)}
+                  className={`flex-1 text-xs py-3 rounded-xl font-semibold transition-colors ${newItemType === t ? 'bg-primary text-white' : 'border border-line text-ink-2 hover:bg-surface-2'}`}
+                >
+                  {t === 'rental' ? 'Rental' : 'Sale'}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={async () => {
+                if (!newItemName.trim() || !newItemPrice) return;
+                try {
+                  await addItem({ sportId, name: newItemName.trim(), price: Number(newItemPrice), type: newItemType, isActive: true });
+                  setNewItemName(''); setNewItemPrice(''); setNewItemType('rental'); setShowAddItem(false);
+                } catch { toast.error('Could not add item.'); }
+              }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Add Item</button>
+              <button onClick={() => setShowAddItem(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button onClick={() => setShowAddItem(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
+            + Add item
           </button>
         )}
       </Section>
@@ -170,7 +304,7 @@ function SportConfigView({
 
 /* ── Main Settings Page ── */
 export default function SettingsPage() {
-  const { tenant, sports, courts, items, users, isOnline, pendingSync, lastSyncedAt, updateTenant, addSport, addItem, updateItem, removeItem, createUser } = useStore();
+  const { tenant, sports, courts, users, isOnline, pendingSync, lastSyncedAt, updateTenant, addSport, createUser } = useStore();
 
   const [selectedSettingsSport, setSelectedSettingsSport] = useState<string | null>(null);
   const [editingFacility, setEditingFacility] = useState(false);
@@ -183,12 +317,6 @@ export default function SettingsPage() {
   const [staffDisplayName, setStaffDisplayName] = useState('');
   const [staffEmail, setStaffEmail] = useState('');
   const tenantUsers = users.filter((u) => u.tenantId === tenant.id);
-
-  // Items
-  const [showAddItem, setShowAddItem] = useState(false);
-  const [newItemName, setNewItemName] = useState('');
-  const [newItemPrice, setNewItemPrice] = useState('');
-  const [newItemType, setNewItemType] = useState<ItemType>('rental');
 
   // Add sport
   const [showAddSport, setShowAddSport] = useState(false);
@@ -205,25 +333,12 @@ export default function SettingsPage() {
 
   const handleAddSport = async (name: string) => {
     try {
-      const id = await addSport({ tenantId: tenant.id, name, operatingHoursRanges: [{ start: 6, end: 22 }] });
+      const id = await addSport({ name, operatingHoursRanges: [{ start: 6, end: 22 }] });
       setShowAddSport(false);
       setNewSportName('');
       setSelectedSettingsSport(id); // R21: immediately open config
     } catch {
       toast.error('Could not add sport.');
-    }
-  };
-
-  const handleAddItem = async () => {
-    if (!newItemName.trim() || !newItemPrice) return;
-    try {
-      await addItem({ tenantId: tenant.id, name: newItemName.trim(), price: Number(newItemPrice), type: newItemType, isActive: true });
-      setNewItemName('');
-      setNewItemPrice('');
-      setNewItemType('rental');
-      setShowAddItem(false);
-    } catch {
-      toast.error('Could not add item.');
     }
   };
 
@@ -258,8 +373,8 @@ export default function SettingsPage() {
                 className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             </div>
             <div className="flex gap-2">
-              <button onClick={handleSaveFacility} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-xs font-medium">Save</button>
-              <button onClick={() => setEditingFacility(false)} className="flex-1 bg-surface-3 text-ink-2 py-2.5 rounded-xl text-xs font-medium">Cancel</button>
+              <button onClick={handleSaveFacility} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
+              <button onClick={() => setEditingFacility(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
             </div>
           </div>
         ) : (
@@ -271,8 +386,38 @@ export default function SettingsPage() {
 
       {/* Sports (R18, R19, R20, R22) */}
       {isSingleSport && activeSports.length === 1 ? (
-        /* Single sport — inline config */
-        <SportConfigView sportId={activeSports[0].id} onBack={() => {}} />
+        /* Single sport — inline config + add sport */
+        <>
+          <SportConfigView sportId={activeSports[0].id} onBack={() => {}} showBack={false} />
+          <Section title="Add another sport">
+            {showAddSport ? (
+              <div className="bg-surface rounded-xl shadow-card p-3 space-y-2">
+                <div className="text-xs text-ink-3 mb-1">Select or type a sport</div>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {PRESET_SPORTS.filter((p) => !sports.some((s) => s.name === p)).map((preset) => (
+                    <button
+                      key={preset}
+                      onClick={() => handleAddSport(preset)}
+                      className="text-xs px-3 py-1.5 rounded-full bg-surface-3 text-ink-3 hover:bg-primary hover:text-white transition-colors"
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input type="text" placeholder="Custom sport name" value={newSportName} onChange={(e) => setNewSportName(e.target.value)}
+                    className="flex-1 bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  <button onClick={() => newSportName.trim() && handleAddSport(newSportName.trim())} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-xs font-semibold transition-colors">Add</button>
+                </div>
+                <button onClick={() => setShowAddSport(false)} className="w-full text-xs text-ink-3 py-1">Cancel</button>
+              </div>
+            ) : (
+              <button onClick={() => setShowAddSport(true)} className="w-full border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
+                + Add sport
+              </button>
+            )}
+          </Section>
+        </>
       ) : (
         /* Multi-sport — sport cards */
         <Section title="Sports">
@@ -316,66 +461,17 @@ export default function SettingsPage() {
               <div className="flex gap-2">
                 <input type="text" placeholder="Custom sport name" value={newSportName} onChange={(e) => setNewSportName(e.target.value)}
                   className="flex-1 bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-                <button onClick={() => newSportName.trim() && handleAddSport(newSportName.trim())} className="bg-primary text-white px-4 py-2 rounded-xl text-xs font-medium">Add</button>
+                <button onClick={() => newSportName.trim() && handleAddSport(newSportName.trim())} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-xs font-semibold transition-colors">Add</button>
               </div>
               <button onClick={() => setShowAddSport(false)} className="w-full text-xs text-ink-3 py-1">Cancel</button>
             </div>
           ) : (
-            <button onClick={() => setShowAddSport(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-2.5 rounded-xl text-xs">
+            <button onClick={() => setShowAddSport(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
               + Add sport
             </button>
           )}
         </Section>
       )}
-
-      {/* Item catalog */}
-      <Section title="Item catalog">
-        <div className="space-y-1.5">
-          {items.map((item) => (
-            <div key={item.id} className="bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
-              <div>
-                <div className="font-medium text-sm">{item.name}</div>
-                <div className="text-xs text-ink-3">₱{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}</div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => updateItem(item.id, { isActive: !item.isActive })}
-                  className={`text-xs px-2 py-1 rounded ${item.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}
-                >
-                  {item.isActive ? 'Active' : 'Off'}
-                </button>
-                <button onClick={() => removeItem(item.id)} className="text-xs px-2 py-1 rounded text-warn">Remove</button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {showAddItem ? (
-          <div className="bg-surface rounded-xl shadow-card p-3 mt-2 space-y-2">
-            <input type="text" placeholder="Item name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-            <input type="number" placeholder="Price (₱)" value={newItemPrice} onChange={(e) => setNewItemPrice(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-            <div className="flex gap-1.5">
-              {(['rental', 'sale'] as const).map((t) => (
-                <button key={t} onClick={() => setNewItemType(t)}
-                  className={`flex-1 text-xs py-2 rounded-xl ${newItemType === t ? 'bg-primary text-white' : 'border border-line text-ink-2'}`}
-                >
-                  {t === 'rental' ? 'Rental' : 'Sale'}
-                </button>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <button onClick={handleAddItem} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-xs font-medium">Add Item</button>
-              <button onClick={() => setShowAddItem(false)} className="flex-1 bg-surface-3 text-ink-2 py-2.5 rounded-xl text-xs font-medium">Cancel</button>
-            </div>
-          </div>
-        ) : (
-          <button onClick={() => setShowAddItem(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-2.5 rounded-xl text-xs">
-            + Add item
-          </button>
-        )}
-      </Section>
 
       {/* Staff management */}
       <Section title="Staff accounts">
@@ -413,12 +509,12 @@ export default function SettingsPage() {
                 createUser({ username: staffUsername.trim(), password: staffPassword.trim(), role: 'tenant_staff', displayName: staffDisplayName.trim(), email: staffEmail.trim() });
                 setStaffUsername(''); setStaffPassword(''); setStaffDisplayName(''); setStaffEmail('');
                 setShowAddStaff(false);
-              }} className="flex-1 bg-primary text-white py-2.5 rounded-xl text-xs font-medium">Add Staff</button>
-              <button onClick={() => setShowAddStaff(false)} className="flex-1 bg-surface-3 text-ink-2 py-2.5 rounded-xl text-xs font-medium">Cancel</button>
+              }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Add Staff</button>
+              <button onClick={() => setShowAddStaff(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
             </div>
           </div>
         ) : (
-          <button onClick={() => setShowAddStaff(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-2.5 rounded-xl text-xs">
+          <button onClick={() => setShowAddStaff(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
             + Add staff member
           </button>
         )}

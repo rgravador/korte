@@ -7,13 +7,13 @@ import {
   apiAddCourt, apiUpdateCourt, apiRemoveCourt,
   apiAddItem, apiUpdateItem, apiRemoveItem,
   apiAddSport, apiUpdateSport, apiRemoveSport,
-  apiUpdateTenant, apiCreateUser, apiHydrate,
+  apiUpdateTenant, apiCreateUser, apiHydrate, apiLogout,
 } from '@/lib/api';
 import { toast } from '@/components/toast';
 
 const EMPTY_TENANT: Tenant = {
   id: '', name: '', subdomain: '', courtCount: 0,
-  operatingHoursStart: 6, operatingHoursEnd: 22, createdAt: '',
+  operatingHoursStart: 6, operatingHoursEnd: 22, freeTrialDays: 7, createdAt: '',
 };
 
 interface AppState {
@@ -33,22 +33,22 @@ interface AppState {
   _hasHydrated: boolean;
 
   login: (username: string, password: string) => User | null;
-  logout: () => void;
+  logout: () => Promise<void>;
   createUser: (data: { username: string; password: string; role: UserRole; displayName: string; email: string }) => Promise<string>;
-  addSport: (data: { tenantId: string; name: string; operatingHoursRanges: TimeRange[] }) => Promise<string>;
+  addSport: (data: { name: string; operatingHoursRanges: TimeRange[] }) => Promise<string>;
   updateSport: (sportId: string, updates: Partial<{ name: string; operatingHoursRanges: TimeRange[]; isActive: boolean }>) => Promise<void>;
   removeSport: (sportId: string) => Promise<void>;
   setSelectedSport: (sportId: string | null) => void;
-  createBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => Promise<string>;
+  createBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'tenantId'>) => Promise<string>;
   updateBookingStatus: (bookingId: string, status: BookingStatus) => Promise<void>;
   cancelBooking: (bookingId: string) => Promise<void>;
   rescheduleBooking: (bookingId: string, date: string, startHour: number) => Promise<void>;
-  addMember: (member: Omit<Member, 'id' | 'createdAt' | 'totalBookings' | 'totalNoShows' | 'lastVisit'>) => Promise<string>;
+  addMember: (member: { firstName: string; lastName: string; phone: string; email: string; tier: 'regular' | 'vip' }) => Promise<string>;
   updateMember: (memberId: string, updates: Partial<Member>) => Promise<void>;
-  addCourt: (court: Omit<Court, 'id'>) => Promise<string>;
+  addCourt: (court: { sportId: string; name: string; hourlyRate: number; isActive: boolean }) => Promise<string>;
   updateCourt: (courtId: string, updates: Partial<Court>) => Promise<void>;
   removeCourt: (courtId: string) => Promise<void>;
-  addItem: (item: Omit<Item, 'id'>) => Promise<string>;
+  addItem: (item: { sportId?: string; name: string; price: number; type: 'rental' | 'sale'; isActive: boolean }) => Promise<string>;
   updateItem: (itemId: string, updates: Partial<Item>) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateTenant: (updates: Partial<Tenant>) => Promise<void>;
@@ -75,33 +75,28 @@ export const useStore = create<AppState>()(
       _hasHydrated: false,
 
       login: (username, password) => {
-        console.debug('[store] login', { username });
         const user = get().users.find((u) => u.username === username && u.password === password && u.isActive);
         if (user) { set({ currentUser: user }); return user; }
         return null;
       },
 
-      logout: () => {
-        console.debug('[store] logout');
+      logout: async () => {
+        await apiLogout();
         set({ currentUser: null, isOnboarded: false, users: [], tenant: EMPTY_TENANT, sports: [], selectedSportId: null, courts: [], items: [], members: [], bookings: [] });
       },
 
       createUser: async (data) => {
-        console.debug('[store] createUser', { username: data.username, role: data.role });
-        const tenantId = get().tenant.id;
-        const result = await apiCreateUser({ tenantId, ...data });
+        const result = await apiCreateUser(data);
         if (!result) throw new Error('Failed to create user');
         set((state) => ({ users: [...state.users, result] }));
         return result.id;
       },
 
       addSport: async (data) => {
-        console.debug('[store] addSport', { name: data.name });
         const result = await apiAddSport(data);
         if (!result) throw new Error('Failed to add sport');
         set((state) => {
           const newSports = [...state.sports, result];
-          // Auto-select if this is the first or only sport
           const selectedSportId = newSports.length === 1 ? result.id : state.selectedSportId;
           return { sports: newSports, selectedSportId };
         });
@@ -109,15 +104,12 @@ export const useStore = create<AppState>()(
       },
 
       updateSport: async (sportId, updates) => {
-        console.debug('[store] updateSport', { sportId });
         const success = await apiUpdateSport(sportId, updates);
         if (!success) throw new Error('Failed to update sport');
         set((state) => ({ sports: state.sports.map((s) => s.id === sportId ? { ...s, ...updates } : s) }));
       },
 
       removeSport: async (sportId) => {
-        console.debug('[store] removeSport', { sportId });
-        // Guard: check locally if sport has courts
         const courtsForSport = get().courts.filter((c) => c.sportId === sportId);
         if (courtsForSport.length > 0) throw new Error('Cannot remove sport with assigned courts');
         const success = await apiRemoveSport(sportId);
@@ -131,12 +123,9 @@ export const useStore = create<AppState>()(
         });
       },
 
-      setSelectedSport: (sportId) => {
-        set({ selectedSportId: sportId });
-      },
+      setSelectedSport: (sportId) => set({ selectedSportId: sportId }),
 
       createBooking: async (bookingData) => {
-        console.debug('[store] createBooking', { courtId: bookingData.courtId, date: bookingData.date, startHour: bookingData.startHour });
         const result = await apiCreateBooking(bookingData);
         if (!result) throw new Error('Failed to create booking');
         set((state) => ({ bookings: [...state.bookings, result] }));
@@ -150,7 +139,6 @@ export const useStore = create<AppState>()(
       },
 
       updateBookingStatus: async (bookingId, status) => {
-        console.debug('[store] updateBookingStatus', { bookingId, status });
         const success = await apiUpdateBookingStatus(bookingId, status);
         if (!success) throw new Error('Failed to update booking status');
         set((state) => ({ bookings: state.bookings.map((b) => b.id !== bookingId ? b : { ...b, status }) }));
@@ -166,87 +154,68 @@ export const useStore = create<AppState>()(
       },
 
       cancelBooking: async (bookingId) => {
-        console.debug('[store] cancelBooking', { bookingId });
         await get().updateBookingStatus(bookingId, 'cancelled');
       },
 
       rescheduleBooking: async (bookingId, date, startHour) => {
-        console.debug('[store] rescheduleBooking', { bookingId, date, startHour });
         const success = await apiRescheduleBooking(bookingId, date, startHour);
         if (!success) throw new Error('Failed to reschedule booking');
         set((state) => ({ bookings: state.bookings.map((b) => b.id === bookingId ? { ...b, date, startHour } : b) }));
       },
 
       addMember: async (memberData) => {
-        console.debug('[store] addMember', { firstName: memberData.firstName, lastName: memberData.lastName });
-        const result = await apiAddMember({
-          tenantId: memberData.tenantId,
-          firstName: memberData.firstName,
-          lastName: memberData.lastName,
-          phone: memberData.phone,
-          email: memberData.email,
-          tier: memberData.tier,
-        });
+        const result = await apiAddMember(memberData);
         if (!result) throw new Error('Failed to add member');
         set((state) => ({ members: [...state.members, result] }));
         return result.id;
       },
 
       updateMember: async (memberId, updates) => {
-        console.debug('[store] updateMember', { memberId });
         const success = await apiUpdateMember(memberId, updates);
         if (!success) throw new Error('Failed to update member');
         set((state) => ({ members: state.members.map((m) => m.id === memberId ? { ...m, ...updates } : m) }));
       },
 
       addCourt: async (courtData) => {
-        console.debug('[store] addCourt', { name: courtData.name, sportId: courtData.sportId });
-        const result = await apiAddCourt({ tenantId: courtData.tenantId, sportId: courtData.sportId, name: courtData.name, hourlyRate: courtData.hourlyRate });
+        const result = await apiAddCourt({ sportId: courtData.sportId, name: courtData.name, hourlyRate: courtData.hourlyRate });
         if (!result) throw new Error('Failed to add court');
         set((state) => ({ courts: [...state.courts, result], tenant: { ...state.tenant, courtCount: state.courts.length + 1 } }));
         return result.id;
       },
 
       updateCourt: async (courtId, updates) => {
-        console.debug('[store] updateCourt', { courtId });
         const success = await apiUpdateCourt(courtId, updates);
         if (!success) throw new Error('Failed to update court');
         set((state) => ({ courts: state.courts.map((c) => c.id === courtId ? { ...c, ...updates } : c) }));
       },
 
       removeCourt: async (courtId) => {
-        console.debug('[store] removeCourt', { courtId });
         const success = await apiRemoveCourt(courtId);
         if (!success) throw new Error('Failed to remove court');
         set((state) => ({ courts: state.courts.filter((c) => c.id !== courtId), tenant: { ...state.tenant, courtCount: state.courts.length - 1 } }));
       },
 
       addItem: async (itemData) => {
-        console.debug('[store] addItem', { name: itemData.name });
-        const result = await apiAddItem({ tenantId: itemData.tenantId, name: itemData.name, price: itemData.price, type: itemData.type });
+        const result = await apiAddItem({ sportId: itemData.sportId, name: itemData.name, price: itemData.price, type: itemData.type });
         if (!result) throw new Error('Failed to add item');
         set((state) => ({ items: [...state.items, result] }));
         return result.id;
       },
 
       updateItem: async (itemId, updates) => {
-        console.debug('[store] updateItem', { itemId });
         const success = await apiUpdateItem(itemId, updates);
         if (!success) throw new Error('Failed to update item');
         set((state) => ({ items: state.items.map((i) => i.id === itemId ? { ...i, ...updates } : i) }));
       },
 
       removeItem: async (itemId) => {
-        console.debug('[store] removeItem', { itemId });
         const success = await apiRemoveItem(itemId);
         if (!success) throw new Error('Failed to remove item');
         set((state) => ({ items: state.items.filter((i) => i.id !== itemId) }));
       },
 
       updateTenant: async (updates) => {
-        console.debug('[store] updateTenant', updates);
-        const tenantId = get().tenant.id;
-        const success = await apiUpdateTenant(tenantId, updates);
+        const success = await apiUpdateTenant(updates);
         if (!success) throw new Error('Failed to update tenant');
         set((state) => ({ tenant: { ...state.tenant, ...updates } }));
       },
@@ -256,10 +225,8 @@ export const useStore = create<AppState>()(
       setLastSynced: (ts) => set({ lastSyncedAt: ts }),
 
       hydrateFromRemote: (data) => {
-        console.debug('[store] hydrateFromRemote', { tenant: data.tenant.name, users: data.users.length, sports: (data.sports ?? []).length, courts: data.courts.length });
         const sports = data.sports ?? [];
         const activeSports = sports.filter((s) => s.isActive);
-        // Auto-select first sport if none selected, or if current selection is invalid
         const currentSelected = get().selectedSportId;
         const selectedSportId = (currentSelected && activeSports.some((s) => s.id === currentSelected))
           ? currentSelected
@@ -270,13 +237,10 @@ export const useStore = create<AppState>()(
       refreshFromServer: async () => {
         const { currentUser, isOnboarded } = get();
         if (!currentUser || !isOnboarded || currentUser.role === 'system_admin') return;
-        if (!currentUser.tenantId) return;
 
-        console.debug('[store] refreshFromServer', { tenantId: currentUser.tenantId });
-        const data = await apiHydrate(currentUser.tenantId);
+        const data = await apiHydrate();
         if (data) {
           get().hydrateFromRemote(data);
-          console.debug('[store] refreshFromServer OK', { courts: data.courts.length });
         } else {
           console.warn('[store] refreshFromServer failed');
           toast.error('Could not sync latest data from the server. You may be viewing outdated information.');

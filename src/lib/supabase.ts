@@ -1,41 +1,25 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Singleton client — reuses the same connection across all calls
 let _client: SupabaseClient | null = null;
 
-function getEnv() {
-  const url = process.env.SUPABASE_URL ?? '';
-  const anonKey = process.env.SUPABASE_ANON_KEY ?? '';
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? '';
-  return { url, anonKey, serviceRoleKey };
-}
-
 /**
- * Returns a singleton Supabase client.
- * Uses service_role key if available (dev mode — bypasses RLS).
- * Falls back to anon key.
- * Returns null if no keys are configured.
+ * Returns a singleton Supabase client using the anon key.
+ * This module is safe to import from client components.
+ * For server-side operations, use supabase-server.ts instead.
  */
 export function getSupabase(): SupabaseClient | null {
   if (_client) return _client;
 
-  const { url, anonKey, serviceRoleKey } = getEnv();
-  if (!url) return null;
+  const url = process.env.SUPABASE_URL ?? '';
+  const anonKey = process.env.SUPABASE_ANON_KEY ?? '';
+  if (!url || !anonKey) return null;
 
-  // Prefer service_role in dev (bypasses RLS)
-  const key = serviceRoleKey || anonKey;
-  if (!key) return null;
-
-  console.debug('[supabase] init client:', serviceRoleKey ? 'service_role' : 'anon');
-
-  _client = createClient(url, key);
+  _client = createClient(url, anonKey);
   return _client;
 }
 
-/**
- * Check if Supabase is configured — evaluated lazily, not at module load.
- */
 export function isSupabaseConfigured(): boolean {
-  const { url, anonKey, serviceRoleKey } = getEnv();
-  return Boolean(url && (anonKey || serviceRoleKey));
+  const url = process.env.SUPABASE_URL ?? '';
+  const anonKey = process.env.SUPABASE_ANON_KEY ?? '';
+  return Boolean(url && anonKey);
 }

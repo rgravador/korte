@@ -16,6 +16,10 @@ export function unauthorized(message = 'Unauthorized') {
   return NextResponse.json({ data: null, error: { code: 'UNAUTHORIZED', message } }, { status: 401 });
 }
 
+export function forbidden(message = 'Forbidden') {
+  return NextResponse.json({ data: null, error: { code: 'FORBIDDEN', message } }, { status: 403 });
+}
+
 export function serverError(message = 'Internal server error') {
   return NextResponse.json({ data: null, error: { code: 'SERVER_ERROR', message } }, { status: 500 });
 }

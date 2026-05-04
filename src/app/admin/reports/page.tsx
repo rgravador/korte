@@ -37,8 +37,8 @@ export default function AdminReportsPage() {
       .catch(() => setLoading(false));
   }, [currentUser, router]);
 
-  const handleLogout = () => {
-    useStore.getState().logout();
+  const handleLogout = async () => {
+    await useStore.getState().logout();
     router.push('/');
   };
 

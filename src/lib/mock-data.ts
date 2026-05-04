@@ -38,6 +38,7 @@ export const seedTenant: Tenant = {
   courtCount: 3,
   operatingHoursStart: 6,
   operatingHoursEnd: 22,
+  freeTrialDays: 7,
   createdAt: '2026-03-01T00:00:00Z',
 };
 
@@ -48,12 +49,12 @@ export const seedCourts: Court[] = [
 ];
 
 export const seedItems: Item[] = [
-  { id: 'item-1', tenantId: TENANT_ID, name: 'Paddle Rental', price: 100, type: 'rental', isActive: true },
-  { id: 'item-2', tenantId: TENANT_ID, name: 'Shoe Rental', price: 80, type: 'rental', isActive: true },
-  { id: 'item-3', tenantId: TENANT_ID, name: 'Towel Rental', price: 50, type: 'rental', isActive: true },
-  { id: 'item-4', tenantId: TENANT_ID, name: 'Pickleball (Franklin X-40)', price: 250, type: 'sale', isActive: true },
-  { id: 'item-5', tenantId: TENANT_ID, name: 'Grip Tape', price: 150, type: 'sale', isActive: true },
-  { id: 'item-6', tenantId: TENANT_ID, name: 'Bottled Water', price: 35, type: 'sale', isActive: true },
+  { id: 'item-1', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Paddle Rental', price: 100, type: 'rental', isActive: true },
+  { id: 'item-2', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Shoe Rental', price: 80, type: 'rental', isActive: true },
+  { id: 'item-3', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Towel Rental', price: 50, type: 'rental', isActive: true },
+  { id: 'item-4', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Pickleball (Franklin X-40)', price: 250, type: 'sale', isActive: true },
+  { id: 'item-5', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Grip Tape', price: 150, type: 'sale', isActive: true },
+  { id: 'item-6', tenantId: TENANT_ID, sportId: 'sport-1', name: 'Bottled Water', price: 35, type: 'sale', isActive: true },
 ];
 
 export const seedMembers: Member[] = [
