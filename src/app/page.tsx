@@ -28,7 +28,6 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
   const getHomeRoute = (role: string) => role === 'system_admin' ? '/admin' : '/dashboard';
 
@@ -148,21 +147,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Remember + Forgot */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-navy-500 bg-navy-700/60 text-primary focus:ring-primary/40 focus:ring-offset-0"
-                />
-                <span className="text-slate-400 text-sm">Remember me</span>
-              </label>
-              <button type="button" className="text-gold text-sm font-medium hover:text-gold-soft transition-colors">
-                Forgot password?
-              </button>
-            </div>
 
             {error && (
               <div className="bg-warn/10 border border-warn/20 rounded-lg px-4 py-3">

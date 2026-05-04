@@ -3,7 +3,8 @@ import { NextRequest } from 'next/server';
 import { UserRole } from './types';
 
 export const COOKIE_NAME = 'korte-session';
-const SESSION_EXPIRY = '24h';
+const SESSION_EXPIRY = '15d';
+const SESSION_MAX_AGE = 15 * 24 * 60 * 60; // 15 days in seconds
 
 export interface SessionPayload {
   userId: string;
@@ -25,17 +26,30 @@ export async function signSession(payload: SessionPayload): Promise<string> {
     .sign(getJwtSecret());
 }
 
-export async function verifySession(token: string): Promise<SessionPayload | null> {
+export interface VerifiedSession extends SessionPayload {
+  issuedAt: number; // unix seconds
+}
+
+export async function verifySession(token: string): Promise<VerifiedSession | null> {
   try {
     const { payload } = await jwtVerify(token, getJwtSecret());
     return {
       userId: payload.userId as string,
       tenantId: payload.tenantId as string,
       role: payload.role as UserRole,
+      issuedAt: (payload.iat as number) ?? 0,
     };
   } catch {
     return null;
   }
+}
+
+const ONE_DAY_SECONDS = 24 * 60 * 60;
+
+/** Returns true if the token was issued more than 24h ago. */
+export function shouldRefreshToken(session: VerifiedSession): boolean {
+  const age = Math.floor(Date.now() / 1000) - session.issuedAt;
+  return age > ONE_DAY_SECONDS;
 }
 
 export async function getSession(req: NextRequest): Promise<SessionPayload | null> {
@@ -54,7 +68,7 @@ export function getSessionFromHeaders(req: NextRequest): SessionPayload {
 
 export function createSessionCookie(token: string): string {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  return `${COOKIE_NAME}=${token}; HttpOnly${secure}; SameSite=Lax; Path=/; Max-Age=86400`;
+  return `${COOKIE_NAME}=${token}; HttpOnly${secure}; SameSite=Lax; Path=/; Max-Age=${SESSION_MAX_AGE}`;
 }
 
 export function clearSessionCookie(): string {

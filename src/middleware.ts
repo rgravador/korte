@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { verifySession, COOKIE_NAME } from '@/lib/auth';
+import { verifySession, shouldRefreshToken, signSession, createSessionCookie, COOKIE_NAME } from '@/lib/auth';
 import { dbGetTenantSubscriptionStatus } from '@/lib/db-subscription';
 
 export const config = {
@@ -176,5 +176,13 @@ export async function middleware(req: NextRequest) {
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     res.headers.set(key, value);
   }
+
+  // Silent token refresh: re-sign daily to keep session alive
+  if (shouldRefreshToken(session)) {
+    const { userId, tenantId, role } = session;
+    const newToken = await signSession({ userId, tenantId, role });
+    res.headers.set('Set-Cookie', createSessionCookie(newToken));
+  }
+
   return res;
 }
