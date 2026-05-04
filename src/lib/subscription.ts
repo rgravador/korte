@@ -1,10 +1,12 @@
 /**
- * Subscription config — plan limits, pricing, and enforcement helpers.
+ * Subscription helpers — plan limit enforcement, trial status, freeze checks.
+ * Plan data is now stored in the database; these helpers operate on Plan objects.
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PlanTier } from './types';
+import { Plan } from './types';
 import { planLimitExceeded } from './api-response';
+import { dbGetPlanBySlug } from './db-subscription';
 
 // ── Plan limits ─────────────────────────────────────────────
 
@@ -15,17 +17,26 @@ interface PlanLimits {
   staff: number;
 }
 
-export const PLAN_LIMITS: Record<PlanTier, PlanLimits> = {
-  basic: { sports: 1, courts: 5, admins: 1, staff: 3 },
-  pro: { sports: 3, courts: 20, admins: 3, staff: 9 },
-};
+/** Extracts PlanLimits from a Plan object. maxCourts=0 means unlimited (Infinity). */
+export function getPlanLimits(plan: Plan): PlanLimits {
+  return {
+    sports: plan.maxSports === 0 ? Infinity : plan.maxSports,
+    courts: plan.maxCourts === 0 ? Infinity : plan.maxCourts,
+    admins: plan.maxAdmins === 0 ? Infinity : plan.maxAdmins,
+    staff: plan.maxStaff === 0 ? Infinity : plan.maxStaff,
+  };
+}
 
-// ── Plan pricing (₱/month) ─────────────────────────────────
-
-export const PLAN_PRICING: Record<PlanTier, number> = {
-  basic: 499,
-  pro: 999,
-};
+/** Format plan price for display. */
+export function formatPlanPrice(plan: Plan): string {
+  if (plan.isContactOnly) {
+    return 'Contact us';
+  }
+  if (plan.perExtraCourt > 0) {
+    return `₱${plan.basePrice}/mo + ₱${plan.perExtraCourt}/extra court`;
+  }
+  return `₱${plan.basePrice}/mo`;
+}
 
 // ── Resource type to DB table/filter mapping ────────────────
 
@@ -47,19 +58,13 @@ const RESOURCE_LABEL: Record<ResourceType, string> = {
 
 // ── Helpers ─────────────────────────────────────────────────
 
-/** Returns the plan limits for a tier. Null (trial) uses Pro limits. */
-export function getPlanLimits(planTier: PlanTier | null): PlanLimits {
-  return PLAN_LIMITS[planTier ?? 'pro'];
-}
-
-/** Returns true when the current count already meets or exceeds the plan limit. */
-export function isOverPlanLimit(
-  planTier: PlanTier | null,
-  resourceType: ResourceType,
-  currentCount: number,
-): boolean {
-  const limits = getPlanLimits(planTier);
-  return currentCount >= limits[resourceType];
+/**
+ * Resolves a Plan from the database by slug.
+ * Falls back to 'pro' plan when slug is null (trial tenants).
+ */
+export async function resolvePlan(sb: SupabaseClient, planSlug: string | null): Promise<Plan | null> {
+  const slug = planSlug ?? 'pro';
+  return dbGetPlanBySlug(sb, slug);
 }
 
 /**
@@ -70,12 +75,12 @@ export function isOverPlanLimit(
 export async function enforceResourceLimit(
   sb: SupabaseClient,
   tenantId: string,
-  planTier: PlanTier | null,
+  plan: Plan,
   resourceType: ResourceType,
 ) {
   const table = RESOURCE_TABLE[resourceType];
   const label = RESOURCE_LABEL[resourceType];
-  const limits = getPlanLimits(planTier);
+  const limits = getPlanLimits(plan);
   const limit = limits[resourceType];
 
   // Build count query
@@ -98,18 +103,8 @@ export async function enforceResourceLimit(
   const currentCount = count ?? 0;
 
   if (currentCount >= limit) {
-    const tierName = planTier ?? 'pro';
-    const tierLabel = tierName.charAt(0).toUpperCase() + tierName.slice(1);
-
-    // Pro ceiling — suggest Max tier contact
-    if (tierName === 'pro') {
-      return planLimitExceeded(
-        `You've reached the ${tierLabel} plan limit of ${limit} ${label}. Need more? Contact us for a custom Max plan.`,
-      );
-    }
-
     return planLimitExceeded(
-      `You've reached the ${tierLabel} plan limit of ${limit} ${label}. Upgrade to Pro for higher limits.`,
+      `You've reached the ${plan.name} plan limit of ${limit} ${label}. Upgrade your plan for higher limits.`,
     );
   }
 

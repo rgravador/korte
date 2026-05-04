@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Tenant, Sport, Court, Item, User, SubscriptionStatus, PlanTier } from '@/lib/types';
+import { Tenant, Sport, Court, Item, User, SubscriptionStatus } from '@/lib/types';
 import { toast } from '@/components/toast';
 import { OperatingHoursDisplay } from '@/components/operating-hours-editor';
 
@@ -15,7 +15,7 @@ interface TenantRow {
   courtCount: number;
   freeTrialDays: number;
   subscriptionStatus: SubscriptionStatus;
-  planTier: PlanTier | null;
+  planTier: string | null;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   adminOverride: boolean;
@@ -28,7 +28,7 @@ interface AttentionItem {
   name: string;
   subdomain: string;
   subscriptionStatus: SubscriptionStatus;
-  planTier: PlanTier | null;
+  planTier: string | null;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   adminOverride: boolean;
@@ -166,7 +166,7 @@ function SubscriptionControls({
 }) {
   const [editing, setEditing] = useState(false);
   const [status, setStatus] = useState<SubscriptionStatus>(tenant.subscriptionStatus);
-  const [planTier, setPlanTier] = useState<PlanTier | ''>(tenant.planTier ?? '');
+  const [planTier, setPlanTier] = useState<string>(tenant.planTier ?? '');
   const [periodEnd, setPeriodEnd] = useState(tenant.currentPeriodEnd ? tenant.currentPeriodEnd.slice(0, 10) : '');
   const [trialEnd, setTrialEnd] = useState(tenant.trialEndsAt ? tenant.trialEndsAt.slice(0, 10) : '');
   const [override, setOverride] = useState(tenant.adminOverride);
@@ -236,9 +236,10 @@ function SubscriptionControls({
             </div>
             <div>
               <label className="text-xs text-ink-3 block mb-1">Plan tier</label>
-              <select value={planTier} onChange={(e) => setPlanTier(e.target.value as PlanTier | '')} className={selectClass}>
+              <select value={planTier} onChange={(e) => setPlanTier(e.target.value)} className={selectClass}>
                 <option value="">None</option>
                 <option value="basic">Basic</option>
+                <option value="basic_plus">Basic Plus</option>
                 <option value="pro">Pro</option>
               </select>
             </div>

@@ -4,8 +4,7 @@ import { dbCreateUser } from '@/lib/db';
 import { ok, created, badRequest, forbidden, serverError } from '@/lib/api-response';
 import { getSessionFromHeaders } from '@/lib/auth';
 import { CreateUserSchema, validateBody } from '@/lib/validation';
-import { enforceResourceLimit } from '@/lib/subscription';
-import { PlanTier } from '@/lib/types';
+import { enforceResourceLimit, resolvePlan } from '@/lib/subscription';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,9 +50,12 @@ export async function POST(req: NextRequest) {
     }
 
     const sb = getServerSupabase();
-    const planTier = (req.headers.get('x-plan-tier') as PlanTier) || null;
+    const planSlug = req.headers.get('x-plan-tier') || null;
+    const plan = await resolvePlan(sb, planSlug);
+    if (!plan) return serverError('Unable to resolve plan limits');
+
     const resourceType = role === 'tenant_admin' ? 'admins' : 'staff';
-    const limitResponse = await enforceResourceLimit(sb, session.tenantId, planTier, resourceType);
+    const limitResponse = await enforceResourceLimit(sb, session.tenantId, plan, resourceType);
     if (limitResponse) return limitResponse;
 
     const user = await dbCreateUser(sb, session.tenantId, parsed.data);

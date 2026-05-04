@@ -49,6 +49,11 @@ function PlanCard({ plan, isCurrentPlan }: { plan: BillingAccountData['planOptio
       <div className="mb-4">
         <span className="font-display font-bold text-2xl text-ink">&#8369;{plan.price}</span>
         <span className="text-xs text-ink-3">/month</span>
+        {plan.perExtraCourt && (
+          <div className="text-xs text-ink-3 mt-0.5">
+            + &#8369;{plan.perExtraCourt}/court after {plan.includedCourts ?? 0} courts
+          </div>
+        )}
       </div>
       <ul className="space-y-2">
         <li className="flex items-center gap-2 text-sm text-ink-2">
@@ -61,7 +66,7 @@ function PlanCard({ plan, isCurrentPlan }: { plan: BillingAccountData['planOptio
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
-          {plan.limits.courts} courts
+          {plan.limits.courts === Infinity ? 'Unlimited courts' : `${plan.limits.courts} courts`}
         </li>
         <li className="flex items-center gap-2 text-sm text-ink-2">
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
@@ -141,9 +146,8 @@ export default function BillingPage() {
   const isTrial = billing.subscriptionStatus === 'trial' && !billing.trialStatus.isExpired;
   const isActive = billing.subscriptionStatus === 'active' && !isFrozen;
 
-  const planTierLabel = billing.planTier
-    ? billing.planTier.charAt(0).toUpperCase() + billing.planTier.slice(1)
-    : null;
+  const TIER_LABELS: Record<string, string> = { basic: 'Basic', basic_plus: 'Basic Plus', pro: 'Pro' };
+  const planTierLabel = billing.planTier ? (TIER_LABELS[billing.planTier] ?? billing.planTier) : null;
 
   return (
     <AppShell>
@@ -199,7 +203,7 @@ export default function BillingPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-ink-2">Amount due</span>
                   <span className="text-sm font-semibold text-ink">
-                    &#8369;{billing.planTier === 'pro' ? '999' : '499'}/mo
+                    {billing.planOptions.find((p) => p.tier === billing.planTier)?.priceLabel ?? `₱${billing.planOptions.find((p) => p.tier === billing.planTier)?.price ?? 0}/mo`}
                   </span>
                 </div>
               )}

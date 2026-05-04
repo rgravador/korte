@@ -8,7 +8,23 @@ export type MemberTier = 'regular' | 'vip';
 
 export type SubscriptionStatus = 'trial' | 'active' | 'frozen';
 
-export type PlanTier = 'basic' | 'pro';
+export interface Plan {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  basePrice: number;
+  perExtraCourt: number;
+  includedCourts: number;
+  maxSports: number;
+  maxCourts: number; // 0 = unlimited
+  maxAdmins: number;
+  maxStaff: number;
+  isActive: boolean;
+  isContactOnly: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
 
 export interface User {
   id: string;
@@ -37,7 +53,7 @@ export interface Tenant {
   operatingHoursRanges?: TimeRange[]; // multiple open windows — legacy, migrated to Sport
   freeTrialDays: number;
   subscriptionStatus: SubscriptionStatus;
-  planTier: PlanTier | null;
+  planTier: string | null;
   trialEndsAt: string | null;       // ISO 8601 timestamp
   currentPeriodEnd: string | null;  // ISO 8601 timestamp
   adminOverride: boolean;

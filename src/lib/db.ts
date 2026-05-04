@@ -8,7 +8,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import {
   User, Tenant, Court, Item, Member, Sport,
   Booking, BookingItem, BookingStatus, ItemType, UserRole, MemberTier, TimeRange,
-  SubscriptionStatus, PlanTier,
+  SubscriptionStatus,
 } from './types';
 
 // ── Row ↔ App mappers ────────────────────────────────────────
@@ -38,7 +38,7 @@ function toTenant(r: Record<string, unknown>): Tenant {
     operatingHoursRanges: r.operating_hours_ranges as TimeRange[] | undefined,
     freeTrialDays: (r.free_trial_days as number) ?? 7,
     subscriptionStatus: (r.subscription_status as SubscriptionStatus) ?? 'trial',
-    planTier: (r.plan_tier as PlanTier) ?? null,
+    planTier: (r.plan_tier as string) ?? null,
     trialEndsAt: (r.trial_ends_at as string) ?? null,
     currentPeriodEnd: (r.current_period_end as string) ?? null,
     adminOverride: (r.admin_override as boolean) ?? false,
@@ -268,7 +268,7 @@ export async function dbUpdateTenant(
     operatingHoursRanges: TimeRange[];
     freeTrialDays: number;
     subscriptionStatus: SubscriptionStatus;
-    planTier: PlanTier | null;
+    planTier: string | null;
     trialEndsAt: string | null;
     currentPeriodEnd: string | null;
     adminOverride: boolean;

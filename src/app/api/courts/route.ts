@@ -4,8 +4,7 @@ import { dbAddCourt, dbUpdateCourt, dbRemoveCourt } from '@/lib/db';
 import { created, ok, badRequest, serverError } from '@/lib/api-response';
 import { getSessionFromHeaders } from '@/lib/auth';
 import { CreateCourtSchema, UpdateCourtSchema, DeleteCourtSchema, validateBody } from '@/lib/validation';
-import { enforceResourceLimit } from '@/lib/subscription';
-import { PlanTier } from '@/lib/types';
+import { enforceResourceLimit, resolvePlan } from '@/lib/subscription';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,8 +16,11 @@ export async function POST(req: NextRequest) {
     if ('error' in parsed) return badRequest(parsed.error);
 
     const sb = getServerSupabase();
-    const planTier = (req.headers.get('x-plan-tier') as PlanTier) || null;
-    const limitResponse = await enforceResourceLimit(sb, session.tenantId, planTier, 'courts');
+    const planSlug = req.headers.get('x-plan-tier') || null;
+    const plan = await resolvePlan(sb, planSlug);
+    if (!plan) return serverError('Unable to resolve plan limits');
+
+    const limitResponse = await enforceResourceLimit(sb, session.tenantId, plan, 'courts');
     if (limitResponse) return limitResponse;
 
     const court = await dbAddCourt(sb, { tenantId: session.tenantId, ...parsed.data });

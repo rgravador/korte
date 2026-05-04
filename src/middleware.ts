@@ -48,6 +48,7 @@ function isFreezeExempt(pathname: string): boolean {
   if (pathname.startsWith('/api/auth/')) return true;
   if (pathname === '/api/hydrate') return true;
   if (pathname.startsWith('/api/billing/')) return true;
+  if (pathname === '/api/plans') return true;
   return false;
 }
 

@@ -217,7 +217,7 @@ export interface BillingAccountData {
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   trialStatus: { daysRemaining: number; isExpired: boolean; isWarning: boolean };
-  planOptions: { tier: string; name: string; price: number; limits: { sports: number; courts: number; admins: number; staff: number } }[];
+  planOptions: { tier: string; name: string; price: number; priceLabel: string; perExtraCourt?: number; includedCourts?: number; limits: { sports: number; courts: number; admins: number; staff: number } }[];
 }
 
 export async function apiBillingAccount(): Promise<BillingAccountData | null> {
