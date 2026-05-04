@@ -211,14 +211,14 @@ export default function DashboardPage() {
               <button
                 key={booking.id}
                 onClick={() => setSelectedBooking(booking)}
-                aria-label={`${booking.memberName} at ${booking.startHour}:00, ${booking.status.replace('_', ' ')}`}
+                aria-label={`${booking.memberName} at ${formatHour(booking.startHour)}, ${booking.status.replace('_', ' ')}`}
                 className={`w-full grid grid-cols-[44px_1fr_auto] md:grid-cols-[56px_1fr_auto] gap-3 items-center py-3 md:py-3.5 px-3.5 md:px-4 text-left hover:bg-surface-2/50 transition-colors ${
                   !isLast ? 'border-b border-line-2' : ''
                 }`}
               >
                 <div>
                   <div className="font-display text-sm md:text-base font-semibold leading-tight text-ink">
-                    {booking.startHour}:00
+                    {formatHour(booking.startHour)}
                   </div>
                   <div className="text-[10px] md:text-xs text-ink-4 mt-0.5">
                     {booking.durationMinutes}m

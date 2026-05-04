@@ -2,8 +2,9 @@
 
 import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { QRCodeCanvas } from 'qrcode.react';
 import { Tenant, Sport, Court, Item, User, SubscriptionStatus, Plan } from '@/lib/types';
 import { toast } from '@/components/toast';
 import { OperatingHoursDisplay } from '@/components/operating-hours-editor';
@@ -862,6 +863,158 @@ function PlanForm({
   );
 }
 
+/* ── QR Code Section ── */
+
+function QrCodeSection() {
+  const qrRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
+  const appDomain = typeof window !== 'undefined' ? window.location.origin : '';
+
+  const handleDownload = useCallback(() => {
+    const canvas = qrRef.current?.querySelector('canvas');
+    if (!canvas) return;
+
+    // Create a new canvas with padding and branding
+    const pad = 32;
+    const labelHeight = 48;
+    const w = canvas.width + pad * 2;
+    const h = canvas.height + pad * 2 + labelHeight;
+    const out = document.createElement('canvas');
+    out.width = w;
+    out.height = h;
+    const ctx = out.getContext('2d');
+    if (!ctx) return;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(canvas, pad, pad);
+
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Korte — Court Booking', w / 2, canvas.height + pad + 28);
+    ctx.font = '11px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.fillText('Scan to get started', w / 2, canvas.height + pad + 44);
+
+    const link = document.createElement('a');
+    link.download = 'korte-qr-code.png';
+    link.href = out.toDataURL('image/png');
+    link.click();
+  }, []);
+
+  const handleCopyLink = useCallback(async () => {
+    await navigator.clipboard.writeText(appDomain);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, []);
+
+  const handleShare = useCallback(async () => {
+    const canvas = qrRef.current?.querySelector('canvas');
+
+    if (navigator.share) {
+      const shareData: ShareData = {
+        title: 'Korte — Court Booking Platform',
+        text: 'Book your court on Korte!',
+        url: appDomain,
+      };
+
+      // Try sharing with image if supported
+      if (canvas) {
+        try {
+          const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+          if (blob) {
+            const file = new File([blob], 'korte-qr-code.png', { type: 'image/png' });
+            if (navigator.canShare?.({ files: [file] })) {
+              shareData.files = [file];
+            }
+          }
+        } catch { /* fall through to share without image */ }
+      }
+
+      try {
+        await navigator.share(shareData);
+      } catch { /* user cancelled */ }
+    } else {
+      await handleCopyLink();
+      toast.success('Link copied to clipboard');
+    }
+  }, [handleCopyLink]);
+
+  return (
+    <div>
+      <h1 className="font-sans font-light text-2xl tracking-tight mb-1">QR Code</h1>
+      <p className="font-sans text-xs text-ink-3 mb-6">
+        Share this QR code with new tenants so they can access the app and register their facility.
+      </p>
+
+      {/* QR Code Card */}
+      <div className="bg-surface rounded-[16px] shadow-card p-6 flex flex-col items-center">
+        <div ref={qrRef} className="bg-white rounded-xl p-4">
+          <QRCodeCanvas
+            value={appDomain}
+            size={200}
+            level="H"
+            marginSize={0}
+          />
+        </div>
+
+        <div className="mt-4 text-center">
+          <div className="font-sans text-sm font-medium text-ink">Korte — Court Booking</div>
+          <div className="font-sans text-xs text-ink-3 mt-0.5">Scan to access the platform</div>
+        </div>
+
+        {/* URL display */}
+        <div className="mt-4 w-full bg-surface-3 rounded-lg px-3 py-2 flex items-center justify-between gap-2">
+          <span className="font-mono text-xs text-ink-3 truncate">{appDomain}</span>
+          <button
+            onClick={handleCopyLink}
+            className="font-sans text-xs text-primary font-medium flex-shrink-0"
+          >
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-4 w-full grid grid-cols-2 gap-2">
+          <button
+            onClick={handleDownload}
+            className="flex items-center justify-center gap-2 bg-primary text-white py-3 rounded-xl text-xs font-semibold transition-colors hover:bg-primary-deep"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M8 2v9M4 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M2 13h12" strokeLinecap="round" />
+            </svg>
+            Download PNG
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex items-center justify-center gap-2 bg-surface-3 text-ink py-3 rounded-xl text-xs font-semibold transition-colors hover:bg-line"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="12" cy="4" r="2" />
+              <circle cx="4" cy="8" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <path d="M6 7l4-2M6 9l4 2" />
+            </svg>
+            Share
+          </button>
+        </div>
+      </div>
+
+      {/* Tips */}
+      <div className="mt-4 bg-surface rounded-[16px] shadow-card p-4 space-y-2">
+        <div className="font-sans text-xs font-semibold text-ink-3 uppercase tracking-wider">How to use</div>
+        <ul className="font-sans text-xs text-ink-3 space-y-1.5">
+          <li className="flex gap-2"><span className="text-primary font-semibold">1.</span> Download or share the QR code with prospective court owners</li>
+          <li className="flex gap-2"><span className="text-primary font-semibold">2.</span> They scan it to open the app and register their facility</li>
+          <li className="flex gap-2"><span className="text-primary font-semibold">3.</span> Print it for events, flyers, or post it on social media</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 function PlanManagement() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1089,7 +1242,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'tenants' | 'plans'>('tenants');
+  const [activeTab, setActiveTab] = useState<'tenants' | 'plans' | 'qr'>('tenants');
 
   useEffect(() => {
     if (!currentUser || currentUser.role !== 'system_admin') {
@@ -1160,9 +1313,17 @@ export default function AdminPage() {
           >
             Plans
           </button>
+          <button
+            onClick={() => { setActiveTab('qr'); setSelectedTenantId(null); }}
+            className={`pb-2.5 text-sm font-medium transition-colors border-b-2 ${activeTab === 'qr' ? 'border-primary text-primary' : 'border-transparent text-ink-3 hover:text-ink'}`}
+          >
+            QR Code
+          </button>
         </div>
 
-        {activeTab === 'plans' ? (
+        {activeTab === 'qr' ? (
+          <QrCodeSection />
+        ) : activeTab === 'plans' ? (
           <PlanManagement />
         ) : selectedTenantId ? (
           <TenantDetailView
