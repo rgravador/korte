@@ -85,7 +85,7 @@ export function InstallPrompt() {
           {/* App info */}
           <div className="flex items-center gap-3.5 mb-4">
             <Image
-              src="/logos/Korte-no-bg.png"
+              src="/korte/Korte-no-bg.png"
               alt="Korte"
               width={52}
               height={52}
