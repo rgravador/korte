@@ -299,7 +299,7 @@ function SubscriptionBanner() {
 
   if (!currentUser || !tenant.id) return null;
 
-  const isAdmin = currentUser.role === 'tenant_admin';
+  const isAdmin = currentUser.role === 'tenant_admin' || currentUser.role === 'system_admin';
   const isFrozen = isTenantFrozen(
     tenant.subscriptionStatus,
     tenant.trialEndsAt,

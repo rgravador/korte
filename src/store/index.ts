@@ -78,7 +78,7 @@ function checkFreezeGuard(get: () => AppState): boolean {
   const frozen = isTenantFrozen(tenant.subscriptionStatus, tenant.trialEndsAt, tenant.currentPeriodEnd);
   if (!frozen) return false;
 
-  const isAdmin = currentUser?.role === 'tenant_admin';
+  const isAdmin = currentUser?.role === 'tenant_admin' || currentUser?.role === 'system_admin';
   toast.error(
     isAdmin
       ? 'Your account is frozen — upgrade your plan to continue.'

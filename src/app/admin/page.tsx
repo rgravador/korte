@@ -4,7 +4,7 @@ import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Tenant, Sport, Court, Item, User, SubscriptionStatus } from '@/lib/types';
+import { Tenant, Sport, Court, Item, User, SubscriptionStatus, Plan } from '@/lib/types';
 import { toast } from '@/components/toast';
 import { OperatingHoursDisplay } from '@/components/operating-hours-editor';
 
@@ -71,6 +71,12 @@ const ATTENTION_LABELS: Record<string, string> = {
   trial_expired: 'Expired trials',
   overdue: 'Overdue',
   admin_override: 'Admin overrides',
+};
+
+const PLAN_TIER_LABELS: Record<string, string> = {
+  basic: 'Basic',
+  basic_plus: 'Basic Plus',
+  pro: 'Pro',
 };
 
 const ATTENTION_COLORS: Record<string, string> = {
@@ -170,6 +176,26 @@ function SubscriptionControls({
   const [periodEnd, setPeriodEnd] = useState(tenant.currentPeriodEnd ? tenant.currentPeriodEnd.slice(0, 10) : '');
   const [trialEnd, setTrialEnd] = useState(tenant.trialEndsAt ? tenant.trialEndsAt.slice(0, 10) : '');
   const [override, setOverride] = useState(tenant.adminOverride);
+  const [availablePlans, setAvailablePlans] = useState<Plan[]>([]);
+
+  // Custom Max sub-package creation
+  const [showMaxForm, setShowMaxForm] = useState(false);
+  const [maxPlanName, setMaxPlanName] = useState(`${tenant.name} Max`);
+  const [maxSports, setMaxSports] = useState(10);
+  const [maxCourts, setMaxCourts] = useState(50);
+  const [maxAdmins, setMaxAdmins] = useState(5);
+  const [maxStaff, setMaxStaff] = useState(20);
+  const [maxBasePrice, setMaxBasePrice] = useState(2999);
+  const [maxPerExtraCourt, setMaxPerExtraCourt] = useState(0);
+  const [maxIncludedCourts, setMaxIncludedCourts] = useState(0);
+  const [creatingMax, setCreatingMax] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/plans')
+      .then((r) => r.json())
+      .then((json) => setAvailablePlans((json.data ?? []).filter((p: Plan) => p.isActive)))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setStatus(tenant.subscriptionStatus);
@@ -208,9 +234,65 @@ function SubscriptionControls({
     setOverride(false);
   };
 
+  const selectedPlan = availablePlans.find((p) => p.slug === planTier);
+  const isContactOnlySelected = selectedPlan?.isContactOnly ?? false;
+
+  const handlePlanTierChange = (slug: string) => {
+    const plan = availablePlans.find((p) => p.slug === slug);
+    if (plan?.isContactOnly) {
+      setPlanTier(slug);
+      setShowMaxForm(true);
+      setMaxPlanName(`${tenant.name} Max`);
+    } else {
+      setPlanTier(slug);
+      setShowMaxForm(false);
+    }
+  };
+
+  const handleCreateMaxPlan = async () => {
+    setCreatingMax(true);
+    try {
+      const slug = `max_${tenant.subdomain}`.replace(/[^a-z0-9_]/g, '_');
+      const res = await fetch('/api/admin/plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: maxPlanName.trim(),
+          slug,
+          description: `Custom Max plan for ${tenant.name}`,
+          basePrice: maxBasePrice,
+          perExtraCourt: maxPerExtraCourt,
+          includedCourts: maxIncludedCourts,
+          maxSports: maxSports,
+          maxCourts: maxCourts,
+          maxAdmins: maxAdmins,
+          maxStaff: maxStaff,
+          isActive: true,
+          isContactOnly: false,
+          sortOrder: 100,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        toast.error(json.error?.message ?? 'Failed to create plan');
+        setCreatingMax(false);
+        return;
+      }
+      const newPlan = json.data;
+      toast.success(`Plan "${newPlan.name}" created`);
+      setAvailablePlans((prev) => [...prev, newPlan]);
+      setPlanTier(newPlan.slug);
+      setShowMaxForm(false);
+    } catch {
+      toast.error('Failed to create plan');
+    }
+    setCreatingMax(false);
+  };
+
   const resetForm = () => {
     setStatus(tenant.subscriptionStatus);
     setPlanTier(tenant.planTier ?? '');
+    setShowMaxForm(false);
     setPeriodEnd(tenant.currentPeriodEnd ? tenant.currentPeriodEnd.slice(0, 10) : '');
     setTrialEnd(tenant.trialEndsAt ? tenant.trialEndsAt.slice(0, 10) : '');
     setOverride(tenant.adminOverride);
@@ -236,13 +318,65 @@ function SubscriptionControls({
             </div>
             <div>
               <label className="text-xs text-ink-3 block mb-1">Plan tier</label>
-              <select value={planTier} onChange={(e) => setPlanTier(e.target.value)} className={selectClass}>
+              <select value={isContactOnlySelected ? selectedPlan?.slug ?? '' : planTier} onChange={(e) => handlePlanTierChange(e.target.value)} className={selectClass}>
                 <option value="">None</option>
-                <option value="basic">Basic</option>
-                <option value="basic_plus">Basic Plus</option>
-                <option value="pro">Pro</option>
+                {availablePlans.map((p) => (
+                  <option key={p.slug} value={p.slug}>{p.name}{p.isContactOnly ? ' (Custom)' : ''}</option>
+                ))}
               </select>
             </div>
+
+            {/* Max sub-package form */}
+            {showMaxForm && (
+              <div className="bg-surface-3 rounded-xl p-3 space-y-2.5 border border-line">
+                <div className="text-xs font-semibold text-ink-3">Create custom plan for {tenant.name}</div>
+                <div>
+                  <label className="text-xs text-ink-3 block mb-1">Plan name</label>
+                  <input type="text" value={maxPlanName} onChange={(e) => setMaxPlanName(e.target.value)} className={inputClass} />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-ink-3 block mb-1">Base price (₱/mo)</label>
+                    <input type="number" value={maxBasePrice} onChange={(e) => setMaxBasePrice(Number(e.target.value))} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-ink-3 block mb-1">Max sports</label>
+                    <input type="number" value={maxSports} onChange={(e) => setMaxSports(Number(e.target.value))} className={inputClass} placeholder="0 = unlimited" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-ink-3 block mb-1">Max courts</label>
+                    <input type="number" value={maxCourts} onChange={(e) => setMaxCourts(Number(e.target.value))} className={inputClass} placeholder="0 = unlimited" />
+                  </div>
+                  <div>
+                    <label className="text-xs text-ink-3 block mb-1">Max admins</label>
+                    <input type="number" value={maxAdmins} onChange={(e) => setMaxAdmins(Number(e.target.value))} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-ink-3 block mb-1">Max staff</label>
+                    <input type="number" value={maxStaff} onChange={(e) => setMaxStaff(Number(e.target.value))} className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-ink-3 block mb-1">Per extra court (₱)</label>
+                    <input type="number" value={maxPerExtraCourt} onChange={(e) => setMaxPerExtraCourt(Number(e.target.value))} className={inputClass} />
+                  </div>
+                  {maxPerExtraCourt > 0 && (
+                    <div>
+                      <label className="text-xs text-ink-3 block mb-1">Included courts</label>
+                      <input type="number" value={maxIncludedCourts} onChange={(e) => setMaxIncludedCourts(Number(e.target.value))} className={inputClass} />
+                    </div>
+                  )}
+                </div>
+                <p className="text-[11px] text-ink-3">0 = unlimited for court/sport/admin/staff fields</p>
+                <button
+                  disabled={creatingMax || !maxPlanName.trim()}
+                  onClick={handleCreateMaxPlan}
+                  className="w-full bg-primary text-white py-2.5 rounded-xl text-xs font-medium disabled:opacity-50"
+                >
+                  {creatingMax ? 'Creating...' : `Create "${maxPlanName.trim()}" plan`}
+                </button>
+              </div>
+            )}
+
             {status === 'trial' && (
               <div>
                 <label className="text-xs text-ink-3 block mb-1">Trial ends</label>
@@ -283,7 +417,7 @@ function SubscriptionControls({
                 </span>
                 {tenant.planTier && (
                   <span className="text-xs px-2.5 py-1 rounded font-medium bg-primary-soft text-primary-deep">
-                    {tenant.planTier === 'pro' ? 'Pro' : 'Basic'}
+                    {availablePlans.find((p) => p.slug === tenant.planTier)?.name ?? PLAN_TIER_LABELS[tenant.planTier] ?? tenant.planTier}
                   </span>
                 )}
                 {tenant.adminOverride && (
@@ -555,6 +689,397 @@ function TenantDetailView({ tenantId, onBack }: { tenantId: string; onBack: () =
   );
 }
 
+/* ── Plan Management ── */
+interface PlanFormData {
+  name: string;
+  slug: string;
+  description: string;
+  basePrice: number;
+  perExtraCourt: number;
+  includedCourts: number;
+  maxSports: number;
+  maxCourts: number;
+  maxAdmins: number;
+  maxStaff: number;
+  isActive: boolean;
+  isContactOnly: boolean;
+  sortOrder: number;
+}
+
+const EMPTY_PLAN_FORM: PlanFormData = {
+  name: '',
+  slug: '',
+  description: '',
+  basePrice: 0,
+  perExtraCourt: 0,
+  includedCourts: 1,
+  maxSports: 1,
+  maxCourts: 0,
+  maxAdmins: 1,
+  maxStaff: 2,
+  isActive: true,
+  isContactOnly: false,
+  sortOrder: 0,
+};
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+}
+
+function PlanForm({
+  initial,
+  isNew,
+  saving,
+  onSave,
+  onCancel,
+}: {
+  initial: PlanFormData;
+  isNew: boolean;
+  saving: boolean;
+  onSave: (data: PlanFormData) => void;
+  onCancel: () => void;
+}) {
+  const [form, setForm] = useState<PlanFormData>(initial);
+  const [autoSlug, setAutoSlug] = useState(isNew);
+
+  const updateField = <K extends keyof PlanFormData>(key: K, value: PlanFormData[K]) => {
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
+      if (key === 'name' && autoSlug) {
+        next.slug = slugify(value as string);
+      }
+      return next;
+    });
+  };
+
+  const inputClass = 'w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary';
+
+  return (
+    <div className="space-y-4">
+      <h3 className="font-semibold text-lg">{isNew ? 'New Plan' : `Edit: ${initial.name}`}</h3>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Name</label>
+          <input value={form.name} onChange={(e) => updateField('name', e.target.value)} className={inputClass} />
+        </div>
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Slug</label>
+          <input
+            value={form.slug}
+            onChange={(e) => { setAutoSlug(false); updateField('slug', e.target.value); }}
+            className={inputClass}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs text-ink-3 block mb-1">Description</label>
+        <input value={form.description} onChange={(e) => updateField('description', e.target.value)} className={inputClass} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Base price</label>
+          <input type="number" min="0" value={form.basePrice} onChange={(e) => updateField('basePrice', Number(e.target.value))} className={inputClass} />
+        </div>
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Per extra court</label>
+          <input type="number" min="0" value={form.perExtraCourt} onChange={(e) => updateField('perExtraCourt', Number(e.target.value))} className={inputClass} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Included courts</label>
+          <input type="number" min="0" value={form.includedCourts} onChange={(e) => updateField('includedCourts', Number(e.target.value))} className={inputClass} />
+        </div>
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Max sports</label>
+          <input type="number" min="0" value={form.maxSports} onChange={(e) => updateField('maxSports', Number(e.target.value))} className={inputClass} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Max courts <span className="text-ink-4">(0 = unlimited)</span></label>
+          <input type="number" min="0" value={form.maxCourts} onChange={(e) => updateField('maxCourts', Number(e.target.value))} className={inputClass} />
+        </div>
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Max admins</label>
+          <input type="number" min="0" value={form.maxAdmins} onChange={(e) => updateField('maxAdmins', Number(e.target.value))} className={inputClass} />
+        </div>
+        <div>
+          <label className="text-xs text-ink-3 block mb-1">Max staff</label>
+          <input type="number" min="0" value={form.maxStaff} onChange={(e) => updateField('maxStaff', Number(e.target.value))} className={inputClass} />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs text-ink-3 block mb-1">Sort order</label>
+        <input type="number" min="0" value={form.sortOrder} onChange={(e) => updateField('sortOrder', Number(e.target.value))} className={inputClass} />
+      </div>
+
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => updateField('isActive', !form.isActive)}
+            className={`w-10 h-5 rounded-full transition-colors relative ${form.isActive ? 'bg-primary' : 'bg-surface-3 border border-line'}`}
+          >
+            <span className={`block w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-transform ${form.isActive ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </button>
+          <span className="text-xs text-ink-2">Active</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => updateField('isContactOnly', !form.isContactOnly)}
+            className={`w-10 h-5 rounded-full transition-colors relative ${form.isContactOnly ? 'bg-primary' : 'bg-surface-3 border border-line'}`}
+          >
+            <span className={`block w-4 h-4 rounded-full bg-white shadow absolute top-0.5 transition-transform ${form.isContactOnly ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </button>
+          <span className="text-xs text-ink-2">Contact only</span>
+        </div>
+      </div>
+
+      <div className="flex gap-2 pt-2">
+        <button
+          disabled={saving || !form.name.trim() || !form.slug.trim()}
+          onClick={() => onSave(form)}
+          className="flex-1 bg-primary text-white py-2.5 rounded-xl text-xs font-medium disabled:opacity-50"
+        >
+          {saving ? 'Saving...' : isNew ? 'Create Plan' : 'Save Changes'}
+        </button>
+        <button onClick={onCancel} className="flex-1 bg-surface-3 text-ink-2 py-2.5 rounded-xl text-xs font-medium">
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PlanManagement() {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/plans')
+      .then((r) => r.json())
+      .then((json) => {
+        const data = json.data ?? [];
+        setPlans(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const sortedPlans = [...plans].sort((a, b) => a.sortOrder - b.sortOrder);
+
+  const handleCreate = async (data: PlanFormData) => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        toast.error(json.error?.message ?? 'Failed to create plan');
+      } else {
+        toast.success('Plan created');
+        setPlans((prev) => [...prev, json.data]);
+        setCreating(false);
+      }
+    } catch {
+      toast.error('Failed to create plan');
+    }
+    setSaving(false);
+  };
+
+  const handleUpdate = async (planId: string, data: PlanFormData) => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/plans/${planId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        toast.error(json.error?.message ?? 'Failed to update plan');
+      } else {
+        toast.success('Plan updated');
+        setPlans((prev) => prev.map((p) => (p.id === planId ? json.data : p)));
+        setEditingPlanId(null);
+      }
+    } catch {
+      toast.error('Failed to update plan');
+    }
+    setSaving(false);
+  };
+
+  const handleDeactivate = async (planId: string) => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/plans/${planId}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        toast.error(json.error?.message ?? 'Failed to deactivate plan');
+      } else {
+        toast.success('Plan deactivated');
+        setPlans((prev) => prev.map((p) => (p.id === planId ? { ...p, isActive: false } : p)));
+      }
+    } catch {
+      toast.error('Failed to deactivate plan');
+    }
+    setSaving(false);
+  };
+
+  if (loading) {
+    return <div className="text-center py-12 text-ink-3 font-sans text-xs">Loading plans...</div>;
+  }
+
+  if (creating) {
+    return (
+      <div className="bg-surface rounded-[16px] shadow-card p-4">
+        <PlanForm
+          initial={EMPTY_PLAN_FORM}
+          isNew
+          saving={saving}
+          onSave={handleCreate}
+          onCancel={() => setCreating(false)}
+        />
+      </div>
+    );
+  }
+
+  if (editingPlanId) {
+    const plan = plans.find((p) => p.id === editingPlanId);
+    if (!plan) return null;
+    const formData: PlanFormData = {
+      name: plan.name,
+      slug: plan.slug,
+      description: plan.description ?? '',
+      basePrice: plan.basePrice,
+      perExtraCourt: plan.perExtraCourt,
+      includedCourts: plan.includedCourts,
+      maxSports: plan.maxSports,
+      maxCourts: plan.maxCourts,
+      maxAdmins: plan.maxAdmins,
+      maxStaff: plan.maxStaff,
+      isActive: plan.isActive,
+      isContactOnly: plan.isContactOnly,
+      sortOrder: plan.sortOrder,
+    };
+    return (
+      <div className="bg-surface rounded-[16px] shadow-card p-4">
+        <PlanForm
+          initial={formData}
+          isNew={false}
+          saving={saving}
+          onSave={(data) => handleUpdate(editingPlanId, data)}
+          onCancel={() => setEditingPlanId(null)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <h1 className="font-sans font-light text-2xl tracking-tight mb-1">Plans</h1>
+      <p className="font-sans text-xs text-ink-3 mb-4">
+        {plans.length} plan{plans.length !== 1 ? 's' : ''} configured
+      </p>
+
+      {sortedPlans.length === 0 ? (
+        <div className="text-center py-12 text-ink-3 font-sans text-xs">No plans yet</div>
+      ) : (
+        <div className="space-y-2">
+          {sortedPlans.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => setEditingPlanId(plan.id)}
+              className={`w-full text-left bg-surface rounded-[16px] shadow-card p-4 hover:bg-surface-3 transition-colors ${!plan.isActive ? 'opacity-50' : ''}`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <div className="font-medium text-sm flex items-center gap-2">
+                    {plan.name}
+                    {!plan.isActive && (
+                      <span className="text-[11px] px-2 py-0.5 rounded font-medium bg-surface-3 text-ink-3">Inactive</span>
+                    )}
+                    {plan.isContactOnly && (
+                      <span className="text-[11px] px-2 py-0.5 rounded font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">Contact only</span>
+                    )}
+                  </div>
+                  <div className="font-sans text-xs text-ink-3 mt-0.5">{plan.slug}</div>
+                </div>
+                <div className="font-sans text-sm font-medium">
+                  {plan.basePrice > 0 ? `\u20B1${plan.basePrice}/mo` : 'Free'}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-5 gap-2 mt-3">
+                <div className="bg-surface-3 rounded-lg p-2">
+                  <div className="font-sans text-[11px] text-ink-3">Sports</div>
+                  <div className="font-sans text-lg leading-none mt-0.5">{plan.maxSports}</div>
+                </div>
+                <div className="bg-surface-3 rounded-lg p-2">
+                  <div className="font-sans text-[11px] text-ink-3">Courts</div>
+                  <div className="font-sans text-lg leading-none mt-0.5">{plan.maxCourts === 0 ? '\u221E' : plan.maxCourts}</div>
+                </div>
+                <div className="bg-surface-3 rounded-lg p-2">
+                  <div className="font-sans text-[11px] text-ink-3">Admins</div>
+                  <div className="font-sans text-lg leading-none mt-0.5">{plan.maxAdmins}</div>
+                </div>
+                <div className="bg-surface-3 rounded-lg p-2">
+                  <div className="font-sans text-[11px] text-ink-3">Staff</div>
+                  <div className="font-sans text-lg leading-none mt-0.5">{plan.maxStaff}</div>
+                </div>
+                <div className="bg-surface-3 rounded-lg p-2">
+                  <div className="font-sans text-[11px] text-ink-3">Incl.</div>
+                  <div className="font-sans text-lg leading-none mt-0.5">{plan.includedCourts}</div>
+                </div>
+              </div>
+
+              {plan.perExtraCourt > 0 && (
+                <div className="mt-2 text-xs text-ink-3">+{'\u20B1'}{plan.perExtraCourt}/extra court</div>
+              )}
+
+              {plan.isActive && (
+                <div className="mt-3 flex justify-end">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeactivate(plan.id); }}
+                    disabled={saving}
+                    className="text-xs text-warn hover:underline"
+                  >
+                    Deactivate
+                  </button>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <button
+        onClick={() => setCreating(true)}
+        className="w-full mt-4 bg-primary text-white py-3 rounded-xl text-sm font-medium"
+      >
+        Add Plan
+      </button>
+    </>
+  );
+}
+
 /* ── Main Admin Page ── */
 export default function AdminPage() {
   const { currentUser } = useStore();
@@ -564,6 +1089,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'tenants' | 'plans'>('tenants');
 
   useEffect(() => {
     if (!currentUser || currentUser.role !== 'system_admin') {
@@ -620,7 +1146,25 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {selectedTenantId ? (
+        {/* Tabs */}
+        <div className="flex gap-6 border-b border-line mb-5">
+          <button
+            onClick={() => { setActiveTab('tenants'); setSelectedTenantId(null); }}
+            className={`pb-2.5 text-sm font-medium transition-colors border-b-2 ${activeTab === 'tenants' ? 'border-primary text-primary' : 'border-transparent text-ink-3 hover:text-ink'}`}
+          >
+            Tenants
+          </button>
+          <button
+            onClick={() => { setActiveTab('plans'); setSelectedTenantId(null); }}
+            className={`pb-2.5 text-sm font-medium transition-colors border-b-2 ${activeTab === 'plans' ? 'border-primary text-primary' : 'border-transparent text-ink-3 hover:text-ink'}`}
+          >
+            Plans
+          </button>
+        </div>
+
+        {activeTab === 'plans' ? (
+          <PlanManagement />
+        ) : selectedTenantId ? (
           <TenantDetailView
             tenantId={selectedTenantId}
             onBack={() => setSelectedTenantId(null)}
@@ -677,7 +1221,7 @@ export default function AdminPage() {
                           </span>
                           {tenant.planTier && (
                             <span className="text-[11px] px-2 py-0.5 rounded font-medium bg-primary-soft text-primary-deep">
-                              {tenant.planTier === 'pro' ? 'Pro' : 'Basic'}
+                              {PLAN_TIER_LABELS[tenant.planTier] ?? tenant.planTier}
                             </span>
                           )}
                         </div>

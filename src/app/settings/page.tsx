@@ -538,7 +538,7 @@ export default function SettingsPage() {
             </div>
             <span className="text-ink-3">&rarr;</span>
           </Link>
-          {currentUser?.role === 'tenant_admin' && (
+          {(currentUser?.role === 'tenant_admin' || currentUser?.role === 'system_admin') && (
             <Link href="/billing" className="w-full bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
               <div>
                 <div className="font-medium text-sm">Billing</div>

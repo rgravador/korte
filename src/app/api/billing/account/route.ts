@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { getServerSupabase } from '@/lib/supabase-server';
 import { ok, forbidden, serverError } from '@/lib/api-response';
 import { getSessionFromHeaders } from '@/lib/auth';
+import { isAdminRole } from '@/lib/types';
 import { getTrialStatus, formatPlanPrice, getPlanLimits } from '@/lib/subscription';
 import { dbGetPlans } from '@/lib/db-subscription';
 
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest) {
     const session = getSessionFromHeaders(req);
 
     // Only tenant admins can access billing
-    if (session.role !== 'tenant_admin') {
+    if (!isAdminRole(session.role)) {
       return forbidden('Only tenant admins can access billing information.');
     }
 

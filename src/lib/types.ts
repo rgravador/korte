@@ -1,5 +1,10 @@
 export type UserRole = 'system_admin' | 'tenant_admin' | 'tenant_staff';
 
+/** Returns true if the role has tenant admin privileges (tenant_admin or system_admin). */
+export function isAdminRole(role: UserRole | string | undefined): boolean {
+  return role === 'tenant_admin' || role === 'system_admin';
+}
+
 export type BookingStatus = 'confirmed' | 'pending' | 'checked_in' | 'no_show' | 'cancelled';
 
 export type ItemType = 'rental' | 'sale';

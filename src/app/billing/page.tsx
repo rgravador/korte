@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiBillingAccount, BillingAccountData } from '@/lib/api';
 import { toast } from '@/components/toast';
+import { isAdminRole } from '@/lib/types';
 import Image from 'next/image';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -60,25 +61,25 @@ function PlanCard({ plan, isCurrentPlan }: { plan: BillingAccountData['planOptio
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
-          {plan.limits.sports} sport{plan.limits.sports !== 1 ? 's' : ''}
+          {(!plan.limits.sports || plan.limits.sports === Infinity) ? 'Unlimited sports' : `${plan.limits.sports} sport${plan.limits.sports !== 1 ? 's' : ''}`}
         </li>
         <li className="flex items-center gap-2 text-sm text-ink-2">
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
-          {plan.limits.courts === Infinity ? 'Unlimited courts' : `${plan.limits.courts} courts`}
+          {(!plan.limits.courts || plan.limits.courts === Infinity) ? 'Unlimited courts' : `${plan.limits.courts} courts`}
         </li>
         <li className="flex items-center gap-2 text-sm text-ink-2">
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
-          {plan.limits.admins} admin{plan.limits.admins !== 1 ? 's' : ''}
+          {(!plan.limits.admins || plan.limits.admins === Infinity) ? 'Unlimited admins' : `${plan.limits.admins} admin${plan.limits.admins !== 1 ? 's' : ''}`}
         </li>
         <li className="flex items-center gap-2 text-sm text-ink-2">
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
-          {plan.limits.staff} staff
+          {(!plan.limits.staff || plan.limits.staff === Infinity) ? 'Unlimited staff' : `${plan.limits.staff} staff`}
         </li>
       </ul>
     </div>
@@ -94,7 +95,7 @@ export default function BillingPage() {
 
   // Redirect staff users to dashboard
   useEffect(() => {
-    if (currentUser && currentUser.role !== 'tenant_admin') {
+    if (currentUser && !isAdminRole(currentUser.role)) {
       toast.error('Only admins can access billing.');
       router.push('/dashboard');
     }
@@ -108,12 +109,12 @@ export default function BillingPage() {
       }
       setLoading(false);
     }
-    if (currentUser?.role === 'tenant_admin') {
+    if (isAdminRole(currentUser?.role)) {
       loadBilling();
     }
   }, [currentUser]);
 
-  if (!currentUser || currentUser.role !== 'tenant_admin') {
+  if (!currentUser || !isAdminRole(currentUser.role)) {
     return null;
   }
 
@@ -212,9 +213,8 @@ export default function BillingPage() {
         </div>
       </Section>
 
-      {/* Plan comparison — hidden during trial */}
-      {!isTrial && (
-        <Section title="Plans">
+      {/* Plan comparison */}
+      <Section title="Plans">
           <div className="flex flex-col sm:flex-row gap-3">
             {billing.planOptions.map((plan) => (
               <PlanCard
@@ -224,11 +224,13 @@ export default function BillingPage() {
               />
             ))}
           </div>
-          <p className="text-xs text-ink-3 mt-2">
-            Need more? Contact us for a custom Max plan with higher limits.
-          </p>
+          <div className="bg-surface rounded-xl shadow-card p-3 mt-3">
+            <p className="text-xs text-ink-3 mb-1">Need more? Contact us for a custom Max plan with higher limits.</p>
+            <p className="text-xs text-ink-2">
+              Redgie Gravador · <a href="mailto:redgiegravador@gmail.com" className="text-primary hover:underline">redgiegravador@gmail.com</a> · <a href="tel:09688788901" className="text-primary hover:underline">09688788901</a>
+            </p>
+          </div>
         </Section>
-      )}
 
       {/* QR PH payment — hidden during trial */}
       {!isTrial && (
