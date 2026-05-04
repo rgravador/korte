@@ -47,6 +47,8 @@ function isPublicRoute(pathname: string, method: string): boolean {
   if (PUBLIC_PATHS.some((p) => pathname === p)) return true;
   // Username availability check is used during onboarding (unauthenticated)
   if (pathname === '/api/users' && method === 'GET') return true;
+  // Temporary debug health check — remove after debugging
+  if (pathname === '/api/health' && method === 'GET') return true;
   return false;
 }
 
