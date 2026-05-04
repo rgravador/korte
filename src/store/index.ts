@@ -10,6 +10,7 @@ import {
   apiUpdateTenant, apiCreateUser, apiHydrate, apiLogout,
 } from '@/lib/api';
 import { toast } from '@/components/toast';
+import { isTenantFrozen } from '@/lib/subscription';
 
 const EMPTY_TENANT: Tenant = {
   id: '', name: '', subdomain: '', courtCount: 0,
@@ -66,6 +67,26 @@ interface AppState {
 
 const isBrowser = typeof window !== 'undefined';
 
+/**
+ * Returns true and shows a role-appropriate toast if the tenant is frozen.
+ * Call at the top of every write action to block mutations on frozen accounts.
+ */
+function checkFreezeGuard(get: () => AppState): boolean {
+  const { tenant, currentUser } = get();
+  if (tenant.adminOverride) return false;
+
+  const frozen = isTenantFrozen(tenant.subscriptionStatus, tenant.trialEndsAt, tenant.currentPeriodEnd);
+  if (!frozen) return false;
+
+  const isAdmin = currentUser?.role === 'tenant_admin';
+  toast.error(
+    isAdmin
+      ? 'Your account is frozen — upgrade your plan to continue.'
+      : 'Your account is frozen — contact your admin.',
+  );
+  return true;
+}
+
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -88,6 +109,7 @@ export const useStore = create<AppState>()(
       },
 
       createUser: async (data) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const result = await apiCreateUser(data);
         if (!result) throw new Error('Failed to create user');
         set((state) => ({ users: [...state.users, result] }));
@@ -95,6 +117,7 @@ export const useStore = create<AppState>()(
       },
 
       addSport: async (data) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const result = await apiAddSport(data);
         if (!result) throw new Error('Failed to add sport');
         set((state) => {
@@ -106,12 +129,14 @@ export const useStore = create<AppState>()(
       },
 
       updateSport: async (sportId, updates) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiUpdateSport(sportId, updates);
         if (!success) throw new Error('Failed to update sport');
         set((state) => ({ sports: state.sports.map((s) => s.id === sportId ? { ...s, ...updates } : s) }));
       },
 
       removeSport: async (sportId) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const courtsForSport = get().courts.filter((c) => c.sportId === sportId);
         if (courtsForSport.length > 0) throw new Error('Cannot remove sport with assigned courts');
         const success = await apiRemoveSport(sportId);
@@ -128,6 +153,7 @@ export const useStore = create<AppState>()(
       setSelectedSport: (sportId) => set({ selectedSportId: sportId }),
 
       createBooking: async (bookingData) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const result = await apiCreateBooking(bookingData);
         if (!result) throw new Error('Failed to create booking');
         set((state) => ({ bookings: [...state.bookings, result] }));
@@ -141,6 +167,7 @@ export const useStore = create<AppState>()(
       },
 
       updateBookingStatus: async (bookingId, status) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiUpdateBookingStatus(bookingId, status);
         if (!success) throw new Error('Failed to update booking status');
         set((state) => ({ bookings: state.bookings.map((b) => b.id !== bookingId ? b : { ...b, status }) }));
@@ -160,12 +187,14 @@ export const useStore = create<AppState>()(
       },
 
       rescheduleBooking: async (bookingId, date, startHour) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiRescheduleBooking(bookingId, date, startHour);
         if (!success) throw new Error('Failed to reschedule booking');
         set((state) => ({ bookings: state.bookings.map((b) => b.id === bookingId ? { ...b, date, startHour } : b) }));
       },
 
       addMember: async (memberData) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const result = await apiAddMember(memberData);
         if (!result) throw new Error('Failed to add member');
         set((state) => ({ members: [...state.members, result] }));
@@ -173,12 +202,14 @@ export const useStore = create<AppState>()(
       },
 
       updateMember: async (memberId, updates) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiUpdateMember(memberId, updates);
         if (!success) throw new Error('Failed to update member');
         set((state) => ({ members: state.members.map((m) => m.id === memberId ? { ...m, ...updates } : m) }));
       },
 
       addCourt: async (courtData) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const result = await apiAddCourt({ sportId: courtData.sportId, name: courtData.name, hourlyRate: courtData.hourlyRate });
         if (!result) throw new Error('Failed to add court');
         set((state) => ({ courts: [...state.courts, result], tenant: { ...state.tenant, courtCount: state.courts.length + 1 } }));
@@ -186,18 +217,21 @@ export const useStore = create<AppState>()(
       },
 
       updateCourt: async (courtId, updates) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiUpdateCourt(courtId, updates);
         if (!success) throw new Error('Failed to update court');
         set((state) => ({ courts: state.courts.map((c) => c.id === courtId ? { ...c, ...updates } : c) }));
       },
 
       removeCourt: async (courtId) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiRemoveCourt(courtId);
         if (!success) throw new Error('Failed to remove court');
         set((state) => ({ courts: state.courts.filter((c) => c.id !== courtId), tenant: { ...state.tenant, courtCount: state.courts.length - 1 } }));
       },
 
       addItem: async (itemData) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const result = await apiAddItem({ sportId: itemData.sportId, name: itemData.name, price: itemData.price, type: itemData.type });
         if (!result) throw new Error('Failed to add item');
         set((state) => ({ items: [...state.items, result] }));
@@ -205,18 +239,21 @@ export const useStore = create<AppState>()(
       },
 
       updateItem: async (itemId, updates) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiUpdateItem(itemId, updates);
         if (!success) throw new Error('Failed to update item');
         set((state) => ({ items: state.items.map((i) => i.id === itemId ? { ...i, ...updates } : i) }));
       },
 
       removeItem: async (itemId) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiRemoveItem(itemId);
         if (!success) throw new Error('Failed to remove item');
         set((state) => ({ items: state.items.filter((i) => i.id !== itemId) }));
       },
 
       updateTenant: async (updates) => {
+        if (checkFreezeGuard(get)) throw new Error('Account is frozen');
         const success = await apiUpdateTenant(updates);
         if (!success) throw new Error('Failed to update tenant');
         set((state) => ({ tenant: { ...state.tenant, ...updates } }));
