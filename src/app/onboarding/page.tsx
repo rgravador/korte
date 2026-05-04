@@ -3,12 +3,18 @@
 import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ItemType, TimeRange } from '@/lib/types';
+import { ItemType, TimeRange, PRESET_SPORTS } from '@/lib/types';
 import { apiRegister, apiHydrate } from '@/lib/api';
 import { OperatingHoursEditor } from '@/components/operating-hours-editor';
 import { UsernameInput } from '@/components/username-input';
 
-type Step = 'welcome' | 'facility' | 'courts' | 'items' | 'review';
+type Step = 'welcome' | 'facility' | 'sports' | 'sport-setup' | 'items' | 'review';
+
+interface SportSetup {
+  name: string;
+  operatingHoursRanges: TimeRange[];
+  courts: { name: string; hourlyRate: number }[];
+}
 
 const SUGGESTED_ITEMS = [
   { name: 'Paddle Rental', price: 100, type: 'rental' as ItemType },
@@ -47,12 +53,14 @@ export default function OnboardingPage() {
   const [ownerUsername, setOwnerUsername] = useState('');
   const [ownerPassword, setOwnerPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [hoursRanges, setHoursRanges] = useState<TimeRange[]>([{ start: 6, end: 22 }]);
 
-  // Courts
-  const [courts, setCourts] = useState<{ name: string; hourlyRate: number }[]>([
-    { name: 'Court 1', hourlyRate: 400 },
-  ]);
+  // Sports selection
+  const [selectedSports, setSelectedSports] = useState<{ name: string }[]>([]);
+  const [customSportName, setCustomSportName] = useState('');
+
+  // Sport setup (sequential per sport: hours + courts)
+  const [sportSetups, setSportSetups] = useState<SportSetup[]>([]);
+  const [currentSportSetupIndex, setCurrentSportSetupIndex] = useState(0);
 
   // Items
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
@@ -74,24 +82,96 @@ export default function OnboardingPage() {
     .replace(/[^a-z0-9]+/g, '')
     .slice(0, 20);
 
-  const addCourt = () => {
-    setCourts([...courts, { name: `Court ${courts.length + 1}`, hourlyRate: 400 }]);
+  // ── Sports helpers ──────────────────────────────────────────
+
+  const togglePresetSport = (sportName: string) => {
+    setSelectedSports((prev) => {
+      const exists = prev.some((s) => s.name === sportName);
+      if (exists) {
+        return prev.filter((s) => s.name !== sportName);
+      }
+      return [...prev, { name: sportName }];
+    });
   };
 
-  const updateCourt = (index: number, field: 'name' | 'hourlyRate', value: string | number) => {
-    const updated = [...courts];
-    if (field === 'name') {
-      updated[index] = { ...updated[index], name: value as string };
-    } else {
-      updated[index] = { ...updated[index], hourlyRate: Number(value) };
-    }
-    setCourts(updated);
+  const addCustomSport = () => {
+    const trimmed = customSportName.trim();
+    if (!trimmed) return;
+    const alreadySelected = selectedSports.some(
+      (s) => s.name.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (alreadySelected) return;
+    setSelectedSports((prev) => [...prev, { name: trimmed }]);
+    setCustomSportName('');
   };
 
-  const removeCourt = (index: number) => {
-    if (courts.length <= 1) return;
-    setCourts(courts.filter((_, i) => i !== index));
+  const initSportSetups = () => {
+    const setups: SportSetup[] = selectedSports.map((sport) => {
+      const existing = sportSetups.find((s) => s.name === sport.name);
+      if (existing) return existing;
+      return {
+        name: sport.name,
+        operatingHoursRanges: [{ start: 6, end: 22 }],
+        courts: [{ name: `Court 1`, hourlyRate: 400 }],
+      };
+    });
+    setSportSetups(setups);
+    setCurrentSportSetupIndex(0);
   };
+
+  // ── Sport-setup helpers ─────────────────────────────────────
+
+  const currentSetup = sportSetups[currentSportSetupIndex] as SportSetup | undefined;
+
+  const updateCurrentSetupHours = (ranges: TimeRange[]) => {
+    setSportSetups((prev) => {
+      const updated = [...prev];
+      updated[currentSportSetupIndex] = { ...updated[currentSportSetupIndex], operatingHoursRanges: ranges };
+      return updated;
+    });
+  };
+
+  const addCourtToCurrentSetup = () => {
+    setSportSetups((prev) => {
+      const updated = [...prev];
+      const setup = updated[currentSportSetupIndex];
+      updated[currentSportSetupIndex] = {
+        ...setup,
+        courts: [...setup.courts, { name: `Court ${setup.courts.length + 1}`, hourlyRate: 400 }],
+      };
+      return updated;
+    });
+  };
+
+  const updateCourtInCurrentSetup = (courtIndex: number, field: 'name' | 'hourlyRate', value: string | number) => {
+    setSportSetups((prev) => {
+      const updated = [...prev];
+      const setup = updated[currentSportSetupIndex];
+      const courts = [...setup.courts];
+      if (field === 'name') {
+        courts[courtIndex] = { ...courts[courtIndex], name: value as string };
+      } else {
+        courts[courtIndex] = { ...courts[courtIndex], hourlyRate: Number(value) };
+      }
+      updated[currentSportSetupIndex] = { ...setup, courts };
+      return updated;
+    });
+  };
+
+  const removeCourtFromCurrentSetup = (courtIndex: number) => {
+    setSportSetups((prev) => {
+      const updated = [...prev];
+      const setup = updated[currentSportSetupIndex];
+      if (setup.courts.length <= 1) return prev;
+      updated[currentSportSetupIndex] = {
+        ...setup,
+        courts: setup.courts.filter((_, i) => i !== courtIndex),
+      };
+      return updated;
+    });
+  };
+
+  // ── Items helpers ───────────────────────────────────────────
 
   const toggleSuggestedItem = (index: number) => {
     const next = new Set(selectedItems);
@@ -116,6 +196,8 @@ export default function OnboardingPage() {
     ...customItems,
   ];
 
+  // ── Registration ────────────────────────────────────────────
+
   const [registering, setRegistering] = useState(false);
   const [registerError, setRegisterError] = useState('');
 
@@ -123,21 +205,31 @@ export default function OnboardingPage() {
     setRegistering(true);
     setRegisterError('');
 
-    const sorted = [...hoursRanges].sort((a, b) => a.start - b.start);
+    const sports = sportSetups.map((s) => ({
+      name: s.name,
+      operatingHoursRanges: s.operatingHoursRanges,
+      courts: s.courts,
+    }));
+
+    // Backward compat: use first sport's first range for legacy fields
+    const firstRange = sports[0]?.operatingHoursRanges[0];
+    const operatingHoursStart = firstRange?.start ?? 6;
+    const operatingHoursEnd = firstRange?.end ?? 22;
 
     try {
       console.debug('[onboarding] Registering via API...');
       const result = await apiRegister({
         name: facilityName,
         subdomain,
-        operatingHoursStart: sorted[0].start,
-        operatingHoursEnd: sorted[sorted.length - 1].end,
+        operatingHoursStart,
+        operatingHoursEnd,
         ownerName,
         ownerEmail,
         ownerUsername,
         ownerPassword,
-        courts,
+        courts: sports.flatMap((s) => s.courts),
         items: allItems,
+        sports,
       });
 
       if (result?.tenant && result?.user) {
@@ -178,7 +270,7 @@ export default function OnboardingPage() {
 
             <h1 className="font-sans font-bold text-4xl leading-tight tracking-tight mb-3">
               Set up your<br />
-              <span className="text-primary font-serif italic">pickleball facility.</span>
+              <span className="text-primary font-serif italic">sports facility.</span>
             </h1>
 
             <p className="text-ink-2 text-sm mb-2 max-w-[32ch]">
@@ -203,13 +295,13 @@ export default function OnboardingPage() {
         {/* Facility Info */}
         {step === 'facility' && (
           <>
-            <StepIndicator current={0} total={4} />
+            <StepIndicator current={0} total={5} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Your <span className="text-primary font-serif italic">facility.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-6">
-              Step 1 of 4 · Basic info
+              Step 1 of 5 · Basic info
             </p>
 
             <div className="space-y-4">
@@ -217,7 +309,7 @@ export default function OnboardingPage() {
                 <label className="font-sans text-xs text-ink-3 block mb-1.5">Facility name</label>
                 <input
                   type="text"
-                  placeholder="e.g. QC Pickle Hub"
+                  placeholder="e.g. QC Sports Hub"
                   value={facilityName}
                   onChange={(e) => setFacilityName(e.target.value)}
                   className="w-full bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -244,7 +336,7 @@ export default function OnboardingPage() {
                 <label className="font-sans text-xs text-ink-3 block mb-1.5">Email</label>
                 <input
                   type="email"
-                  placeholder="marco@qcpicklehub.com"
+                  placeholder="marco@qcsportshub.com"
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
                   className="w-full bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -297,11 +389,6 @@ export default function OnboardingPage() {
                   </button>
                 </div>
               </div>
-
-              <div className="h-px bg-line my-1" />
-
-              <div className="text-xs text-ink-3 mb-1.5">Operating hours</div>
-              <OperatingHoursEditor ranges={hoursRanges} onChange={setHoursRanges} />
             </div>
 
             <div className="flex gap-3 mt-8">
@@ -312,7 +399,7 @@ export default function OnboardingPage() {
                 Back
               </button>
               <button
-                onClick={() => setStep('courts')}
+                onClick={() => setStep('sports')}
                 disabled={!facilityName.trim() || !ownerName.trim() || !ownerUsername.trim() || ownerPassword.length < 6}
                 className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-40"
               >
@@ -322,42 +409,153 @@ export default function OnboardingPage() {
           </>
         )}
 
-        {/* Courts */}
-        {step === 'courts' && (
+        {/* Sports Selection */}
+        {step === 'sports' && (
           <>
-            <StepIndicator current={1} total={4} />
+            <StepIndicator current={1} total={5} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Your <span className="text-primary font-serif italic">courts.</span>
+              Your <span className="text-primary font-serif italic">sports.</span>
             </h1>
-            <p className="font-sans text-xs text-ink-3 mb-6">
-              Step 2 of 4 · How many pickleball courts?
+            <p className="font-sans text-xs text-ink-3 mb-2">
+              Step 2 of 5 · Which sports does your facility offer?
+            </p>
+            <p className="text-ink-2 text-xs mb-5">
+              Select one or more sports. You&apos;ll configure hours and courts for each one next.
             </p>
 
+            <div className="flex flex-wrap gap-2 mb-4">
+              {PRESET_SPORTS.map((sport) => {
+                const isSelected = selectedSports.some((s) => s.name === sport);
+                return (
+                  <button
+                    key={sport}
+                    onClick={() => togglePresetSport(sport)}
+                    className={`px-4 py-2.5 rounded-xl font-sans text-sm transition-colors ${
+                      isSelected
+                        ? 'bg-primary text-white'
+                        : 'bg-surface border border-line text-ink-2 hover:border-primary'
+                    }`}
+                  >
+                    {sport}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Custom sport input */}
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                placeholder="Other sport name"
+                value={customSportName}
+                onChange={(e) => setCustomSportName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addCustomSport();
+                  }
+                }}
+                className="flex-1 bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+              <button
+                onClick={addCustomSport}
+                disabled={!customSportName.trim()}
+                className="bg-surface-3 text-ink-2 px-4 py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-40"
+              >
+                Add
+              </button>
+            </div>
+
+            {/* Show custom sports that aren't in presets */}
+            {selectedSports.filter((s) => !(PRESET_SPORTS as readonly string[]).includes(s.name)).length > 0 && (
+              <div className="mb-4">
+                <div className="font-sans text-xs text-ink-3 mb-2">Custom sports</div>
+                <div className="flex flex-wrap gap-2">
+                  {selectedSports
+                    .filter((s) => !(PRESET_SPORTS as readonly string[]).includes(s.name))
+                    .map((sport) => (
+                      <button
+                        key={sport.name}
+                        onClick={() => setSelectedSports((prev) => prev.filter((s) => s.name !== sport.name))}
+                        className="px-4 py-2.5 rounded-xl font-sans text-sm bg-primary text-white flex items-center gap-2"
+                      >
+                        {sport.name}
+                        <span className="text-white/70">&times;</span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={() => setStep('facility')}
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
+              >
+                Back
+              </button>
+              <button
+                onClick={() => {
+                  initSportSetups();
+                  setStep('sport-setup');
+                }}
+                disabled={selectedSports.length < 1}
+                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Sport Setup (sequential, per sport) */}
+        {step === 'sport-setup' && currentSetup && (
+          <>
+            <StepIndicator current={2} total={5} />
+
+            <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
+              Set up <span className="text-primary font-serif italic">{currentSetup.name}.</span>
+            </h1>
+            <p className="font-sans text-xs text-ink-3 mb-6">
+              Step 3 of 5 · Sport {currentSportSetupIndex + 1} of {sportSetups.length}
+            </p>
+
+            {/* Operating hours for this sport */}
+            <div className="mb-6">
+              <div className="text-xs text-ink-3 mb-1.5">Operating hours</div>
+              <OperatingHoursEditor
+                ranges={currentSetup.operatingHoursRanges}
+                onChange={updateCurrentSetupHours}
+              />
+            </div>
+
+            {/* Courts for this sport */}
+            <div className="font-sans text-xs text-ink-3 mb-2">Courts</div>
             <div className="space-y-2">
-              {courts.map((court, index) => (
+              {currentSetup.courts.map((court, index) => (
                 <div key={index} className="bg-surface rounded-[16px] shadow-card p-3 flex gap-2 items-end">
                   <div className="flex-1">
                     <label className="font-sans text-xs text-ink-3 block mb-1">Name</label>
                     <input
                       type="text"
                       value={court.name}
-                      onChange={(e) => updateCourt(index, 'name', e.target.value)}
+                      onChange={(e) => updateCourtInCurrentSetup(index, 'name', e.target.value)}
                       className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   <div className="w-28">
-                    <label className="font-sans text-xs text-ink-3 block mb-1">₱/hour</label>
+                    <label className="font-sans text-xs text-ink-3 block mb-1">&#8369;/hour</label>
                     <input
                       type="number"
                       value={court.hourlyRate}
-                      onChange={(e) => updateCourt(index, 'hourlyRate', e.target.value)}
+                      onChange={(e) => updateCourtInCurrentSetup(index, 'hourlyRate', e.target.value)}
                       className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
-                  {courts.length > 1 && (
+                  {currentSetup.courts.length > 1 && (
                     <button
-                      onClick={() => removeCourt(index)}
+                      onClick={() => removeCourtFromCurrentSetup(index)}
                       className="w-8 h-8 flex items-center justify-center text-warn font-sans text-sm"
                       aria-label="Remove court"
                     >
@@ -369,7 +567,7 @@ export default function OnboardingPage() {
             </div>
 
             <button
-              onClick={addCourt}
+              onClick={addCourtToCurrentSetup}
               className="w-full mt-3 border border-dashed border-line text-ink-3 py-3 rounded-[16px] font-sans text-xs"
             >
               + Add another court
@@ -377,16 +575,28 @@ export default function OnboardingPage() {
 
             <div className="flex gap-3 mt-8">
               <button
-                onClick={() => setStep('facility')}
+                onClick={() => {
+                  if (currentSportSetupIndex > 0) {
+                    setCurrentSportSetupIndex(currentSportSetupIndex - 1);
+                  } else {
+                    setStep('sports');
+                  }
+                }}
                 className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
               >
                 Back
               </button>
               <button
-                onClick={() => setStep('items')}
+                onClick={() => {
+                  if (currentSportSetupIndex < sportSetups.length - 1) {
+                    setCurrentSportSetupIndex(currentSportSetupIndex + 1);
+                  } else {
+                    setStep('items');
+                  }
+                }}
                 className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium"
               >
-                Next
+                {currentSportSetupIndex < sportSetups.length - 1 ? 'Next sport' : 'Next'}
               </button>
             </div>
           </>
@@ -395,13 +605,13 @@ export default function OnboardingPage() {
         {/* Items */}
         {step === 'items' && (
           <>
-            <StepIndicator current={2} total={4} />
+            <StepIndicator current={3} total={5} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Rentals & <span className="text-primary font-serif italic">extras.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-2">
-              Step 3 of 4 · Equipment and items to sell
+              Step 4 of 5 · Equipment and items to sell
             </p>
             <p className="text-ink-2 text-xs mb-5">
               Select items your facility offers. Staff can add these when creating bookings. You can always change this later.
@@ -422,7 +632,7 @@ export default function OnboardingPage() {
                     <div>
                       <div className="font-medium text-sm">{item.name}</div>
                       <div className="font-sans text-xs text-ink-3">
-                        ₱{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}
+                        &#8369;{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}
                       </div>
                     </div>
                     <div
@@ -450,7 +660,7 @@ export default function OnboardingPage() {
                     <div key={index} className="bg-surface rounded-[16px] shadow-card p-3 flex justify-between items-center">
                       <div>
                         <div className="font-medium text-sm">{item.name}</div>
-                        <div className="font-sans text-xs text-ink-3">₱{item.price} · {item.type}</div>
+                        <div className="font-sans text-xs text-ink-3">&#8369;{item.price} · {item.type}</div>
                       </div>
                       <button
                         onClick={() => setCustomItems(customItems.filter((_, i) => i !== index))}
@@ -475,7 +685,7 @@ export default function OnboardingPage() {
                 />
                 <input
                   type="number"
-                  placeholder="Price (₱)"
+                  placeholder="Price (&#8369;)"
                   value={customPrice}
                   onChange={(e) => setCustomPrice(e.target.value)}
                   className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -509,7 +719,10 @@ export default function OnboardingPage() {
 
             <div className="flex gap-3 mt-4">
               <button
-                onClick={() => setStep('courts')}
+                onClick={() => {
+                  setCurrentSportSetupIndex(sportSetups.length - 1);
+                  setStep('sport-setup');
+                }}
                 className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
               >
                 Back
@@ -527,13 +740,13 @@ export default function OnboardingPage() {
         {/* Review */}
         {step === 'review' && (
           <>
-            <StepIndicator current={3} total={4} />
+            <StepIndicator current={4} total={5} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Ready to <span className="text-primary font-serif italic">launch.</span>
             </h1>
             <p className="font-sans text-xs text-ink-3 mb-6">
-              Step 4 of 4 · Review your setup
+              Step 5 of 5 · Review your setup
             </p>
 
             {/* Facility summary */}
@@ -551,18 +764,26 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            {/* Courts summary */}
-            <div className="bg-surface rounded-[16px] shadow-card p-4 mb-3">
-              <div className="font-sans text-xs font-semibold text-ink-3 mb-2">
-                {courts.length} Court{courts.length !== 1 ? 's' : ''}
-              </div>
-              {courts.map((court, i) => (
-                <div key={i} className="flex justify-between py-1.5 border-b border-line-2 last:border-0">
-                  <span className="text-sm">{court.name}</span>
-                  <span className="font-sans text-xs text-ink-3">₱{court.hourlyRate}/hr</span>
+            {/* Sports summary — grouped by sport */}
+            {sportSetups.map((sport, sportIndex) => (
+              <div key={sportIndex} className="bg-surface rounded-[16px] shadow-card p-4 mb-3">
+                <div className="font-sans text-xs font-semibold text-ink-3 mb-2">{sport.name}</div>
+
+                <div className="font-sans text-xs text-ink-3 mb-2">
+                  Hours: {sport.operatingHoursRanges.map((r) => `${r.start}:00 – ${r.end}:00`).join(', ')}
                 </div>
-              ))}
-            </div>
+
+                <div className="font-sans text-xs text-ink-3 mb-1">
+                  {sport.courts.length} Court{sport.courts.length !== 1 ? 's' : ''}
+                </div>
+                {sport.courts.map((court, i) => (
+                  <div key={i} className="flex justify-between py-1.5 border-b border-line-2 last:border-0">
+                    <span className="text-sm">{court.name}</span>
+                    <span className="font-sans text-xs text-ink-3">&#8369;{court.hourlyRate}/hr</span>
+                  </div>
+                ))}
+              </div>
+            ))}
 
             {/* Items summary */}
             <div className="bg-surface rounded-[16px] shadow-card p-4 mb-6">
@@ -575,7 +796,7 @@ export default function OnboardingPage() {
                 allItems.map((item, i) => (
                   <div key={i} className="flex justify-between py-1.5 border-b border-line-2 last:border-0">
                     <span className="text-sm">{item.name}</span>
-                    <span className="font-sans text-xs text-ink-3">₱{item.price} · {item.type}</span>
+                    <span className="font-sans text-xs text-ink-3">&#8369;{item.price} · {item.type}</span>
                   </div>
                 ))
               )}

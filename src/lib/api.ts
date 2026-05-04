@@ -51,6 +51,7 @@ export async function apiRegister(data: {
   ownerPassword: string;
   courts: { name: string; hourlyRate: number }[];
   items: { name: string; price: number; type: ItemType }[];
+  sports?: { name: string; operatingHoursRanges: TimeRange[]; courts: { name: string; hourlyRate: number }[] }[];
 }): Promise<{ tenant: Tenant; user: User; courts: Court[]; items: Item[] } | null> {
   return fetchApi('/api/auth/register', {
     method: 'POST',
