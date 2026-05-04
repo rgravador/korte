@@ -27,7 +27,7 @@ export function Header() {
   return (
     <div className="flex justify-between items-center mb-5">
       <div className="flex items-center gap-2.5">
-        <Image src="/logos/logo-no-bg.png" alt="Korte" width={32} height={32} className="w-8 h-8" />
+        <Image src="/logos/Korte-no-bg.png" alt="Korte" width={32} height={32} className="w-8 h-8" />
         <span className="font-display font-semibold text-base tracking-tight text-ink">
           Korte
         </span>
