@@ -227,7 +227,7 @@ export default function OnboardingPage() {
 
             <h1 className="font-sans font-bold text-4xl leading-tight tracking-tight mb-3">
               Set up your<br />
-              <span className="text-primary font-serif italic">sports facility.</span>
+              <span className="text-primary font-display italic">sports facility.</span>
             </h1>
 
             <p className="text-ink-2 text-base mb-2 max-w-[32ch]">
@@ -255,7 +255,7 @@ export default function OnboardingPage() {
             <StepIndicator current={0} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Your <span className="text-primary font-serif italic">facility.</span>
+              Your <span className="text-primary font-display italic">facility.</span>
             </h1>
             <p className="font-sans text-base text-ink-3 mb-6">
               Step 1 of 4 · Basic info
@@ -372,7 +372,7 @@ export default function OnboardingPage() {
             <StepIndicator current={1} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Your <span className="text-primary font-serif italic">sports.</span>
+              Your <span className="text-primary font-display italic">sports.</span>
             </h1>
             <p className="font-sans text-base text-ink-3 mb-2">
               Step 2 of 4 · Which sports does your facility offer?
@@ -472,7 +472,7 @@ export default function OnboardingPage() {
             <StepIndicator current={2} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Set up <span className="text-primary font-serif italic">{currentSetup.name}.</span>
+              Set up <span className="text-primary font-display italic">{currentSetup.name}.</span>
             </h1>
             <p className="font-sans text-base text-ink-3 mb-6">
               Step 3 of 4 · Sport {currentSportSetupIndex + 1} of {sportSetups.length}
@@ -565,7 +565,7 @@ export default function OnboardingPage() {
             <StepIndicator current={3} total={4} />
 
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
-              Ready to <span className="text-primary font-serif italic">launch.</span>
+              Ready to <span className="text-primary font-display italic">launch.</span>
             </h1>
             <p className="font-sans text-base text-ink-3 mb-6">
               Step 4 of 4 · Review your setup

@@ -1,28 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito, Quicksand, Fraunces } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { SyncProvider } from "@/components/sync-provider";
 import { InstallPrompt } from "@/components/install-prompt";
 import { ToastContainer } from "@/components/toast";
 
-const nunito = Nunito({
-  subsets: ["latin"],
-  variable: "--font-nunito",
-  weight: ["400", "500", "600", "700", "800"],
+const sora = localFont({
+  src: "./fonts/sora-variable.woff2",
+  variable: "--font-display",
   display: "swap",
 });
 
-const quicksand = Quicksand({
-  subsets: ["latin"],
-  variable: "--font-quicksand",
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  weight: ["400", "500", "600", "700", "800"],
+const plusJakartaSans = localFont({
+  src: [
+    { path: "./fonts/plus-jakarta-sans-400.woff2", weight: "400" },
+    { path: "./fonts/plus-jakarta-sans-500.woff2", weight: "500" },
+    { path: "./fonts/plus-jakarta-sans-600.woff2", weight: "600" },
+    { path: "./fonts/plus-jakarta-sans-700.woff2", weight: "700" },
+  ],
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -53,7 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${nunito.variable} ${quicksand.variable} ${fraunces.variable} font-sans antialiased`}
+        className={`${sora.variable} ${plusJakartaSans.variable} font-sans antialiased`}
       >
         <SyncProvider>{children}</SyncProvider>
         <InstallPrompt />

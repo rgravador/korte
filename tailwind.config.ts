@@ -45,9 +45,8 @@ const config: Config = {
         'pending-text': '#E8C56B',
       },
       fontFamily: {
-        sans: ['var(--font-nunito)', 'Nunito', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        display: ['var(--font-quicksand)', 'Quicksand', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        serif: ['var(--font-fraunces)', 'Fraunces', 'Georgia', 'serif'],
+        sans: ['var(--font-sans)', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        display: ['var(--font-display)', 'var(--font-sans)', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       borderRadius: {
         card: '16px',

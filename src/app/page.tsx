@@ -224,7 +224,7 @@ export default function HomePage() {
           <h3 className="text-white font-display font-bold text-4xl xl:text-5xl leading-tight tracking-tight mb-5">
             Streamline Your<br />
             Court Operations<br />
-            <span className="text-gold font-serif italic">With Smart Booking</span>
+            <span className="text-gold font-display italic">With Smart Booking</span>
           </h3>
           <p className="text-slate-400 text-base leading-relaxed mb-12 max-w-md">
             A modern multi-facility platform designed to manage your pickleball courts from booking to check-in.

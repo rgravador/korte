@@ -212,7 +212,7 @@ export default function DashboardPage() {
       {/* Greeting */}
         <h1 className="font-display font-bold text-2xl md:text-3xl leading-tight tracking-tight mb-1 text-ink">
           Good morning,<br />
-          <span className="text-primary font-serif italic">{firstName}.</span>
+          <span className="text-primary font-display italic">{firstName}.</span>
         </h1>
         <p className="text-base md:text-sm text-ink-3 mb-5 md:mb-8">
           {dayName} {dayDate} &middot; {tenant.name}

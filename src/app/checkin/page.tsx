@@ -78,7 +78,7 @@ export default function CheckinPage() {
         </div>
 
         <h1 className="font-sans font-light text-2xl tracking-tight mb-1">
-          Check-<span className="text-primary font-serif italic">in.</span>
+          Check-<span className="text-primary font-display italic">in.</span>
         </h1>
         <p className="font-sans text-base text-ink-3 mb-4">
           {new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })} · {expectedCount} expected today
