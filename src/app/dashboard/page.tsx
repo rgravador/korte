@@ -11,8 +11,7 @@ import { SportFilter } from '@/components/sport-filter';
 
 function formatHour(hour: number): string {
   const h = hour % 12 || 12;
-  const ampm = hour < 12 ? 'AM' : 'PM';
-  return `${h}:00 ${ampm}`;
+  return `${h} ${hour < 12 ? 'AM' : 'PM'}`;
 }
 
 function BookingDetailSheet({
