@@ -109,8 +109,10 @@ export const useStore = create<AppState>()(
       },
 
       logout: async () => {
-        await apiLogout();
-        set({ currentUser: null, isOnboarded: false, users: [], tenant: EMPTY_TENANT, sports: [], selectedSportId: null, courts: [], items: [], members: [], bookings: [] });
+        if (navigator.onLine) {
+          try { await apiLogout(); } catch { /* ignore network errors */ }
+        }
+        set({ currentUser: null, isOnboarded: false, tenant: EMPTY_TENANT, sports: [], selectedSportId: null, courts: [], items: [], members: [], bookings: [] });
       },
 
       createUser: async (data) => {
@@ -412,15 +414,15 @@ export const useStore = create<AppState>()(
       },
 
       refreshFromServer: async () => {
-        const { currentUser, isOnboarded } = get();
+        const { currentUser, isOnboarded, isOnline } = get();
         if (!currentUser || !isOnboarded || currentUser.role === 'system_admin') return;
+        if (!isOnline) return; // skip network calls when offline
 
         const data = await apiHydrate();
         if (data) {
           get().hydrateFromRemote(data);
         } else {
           console.warn('[store] refreshFromServer failed');
-          toast.error('Could not sync latest data from the server. You may be viewing outdated information.');
         }
       },
     }),
@@ -452,7 +454,7 @@ export const useStore = create<AppState>()(
         return (state) => {
           if (!state) return;
           state._hasHydrated = true;
-          state.refreshFromServer();
+          if (navigator.onLine) state.refreshFromServer();
         };
       },
     }

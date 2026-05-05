@@ -91,7 +91,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     if (!currentUser || !isOnboarded || currentUser.role === 'system_admin') return;
 
     const interval = setInterval(() => {
-      refreshFromServer();
+      if (navigator.onLine) refreshFromServer();
     }, 5 * 60 * 1000);
 
     return () => clearInterval(interval);
@@ -102,7 +102,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     if (!currentUser || !isOnboarded) return;
 
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === 'visible' && navigator.onLine) {
         refreshFromServer();
       }
     };

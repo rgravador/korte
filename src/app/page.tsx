@@ -38,6 +38,12 @@ export default function HomePage() {
       return;
     }
 
+    // When offline, skip session recovery — show login form immediately
+    if (!navigator.onLine) {
+      setRecovering(false);
+      return;
+    }
+
     // Auto-recover session only in installed PWA mode (mobile/desktop)
     const isPwa = window.matchMedia('(display-mode: standalone)').matches
       || (navigator as unknown as { standalone?: boolean }).standalone === true;
@@ -74,6 +80,21 @@ export default function HomePage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Offline login: match against cached users from the store
+    if (!navigator.onLine) {
+      const { users, isOnboarded } = useStore.getState();
+      const cachedUser = users.find((u) => u.username === username);
+      if (cachedUser && isOnboarded) {
+        useStore.setState({ currentUser: cachedUser, isOnboarded: true });
+        setLoading(false);
+        router.push(getHomeRoute(cachedUser.role));
+        return;
+      }
+      setLoading(false);
+      setError('You are offline. Only the last signed-in account can be used while offline.');
+      return;
+    }
 
     const user = await apiLogin(username, password);
     if (!user) {
