@@ -427,7 +427,7 @@ export const useStore = create<AppState>()(
     {
       name: 'korte-store',
       storage: createJSONStorage(() => {
-        if (isBrowser) return createEncryptedStorage(sessionStorage);
+        if (isBrowser) return createEncryptedStorage(localStorage);
         return {
           getItem: () => null,
           setItem: () => {},
