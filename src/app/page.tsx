@@ -3,7 +3,7 @@
 import { useStore } from '@/store';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { apiLogin, apiHydrate } from '@/lib/api';
+import { apiLogin, apiHydrate, apiGetMe } from '@/lib/api';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -28,14 +28,47 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [recovering, setRecovering] = useState(true);
 
   const getHomeRoute = (role: string) => role === 'system_admin' ? '/admin' : '/dashboard';
 
   useEffect(() => {
     if (currentUser) {
       router.replace(getHomeRoute(currentUser.role));
+      return;
     }
-  }, [currentUser, router]);
+
+    // Auto-recover session only in installed PWA mode (mobile/desktop)
+    const isPwa = window.matchMedia('(display-mode: standalone)').matches
+      || (navigator as unknown as { standalone?: boolean }).standalone === true;
+
+    if (!isPwa) {
+      setRecovering(false);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      const user = await apiGetMe();
+      if (cancelled) return;
+
+      if (!user) {
+        setRecovering(false);
+        return;
+      }
+
+      if (user.role !== 'system_admin' && user.tenantId) {
+        const data = await apiHydrate(user.tenantId);
+        if (cancelled) return;
+        if (data) hydrateFromRemote(data);
+      }
+
+      useStore.setState({ currentUser: user, isOnboarded: true });
+      router.replace(getHomeRoute(user.role));
+    })();
+
+    return () => { cancelled = true; };
+  }, [currentUser, router, hydrateFromRemote]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,6 +111,16 @@ export default function HomePage() {
     setLoading(false);
     router.push(getHomeRoute(user.role));
   };
+
+  if (recovering) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-navy-900">
+        <div className="flex flex-col items-center gap-4">
+          <Image src="/korte/Korte-no-bg.png" alt="Korte" width={48} height={48} className="w-12 h-12 animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-navy-900">

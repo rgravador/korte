@@ -172,6 +172,21 @@ export async function dbLogin(
   return toUser(data);
 }
 
+export async function dbGetUserById(
+  sb: SupabaseClient,
+  userId: string
+): Promise<User | null> {
+  const { data, error } = await sb
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return toUser(data);
+}
+
 export async function dbCreateUser(
   sb: SupabaseClient,
   tenantId: string,

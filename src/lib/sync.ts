@@ -9,6 +9,7 @@
  * - Conflict resolution: last-write-wins (queue replays in order)
  */
 
+import { encrypt, decrypt } from './crypto-storage';
 import { getSupabase, isSupabaseConfigured } from './supabase';
 import {
   dbLogin, dbCreateUser, dbCreateTenant, dbUpdateTenant,
@@ -59,17 +60,24 @@ export type MutationType =
 
 const QUEUE_KEY = 'court-books-sync-queue';
 
-export function getQueue(): MutationType[] {
+export async function getQueue(): Promise<MutationType[]> {
   if (typeof localStorage === 'undefined') return [];
   const raw = localStorage.getItem(QUEUE_KEY);
   if (!raw) return [];
-  try { return JSON.parse(raw); } catch { return []; }
+  try {
+    const decrypted = await decrypt(raw);
+    return JSON.parse(decrypted);
+  } catch {
+    localStorage.removeItem(QUEUE_KEY);
+    return [];
+  }
 }
 
-export function enqueue(mutation: MutationType) {
-  const queue = getQueue();
+export async function enqueue(mutation: MutationType) {
+  const queue = await getQueue();
   queue.push(mutation);
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  const encrypted = await encrypt(JSON.stringify(queue));
+  localStorage.setItem(QUEUE_KEY, encrypted);
 }
 
 function clearQueue() {
@@ -82,7 +90,7 @@ export async function flushQueue(): Promise<{ flushed: number; failed: number }>
   const sb = getSupabase();
   if (!sb || !getOnlineStatus()) return { flushed: 0, failed: 0 };
 
-  const queue = getQueue();
+  const queue = await getQueue();
   if (queue.length === 0) return { flushed: 0, failed: 0 };
 
   let flushed = 0;

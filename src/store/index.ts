@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { createEncryptedStorage } from '@/lib/crypto-storage';
 import { User, Tenant, Court, Item, Member, Booking, Sport, BookingStatus, UserRole, TimeRange } from '@/lib/types';
 import {
   apiCreateBooking, apiUpdateBookingStatus, apiRescheduleBooking,
@@ -9,8 +10,11 @@ import {
   apiAddSport, apiUpdateSport, apiRemoveSport,
   apiUpdateTenant, apiCreateUser, apiHydrate, apiLogout,
 } from '@/lib/api';
+import { enqueue } from '@/lib/sync';
 import { toast } from '@/components/toast';
 import { isTenantFrozen } from '@/lib/subscription';
+
+const OFFLINE_TOAST = 'Saved offline — will sync when back online.';
 
 const EMPTY_TENANT: Tenant = {
   id: '', name: '', subdomain: '', courtCount: 0,
@@ -155,23 +159,46 @@ export const useStore = create<AppState>()(
 
       createBooking: async (bookingData) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const result = await apiCreateBooking(bookingData);
-        if (!result) throw new Error('Failed to create booking');
-        set((state) => ({ bookings: [...state.bookings, result] }));
-        if (bookingData.memberId) {
-          const member = get().members.find((m) => m.id === bookingData.memberId);
-          if (member) {
-            await get().updateMember(bookingData.memberId, { totalBookings: member.totalBookings + 1, lastVisit: bookingData.date }).catch(() => { toast.error('Could not update member stats, but the booking was saved.'); });
+        const { tenant, isOnline } = get();
+
+        if (isOnline) {
+          const result = await apiCreateBooking(bookingData);
+          if (!result) throw new Error('Failed to create booking');
+          set((state) => ({ bookings: [...state.bookings, result] }));
+          if (bookingData.memberId) {
+            const member = get().members.find((m) => m.id === bookingData.memberId);
+            if (member) {
+              await get().updateMember(bookingData.memberId, { totalBookings: member.totalBookings + 1, lastVisit: bookingData.date }).catch(() => { toast.error('Could not update member stats, but the booking was saved.'); });
+            }
           }
+          return result.id;
         }
-        return result.id;
+
+        const tempId = crypto.randomUUID();
+        set((state) => ({
+          bookings: [...state.bookings, { ...bookingData, id: tempId, tenantId: tenant.id, createdAt: new Date().toISOString() } as Booking],
+          pendingSync: state.pendingSync + 1,
+        }));
+        await enqueue({ kind: 'createBooking', payload: { ...bookingData, tenantId: tenant.id } as Record<string, unknown> });
+        toast.info(OFFLINE_TOAST);
+        return tempId;
       },
 
       updateBookingStatus: async (bookingId, status) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const success = await apiUpdateBookingStatus(bookingId, status);
-        if (!success) throw new Error('Failed to update booking status');
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const success = await apiUpdateBookingStatus(bookingId, status);
+          if (!success) throw new Error('Failed to update booking status');
+        } else {
+          set((state) => ({ pendingSync: state.pendingSync + 1 }));
+          await enqueue({ kind: 'updateBookingStatus', payload: { bookingId, tenantId: tenant.id, status } });
+          toast.info(OFFLINE_TOAST);
+        }
+
         set((state) => ({ bookings: state.bookings.map((b) => b.id !== bookingId ? b : { ...b, status }) }));
+
         if (status === 'no_show') {
           const booking = get().bookings.find((b) => b.id === bookingId);
           if (booking?.memberId) {
@@ -189,74 +216,184 @@ export const useStore = create<AppState>()(
 
       rescheduleBooking: async (bookingId, date, startHour) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const success = await apiRescheduleBooking(bookingId, date, startHour);
-        if (!success) throw new Error('Failed to reschedule booking');
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const success = await apiRescheduleBooking(bookingId, date, startHour);
+          if (!success) throw new Error('Failed to reschedule booking');
+        } else {
+          set((state) => ({ pendingSync: state.pendingSync + 1 }));
+          await enqueue({ kind: 'rescheduleBooking', payload: { bookingId, tenantId: tenant.id, date, startHour } });
+          toast.info(OFFLINE_TOAST);
+        }
+
         set((state) => ({ bookings: state.bookings.map((b) => b.id === bookingId ? { ...b, date, startHour } : b) }));
       },
 
       addMember: async (memberData) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const result = await apiAddMember(memberData);
-        if (!result) throw new Error('Failed to add member');
-        set((state) => ({ members: [...state.members, result] }));
-        return result.id;
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const result = await apiAddMember(memberData);
+          if (!result) throw new Error('Failed to add member');
+          set((state) => ({ members: [...state.members, result] }));
+          return result.id;
+        }
+
+        const tempId = crypto.randomUUID();
+        const optimistic: Member = {
+          id: tempId, tenantId: tenant.id, ...memberData,
+          totalBookings: 0, totalNoShows: 0, lastVisit: null,
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => ({ members: [...state.members, optimistic], pendingSync: state.pendingSync + 1 }));
+        await enqueue({ kind: 'addMember', payload: { tenantId: tenant.id, ...memberData } });
+        toast.info(OFFLINE_TOAST);
+        return tempId;
       },
 
       updateMember: async (memberId, updates) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const success = await apiUpdateMember(memberId, updates);
-        if (!success) throw new Error('Failed to update member');
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const success = await apiUpdateMember(memberId, updates);
+          if (!success) throw new Error('Failed to update member');
+        } else {
+          set((state) => ({ pendingSync: state.pendingSync + 1 }));
+          await enqueue({ kind: 'updateMember', payload: { memberId, tenantId: tenant.id, updates: updates as Record<string, unknown> } });
+          toast.info(OFFLINE_TOAST);
+        }
+
         set((state) => ({ members: state.members.map((m) => m.id === memberId ? { ...m, ...updates } : m) }));
       },
 
       addCourt: async (courtData) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const result = await apiAddCourt({ sportId: courtData.sportId, name: courtData.name, hourlyRate: courtData.hourlyRate });
-        if (!result) throw new Error('Failed to add court');
-        set((state) => ({ courts: [...state.courts, result], tenant: { ...state.tenant, courtCount: state.courts.length + 1 } }));
-        return result.id;
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const result = await apiAddCourt({ sportId: courtData.sportId, name: courtData.name, hourlyRate: courtData.hourlyRate });
+          if (!result) throw new Error('Failed to add court');
+          set((state) => ({ courts: [...state.courts, result], tenant: { ...state.tenant, courtCount: state.courts.length + 1 } }));
+          return result.id;
+        }
+
+        const tempId = crypto.randomUUID();
+        const optimistic: Court = {
+          id: tempId, tenantId: tenant.id, sportId: courtData.sportId,
+          name: courtData.name, hourlyRate: courtData.hourlyRate, isActive: courtData.isActive,
+        };
+        set((state) => ({
+          courts: [...state.courts, optimistic],
+          tenant: { ...state.tenant, courtCount: state.courts.length + 1 },
+          pendingSync: state.pendingSync + 1,
+        }));
+        await enqueue({ kind: 'addCourt', payload: { tenantId: tenant.id, sportId: courtData.sportId, name: courtData.name, hourlyRate: courtData.hourlyRate } });
+        toast.info(OFFLINE_TOAST);
+        return tempId;
       },
 
       updateCourt: async (courtId, updates) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const success = await apiUpdateCourt(courtId, updates);
-        if (!success) throw new Error('Failed to update court');
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const success = await apiUpdateCourt(courtId, updates);
+          if (!success) throw new Error('Failed to update court');
+        } else {
+          set((state) => ({ pendingSync: state.pendingSync + 1 }));
+          await enqueue({ kind: 'updateCourt', payload: { courtId, tenantId: tenant.id, updates: updates as Record<string, unknown> } });
+          toast.info(OFFLINE_TOAST);
+        }
+
         set((state) => ({ courts: state.courts.map((c) => c.id === courtId ? { ...c, ...updates } : c) }));
       },
 
       removeCourt: async (courtId) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const success = await apiRemoveCourt(courtId);
-        if (!success) throw new Error('Failed to remove court');
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const success = await apiRemoveCourt(courtId);
+          if (!success) throw new Error('Failed to remove court');
+        } else {
+          set((state) => ({ pendingSync: state.pendingSync + 1 }));
+          await enqueue({ kind: 'removeCourt', payload: { courtId, tenantId: tenant.id } });
+          toast.info(OFFLINE_TOAST);
+        }
+
         set((state) => ({ courts: state.courts.filter((c) => c.id !== courtId), tenant: { ...state.tenant, courtCount: state.courts.length - 1 } }));
       },
 
       addItem: async (itemData) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const result = await apiAddItem({ sportId: itemData.sportId, name: itemData.name, price: itemData.price, type: itemData.type });
-        if (!result) throw new Error('Failed to add item');
-        set((state) => ({ items: [...state.items, result] }));
-        return result.id;
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const result = await apiAddItem({ sportId: itemData.sportId, name: itemData.name, price: itemData.price, type: itemData.type });
+          if (!result) throw new Error('Failed to add item');
+          set((state) => ({ items: [...state.items, result] }));
+          return result.id;
+        }
+
+        const tempId = crypto.randomUUID();
+        const optimistic: Item = {
+          id: tempId, tenantId: tenant.id, sportId: itemData.sportId ?? '',
+          name: itemData.name, price: itemData.price, type: itemData.type, isActive: itemData.isActive,
+        };
+        set((state) => ({ items: [...state.items, optimistic], pendingSync: state.pendingSync + 1 }));
+        await enqueue({ kind: 'addItem', payload: { tenantId: tenant.id, sportId: itemData.sportId, name: itemData.name, price: itemData.price, type: itemData.type } });
+        toast.info(OFFLINE_TOAST);
+        return tempId;
       },
 
       updateItem: async (itemId, updates) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const success = await apiUpdateItem(itemId, updates);
-        if (!success) throw new Error('Failed to update item');
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const success = await apiUpdateItem(itemId, updates);
+          if (!success) throw new Error('Failed to update item');
+        } else {
+          set((state) => ({ pendingSync: state.pendingSync + 1 }));
+          await enqueue({ kind: 'updateItem', payload: { itemId, tenantId: tenant.id, updates: updates as Record<string, unknown> } });
+          toast.info(OFFLINE_TOAST);
+        }
+
         set((state) => ({ items: state.items.map((i) => i.id === itemId ? { ...i, ...updates } : i) }));
       },
 
       removeItem: async (itemId) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const success = await apiRemoveItem(itemId);
-        if (!success) throw new Error('Failed to remove item');
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const success = await apiRemoveItem(itemId);
+          if (!success) throw new Error('Failed to remove item');
+        } else {
+          set((state) => ({ pendingSync: state.pendingSync + 1 }));
+          await enqueue({ kind: 'removeItem', payload: { itemId, tenantId: tenant.id } });
+          toast.info(OFFLINE_TOAST);
+        }
+
         set((state) => ({ items: state.items.filter((i) => i.id !== itemId) }));
       },
 
       updateTenant: async (updates) => {
         if (checkFreezeGuard(get)) throw new Error('Account is frozen');
-        const success = await apiUpdateTenant(updates);
-        if (!success) throw new Error('Failed to update tenant');
+        const { isOnline, tenant } = get();
+
+        if (isOnline) {
+          const success = await apiUpdateTenant(updates);
+          if (!success) throw new Error('Failed to update tenant');
+        } else {
+          set((state) => ({ pendingSync: state.pendingSync + 1 }));
+          await enqueue({ kind: 'updateTenant', payload: { tenantId: tenant.id, updates: updates as Record<string, unknown> } });
+          toast.info(OFFLINE_TOAST);
+        }
+
         set((state) => ({ tenant: { ...state.tenant, ...updates } }));
       },
 
@@ -290,7 +427,7 @@ export const useStore = create<AppState>()(
     {
       name: 'korte-store',
       storage: createJSONStorage(() => {
-        if (isBrowser) return sessionStorage;
+        if (isBrowser) return createEncryptedStorage(sessionStorage);
         return {
           getItem: () => null,
           setItem: () => {},
@@ -307,7 +444,8 @@ export const useStore = create<AppState>()(
         courts: state.courts,
         items: state.items,
         members: state.members,
-        // bookings excluded — always fetched fresh from server on hydrate
+        bookings: state.bookings,
+        pendingSync: state.pendingSync,
         lastSyncedAt: state.lastSyncedAt,
       }),
       onRehydrateStorage: () => {

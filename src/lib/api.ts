@@ -40,6 +40,10 @@ export async function apiLogin(username: string, password: string): Promise<User
   });
 }
 
+export async function apiGetMe(): Promise<User | null> {
+  return fetchApi<User>('/api/auth/me');
+}
+
 export async function apiLogout(): Promise<void> {
   await fetchApi('/api/auth/logout', { method: 'POST' });
 }

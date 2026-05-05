@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SyncProvider } from "@/components/sync-provider";
+import { SwRegister } from "@/components/sw-register";
 import { InstallPrompt } from "@/components/install-prompt";
 import { ToastContainer } from "@/components/toast";
 
@@ -52,6 +53,7 @@ export default function RootLayout({
         className={`${sora.variable} ${plusJakartaSans.variable} font-sans antialiased`}
       >
         <SyncProvider>{children}</SyncProvider>
+        <SwRegister />
         <InstallPrompt />
         <ToastContainer />
       </body>
