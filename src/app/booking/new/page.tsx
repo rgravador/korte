@@ -13,6 +13,12 @@ function formatHour(hour: number): string {
   return `${h}:00 ${ampm}`;
 }
 
+/** Compact format for grid buttons — e.g. "6 AM", "12 PM" */
+function formatHourShort(hour: number): string {
+  const h = hour % 12 || 12;
+  return `${h} ${hour < 12 ? 'AM' : 'PM'}`;
+}
+
 function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number);
   const d = new Date(year, month - 1, day);
@@ -363,7 +369,7 @@ function NewBookingForm() {
               setSelectedHours([]);
             }}
             min={today}
-            className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-base text-ink border-none outline-none mb-3"
+            className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm text-ink border-none outline-none mb-3"
           />
 
           {selectedCourtId ? (
@@ -387,7 +393,7 @@ function NewBookingForm() {
                             : 'bg-surface-3 text-ink hover:bg-primary-faint'
                       }`}
                     >
-                      {formatHour(hour)}
+                      {formatHourShort(hour)}
                     </button>
                   );
                 })}
