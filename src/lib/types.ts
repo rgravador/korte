@@ -174,6 +174,8 @@ export interface Booking {
   items: BookingItem[];
   itemsTotal: number;
   total: number; // courtFee + itemsTotal
+  paymentMode: 'full' | 'downpayment'; // policy at booking time
+  paidAmount: number; // amount collected at booking time
   isRecurring: boolean;
   notes: string;
   createdAt: string;

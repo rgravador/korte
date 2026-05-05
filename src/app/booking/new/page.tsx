@@ -258,10 +258,16 @@ function NewBookingForm() {
       const blocks = groupConsecutive(selectedHours);
       let lastId = '';
 
+      const isDownpayment = tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0;
+
       for (const block of blocks) {
         const blockDuration = block.length * 60;
         const blockCourtFee = (selectedCourt?.hourlyRate ?? 0) * block.length;
         const isFirstBlock = block === blocks[0];
+        const blockTotal = blockCourtFee + (isFirstBlock ? itemsTotal : 0);
+        const blockPaidAmount = isDownpayment
+          ? tenant.downpaymentPerHour * block.length
+          : blockTotal;
 
         lastId = await createBooking({
           courtId: selectedCourtId,
@@ -274,7 +280,9 @@ function NewBookingForm() {
           courtFee: blockCourtFee,
           items: isFirstBlock ? bookingItems : [],
           itemsTotal: isFirstBlock ? itemsTotal : 0,
-          total: blockCourtFee + (isFirstBlock ? itemsTotal : 0),
+          total: blockTotal,
+          paymentMode: tenant.paymentMode,
+          paidAmount: blockPaidAmount,
           isRecurring: false,
           notes: blocks.length > 1 ? `Part of multi-block booking (${totalHours}h total)` : '',
         });

@@ -59,6 +59,8 @@ export const CreateBookingSchema = z.object({
   items: z.array(BookingItemSchema).default([]),
   itemsTotal: z.number().min(0).default(0),
   total: z.number().min(0).default(0),
+  paymentMode: z.enum(['full', 'downpayment']).default('full'),
+  paidAmount: z.number().min(0).default(0),
   isRecurring: z.boolean().default(false),
   notes: z.string().max(2000).default(''),
 });

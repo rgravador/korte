@@ -122,6 +122,8 @@ function toBooking(r: Record<string, unknown>, items: BookingItem[]): Booking {
     courtFee: Number(r.court_fee),
     itemsTotal: Number(r.items_total),
     total: Number(r.total),
+    paymentMode: (r.payment_mode as 'full' | 'downpayment') ?? 'full',
+    paidAmount: Number(r.paid_amount ?? r.total ?? 0),
     isRecurring: r.is_recurring as boolean,
     notes: (r.notes as string) ?? '',
     items,
@@ -670,6 +672,8 @@ export async function dbCreateBooking(
       court_fee: b.courtFee,
       items_total: b.itemsTotal,
       total: b.total,
+      payment_mode: b.paymentMode,
+      paid_amount: b.paidAmount,
       is_recurring: b.isRecurring,
       notes: b.notes,
     })

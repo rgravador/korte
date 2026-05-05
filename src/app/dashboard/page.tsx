@@ -25,13 +25,10 @@ function BookingDetailSheet({
   onClose: () => void;
   onStatusChange: (id: string, status: BookingStatus) => void;
 }) {
-  const { tenant } = useStore();
   const court = courts.find((c) => c.id === booking.courtId);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
-  const totalHours = booking.durationMinutes / 60;
-  const isDownpayment = tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0;
-  const downpaymentAmount = isDownpayment ? tenant.downpaymentPerHour * totalHours : 0;
-  const balanceDue = isDownpayment ? Math.max(0, booking.total - downpaymentAmount) : 0;
+  const isDownpayment = booking.paymentMode === 'downpayment';
+  const balanceDue = isDownpayment ? Math.max(0, booking.total - booking.paidAmount) : 0;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end lg:items-center justify-center" onClick={onClose}>
@@ -83,7 +80,7 @@ function BookingDetailSheet({
 
         {isDownpayment ? (
           <div className="text-base text-ink-3 mb-4 space-y-0.5">
-            <div>Downpayment collected: ₱{downpaymentAmount.toLocaleString()}</div>
+            <div>Downpayment collected: ₱{booking.paidAmount.toLocaleString()}</div>
             {balanceDue > 0 && <div className="text-warn">Balance to collect at check-in: ₱{balanceDue.toLocaleString()}</div>}
           </div>
         ) : (

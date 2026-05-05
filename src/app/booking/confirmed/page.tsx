@@ -19,7 +19,7 @@ function formatDate(dateStr: string): string {
 function ConfirmedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { bookings, courts, tenant } = useStore();
+  const { bookings, courts } = useStore();
 
   const bookingId = searchParams.get('id');
   const booking = bookings.find((b) => b.id === bookingId);
@@ -120,15 +120,15 @@ function ConfirmedContent() {
               <span className="text-primary font-bold">₱{booking.total.toLocaleString()}</span>
             </div>
           </div>
-          {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0 ? (
+          {booking.paymentMode === 'downpayment' ? (
             <div className="space-y-1 mt-2 pt-2 border-t border-line">
               <div className="flex justify-between font-sans text-base">
                 <span className="text-ink-3">Downpayment due now</span>
-                <span className="text-ink font-medium">₱{(tenant.downpaymentPerHour * (booking.durationMinutes / 60)).toLocaleString()}</span>
+                <span className="text-ink font-medium">₱{booking.paidAmount.toLocaleString()}</span>
               </div>
               <div className="flex justify-between font-sans text-base">
                 <span className="text-ink-3">Balance at check-in</span>
-                <span className="text-ink font-medium">₱{Math.max(0, booking.total - tenant.downpaymentPerHour * (booking.durationMinutes / 60)).toLocaleString()}</span>
+                <span className="text-ink font-medium">₱{Math.max(0, booking.total - booking.paidAmount).toLocaleString()}</span>
               </div>
             </div>
           ) : (

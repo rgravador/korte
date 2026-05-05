@@ -132,13 +132,13 @@ export const seedBookings: Booking[] = [
     items: [
       { itemId: 'item-1', itemName: 'Paddle Rental', itemType: 'rental', unitPrice: 100, quantity: 2 },
     ],
-    itemsTotal: 200, total: 700, isRecurring: false, notes: '', createdAt: '2026-04-28T10:00:00Z',
+    itemsTotal: 200, total: 700, paymentMode: 'full', paidAmount: 700, isRecurring: false, notes: '', createdAt: '2026-04-28T10:00:00Z',
   },
   {
     id: 'booking-2', tenantId: TENANT_ID, courtId: 'court-3', memberId: 'member-3',
     memberName: 'Tue Open League', date: todayStr, startHour: 10, durationMinutes: 90,
     status: 'checked_in', courtFee: 400,
-    items: [], itemsTotal: 0, total: 400, isRecurring: true, notes: '8 players', createdAt: '2026-04-01T10:00:00Z',
+    items: [], itemsTotal: 0, total: 400, paymentMode: 'full', paidAmount: 400, isRecurring: true, notes: '8 players', createdAt: '2026-04-01T10:00:00Z',
   },
   {
     id: 'booking-3', tenantId: TENANT_ID, courtId: 'court-1', memberId: 'member-2',
@@ -147,13 +147,13 @@ export const seedBookings: Booking[] = [
     items: [
       { itemId: 'item-4', itemName: 'Pickleball (Franklin X-40)', itemType: 'sale', unitPrice: 250, quantity: 1 },
     ],
-    itemsTotal: 250, total: 650, isRecurring: false, notes: '', createdAt: '2026-04-29T14:00:00Z',
+    itemsTotal: 250, total: 650, paymentMode: 'full', paidAmount: 650, isRecurring: false, notes: '', createdAt: '2026-04-29T14:00:00Z',
   },
   {
     id: 'booking-4', tenantId: TENANT_ID, courtId: 'court-2', memberId: 'member-3',
     memberName: 'M. Santos', date: todayStr, startHour: 13, durationMinutes: 60,
     status: 'confirmed', courtFee: 500,
-    items: [], itemsTotal: 0, total: 500, isRecurring: false, notes: '', createdAt: '2026-04-28T16:00:00Z',
+    items: [], itemsTotal: 0, total: 500, paymentMode: 'full', paidAmount: 500, isRecurring: false, notes: '', createdAt: '2026-04-28T16:00:00Z',
   },
   {
     id: 'booking-5', tenantId: TENANT_ID, courtId: 'court-1', memberId: 'member-5',
@@ -163,13 +163,13 @@ export const seedBookings: Booking[] = [
       { itemId: 'item-1', itemName: 'Paddle Rental', itemType: 'rental', unitPrice: 100, quantity: 1 },
       { itemId: 'item-6', itemName: 'Bottled Water', itemType: 'sale', unitPrice: 35, quantity: 2 },
     ],
-    itemsTotal: 170, total: 570, isRecurring: false, notes: '', createdAt: '2026-04-29T09:00:00Z',
+    itemsTotal: 170, total: 570, paymentMode: 'full', paidAmount: 570, isRecurring: false, notes: '', createdAt: '2026-04-29T09:00:00Z',
   },
   {
     id: 'booking-6', tenantId: TENANT_ID, courtId: 'court-3', memberId: 'member-4',
     memberName: 'P. Delgado', date: todayStr, startHour: 14, durationMinutes: 120,
     status: 'confirmed', courtFee: 800,
-    items: [], itemsTotal: 0, total: 800, isRecurring: false, notes: '', createdAt: '2026-04-28T11:00:00Z',
+    items: [], itemsTotal: 0, total: 800, paymentMode: 'full', paidAmount: 800, isRecurring: false, notes: '', createdAt: '2026-04-28T11:00:00Z',
   },
   {
     id: 'booking-7', tenantId: TENANT_ID, courtId: 'court-1', memberId: null,
@@ -179,20 +179,20 @@ export const seedBookings: Booking[] = [
       { itemId: 'item-1', itemName: 'Paddle Rental', itemType: 'rental', unitPrice: 100, quantity: 2 },
       { itemId: 'item-2', itemName: 'Shoe Rental', itemType: 'rental', unitPrice: 80, quantity: 1 },
     ],
-    itemsTotal: 280, total: 680, isRecurring: false, notes: '', createdAt: '2026-04-30T08:50:00Z',
+    itemsTotal: 280, total: 680, paymentMode: 'full', paidAmount: 680, isRecurring: false, notes: '', createdAt: '2026-04-30T08:50:00Z',
   },
   // Yesterday — one no-show
   {
     id: 'booking-8', tenantId: TENANT_ID, courtId: 'court-2', memberId: 'member-6',
     memberName: 'E. Velasco', date: yesterdayStr, startHour: 10, durationMinutes: 60,
     status: 'no_show', courtFee: 500,
-    items: [], itemsTotal: 0, total: 500, isRecurring: false, notes: '', createdAt: '2026-04-27T10:00:00Z',
+    items: [], itemsTotal: 0, total: 500, paymentMode: 'full', paidAmount: 500, isRecurring: false, notes: '', createdAt: '2026-04-27T10:00:00Z',
   },
   {
     id: 'booking-9', tenantId: TENANT_ID, courtId: 'court-1', memberId: 'member-7',
     memberName: 'B. Lim', date: yesterdayStr, startHour: 14, durationMinutes: 60,
     status: 'checked_in', courtFee: 400,
-    items: [], itemsTotal: 0, total: 400, isRecurring: false, notes: '', createdAt: '2026-04-27T12:00:00Z',
+    items: [], itemsTotal: 0, total: 400, paymentMode: 'full', paidAmount: 400, isRecurring: false, notes: '', createdAt: '2026-04-27T12:00:00Z',
   },
   {
     id: 'booking-10', tenantId: TENANT_ID, courtId: 'court-3', memberId: 'member-8',
@@ -201,20 +201,20 @@ export const seedBookings: Booking[] = [
     items: [
       { itemId: 'item-1', itemName: 'Paddle Rental', itemType: 'rental', unitPrice: 100, quantity: 1 },
     ],
-    itemsTotal: 100, total: 500, isRecurring: false, notes: '', createdAt: '2026-04-27T09:00:00Z',
+    itemsTotal: 100, total: 500, paymentMode: 'full', paidAmount: 500, isRecurring: false, notes: '', createdAt: '2026-04-27T09:00:00Z',
   },
   // Tomorrow
   {
     id: 'booking-11', tenantId: TENANT_ID, courtId: 'court-1', memberId: 'member-1',
     memberName: 'A. Reyes', date: tomorrowStr, startHour: 10, durationMinutes: 60,
     status: 'confirmed', courtFee: 400,
-    items: [], itemsTotal: 0, total: 400, isRecurring: false, notes: '', createdAt: '2026-04-29T10:00:00Z',
+    items: [], itemsTotal: 0, total: 400, paymentMode: 'full', paidAmount: 400, isRecurring: false, notes: '', createdAt: '2026-04-29T10:00:00Z',
   },
   {
     id: 'booking-12', tenantId: TENANT_ID, courtId: 'court-2', memberId: 'member-5',
     memberName: 'R. Katigbak', date: tomorrowStr, startHour: 18, durationMinutes: 60,
     status: 'confirmed', courtFee: 500,
-    items: [], itemsTotal: 0, total: 500, isRecurring: true, notes: 'Weekly regular', createdAt: '2026-04-15T10:00:00Z',
+    items: [], itemsTotal: 0, total: 500, paymentMode: 'full', paidAmount: 500, isRecurring: true, notes: 'Weekly regular', createdAt: '2026-04-15T10:00:00Z',
   },
   // Day after tomorrow
   {
@@ -225,18 +225,18 @@ export const seedBookings: Booking[] = [
       { itemId: 'item-1', itemName: 'Paddle Rental', itemType: 'rental', unitPrice: 100, quantity: 2 },
       { itemId: 'item-4', itemName: 'Pickleball (Franklin X-40)', itemType: 'sale', unitPrice: 250, quantity: 1 },
     ],
-    itemsTotal: 450, total: 850, isRecurring: false, notes: '', createdAt: '2026-04-29T18:00:00Z',
+    itemsTotal: 450, total: 850, paymentMode: 'full', paidAmount: 850, isRecurring: false, notes: '', createdAt: '2026-04-29T18:00:00Z',
   },
   {
     id: 'booking-14', tenantId: TENANT_ID, courtId: 'court-1', memberId: 'member-7',
     memberName: 'B. Lim', date: dayAfterStr, startHour: 8, durationMinutes: 60,
     status: 'confirmed', courtFee: 400,
-    items: [], itemsTotal: 0, total: 400, isRecurring: false, notes: 'Early bird', createdAt: '2026-04-29T20:00:00Z',
+    items: [], itemsTotal: 0, total: 400, paymentMode: 'full', paidAmount: 400, isRecurring: false, notes: 'Early bird', createdAt: '2026-04-29T20:00:00Z',
   },
   {
     id: 'booking-15', tenantId: TENANT_ID, courtId: 'court-2', memberId: 'member-3',
     memberName: 'M. Santos', date: tomorrowStr, startHour: 10, durationMinutes: 60,
     status: 'confirmed', courtFee: 500,
-    items: [], itemsTotal: 0, total: 500, isRecurring: false, notes: '', createdAt: '2026-04-29T11:00:00Z',
+    items: [], itemsTotal: 0, total: 500, paymentMode: 'full', paidAmount: 500, isRecurring: false, notes: '', createdAt: '2026-04-29T11:00:00Z',
   },
 ];
