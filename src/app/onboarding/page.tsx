@@ -230,17 +230,17 @@ export default function OnboardingPage() {
               <span className="text-primary font-serif italic">sports facility.</span>
             </h1>
 
-            <p className="text-ink-2 text-sm mb-2 max-w-[32ch]">
+            <p className="text-ink-2 text-base mb-2 max-w-[32ch]">
               Get your courts online in under 5 minutes. Staff can start managing bookings right away.
             </p>
 
-            <p className="font-sans text-xs text-ink-3 mb-8">
+            <p className="font-sans text-base text-ink-3 mb-8">
               No credit card required · Free during setup
             </p>
 
             <button
               onClick={() => setStep('facility')}
-              className="w-full bg-primary text-white py-4 rounded-xl font-sans text-sm font-medium flex justify-between items-center px-5"
+              className="w-full bg-primary text-white py-4 rounded-xl font-sans text-base font-medium flex justify-between items-center px-5"
             >
               <span>Get Started</span>
               <span className="font-sans">&rarr;</span>
@@ -257,65 +257,65 @@ export default function OnboardingPage() {
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Your <span className="text-primary font-serif italic">facility.</span>
             </h1>
-            <p className="font-sans text-xs text-ink-3 mb-6">
+            <p className="font-sans text-base text-ink-3 mb-6">
               Step 1 of 4 · Basic info
             </p>
 
             <div className="space-y-4">
               <div>
-                <label className="font-sans text-xs text-ink-3 block mb-1.5">Facility name</label>
+                <label className="font-sans text-base text-ink-3 block mb-1.5">Facility name</label>
                 <input
                   type="text"
                   placeholder="e.g. QC Sports Hub"
                   value={facilityName}
                   onChange={(e) => setFacilityName(e.target.value)}
-                  className="w-full bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full bg-surface rounded-xl px-4 py-3 text-base font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
                 {subdomain && (
-                  <p className="font-sans text-xs text-ink-3 mt-1.5">
+                  <p className="font-sans text-base text-ink-3 mt-1.5">
                     Your URL: <span className="text-ink">{subdomain}.korte.app</span>
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="font-sans text-xs text-ink-3 block mb-1.5">Your name</label>
+                <label className="font-sans text-base text-ink-3 block mb-1.5">Your name</label>
                 <input
                   type="text"
                   placeholder="e.g. Marco Reyes"
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
-                  className="w-full bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full bg-surface rounded-xl px-4 py-3 text-base font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="font-sans text-xs text-ink-3 block mb-1.5">Email</label>
+                <label className="font-sans text-base text-ink-3 block mb-1.5">Email</label>
                 <input
                   type="email"
                   placeholder="marco@qcsportshub.com"
                   value={ownerEmail}
                   onChange={(e) => setOwnerEmail(e.target.value)}
-                  className="w-full bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full bg-surface rounded-xl px-4 py-3 text-base font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div className="h-px bg-line my-1" />
 
-              <div className="font-sans text-xs text-ink-3">Login credentials</div>
+              <div className="font-sans text-base text-ink-3">Login credentials</div>
 
               <div>
-                <label className="font-sans text-xs text-ink-3 block mb-1.5">Username</label>
+                <label className="font-sans text-base text-ink-3 block mb-1.5">Username</label>
                 <UsernameInput
                   value={ownerUsername}
                   onChange={setOwnerUsername}
                   placeholder="e.g. marco"
-                  className="bg-surface rounded-xl px-4 py-3 pr-10 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="bg-surface rounded-xl px-4 py-3 pr-10 text-base font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="font-sans text-xs text-ink-3 block mb-1.5">Password</label>
+                <label className="font-sans text-base text-ink-3 block mb-1.5">Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -323,7 +323,7 @@ export default function OnboardingPage() {
                     value={ownerPassword}
                     onChange={(e) => setOwnerPassword(e.target.value)}
                     autoComplete="new-password"
-                    className="w-full bg-surface rounded-xl px-4 py-3 pr-12 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    className="w-full bg-surface rounded-xl px-4 py-3 pr-12 text-base font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                   <button
                     type="button"
@@ -351,14 +351,14 @@ export default function OnboardingPage() {
             <div className="flex gap-3 mt-8">
               <button
                 onClick={() => setStep('welcome')}
-                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-base font-medium"
               >
                 Back
               </button>
               <button
                 onClick={() => setStep('sports')}
                 disabled={!facilityName.trim() || !ownerName.trim() || !ownerUsername.trim() || ownerPassword.length < 6}
-                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-40"
+                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-base font-medium disabled:opacity-40"
               >
                 Next
               </button>
@@ -374,10 +374,10 @@ export default function OnboardingPage() {
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Your <span className="text-primary font-serif italic">sports.</span>
             </h1>
-            <p className="font-sans text-xs text-ink-3 mb-2">
+            <p className="font-sans text-base text-ink-3 mb-2">
               Step 2 of 4 · Which sports does your facility offer?
             </p>
-            <p className="text-ink-2 text-xs mb-5">
+            <p className="text-ink-2 text-base mb-5">
               Select one or more sports. You&apos;ll configure hours and courts for each one next.
             </p>
 
@@ -388,7 +388,7 @@ export default function OnboardingPage() {
                   <button
                     key={sport}
                     onClick={() => togglePresetSport(sport)}
-                    className={`px-4 py-2.5 rounded-xl font-sans text-sm transition-colors ${
+                    className={`px-4 py-2.5 rounded-xl font-sans text-base transition-colors ${
                       isSelected
                         ? 'bg-primary text-white'
                         : 'bg-surface border border-line text-ink-2 hover:border-primary'
@@ -413,12 +413,12 @@ export default function OnboardingPage() {
                     addCustomSport();
                   }
                 }}
-                className="flex-1 bg-surface rounded-xl px-4 py-3 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="flex-1 bg-surface rounded-xl px-4 py-3 text-base font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
               <button
                 onClick={addCustomSport}
                 disabled={!customSportName.trim()}
-                className="bg-surface-3 text-ink-2 px-4 py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-40"
+                className="bg-surface-3 text-ink-2 px-4 py-3 rounded-xl font-sans text-base font-medium disabled:opacity-40"
               >
                 Add
               </button>
@@ -427,7 +427,7 @@ export default function OnboardingPage() {
             {/* Show custom sports that aren't in presets */}
             {selectedSports.filter((s) => !(PRESET_SPORTS as readonly string[]).includes(s.name)).length > 0 && (
               <div className="mb-4">
-                <div className="font-sans text-xs text-ink-3 mb-2">Custom sports</div>
+                <div className="font-sans text-base text-ink-3 mb-2">Custom sports</div>
                 <div className="flex flex-wrap gap-2">
                   {selectedSports
                     .filter((s) => !(PRESET_SPORTS as readonly string[]).includes(s.name))
@@ -435,7 +435,7 @@ export default function OnboardingPage() {
                       <button
                         key={sport.name}
                         onClick={() => setSelectedSports((prev) => prev.filter((s) => s.name !== sport.name))}
-                        className="px-4 py-2.5 rounded-xl font-sans text-sm bg-primary text-white flex items-center gap-2"
+                        className="px-4 py-2.5 rounded-xl font-sans text-base bg-primary text-white flex items-center gap-2"
                       >
                         {sport.name}
                         <span className="text-white/70">&times;</span>
@@ -448,7 +448,7 @@ export default function OnboardingPage() {
             <div className="flex gap-3 mt-8">
               <button
                 onClick={() => setStep('facility')}
-                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-base font-medium"
               >
                 Back
               </button>
@@ -458,7 +458,7 @@ export default function OnboardingPage() {
                   setStep('sport-setup');
                 }}
                 disabled={selectedSports.length < 1}
-                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-40"
+                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-base font-medium disabled:opacity-40"
               >
                 Next
               </button>
@@ -474,13 +474,13 @@ export default function OnboardingPage() {
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Set up <span className="text-primary font-serif italic">{currentSetup.name}.</span>
             </h1>
-            <p className="font-sans text-xs text-ink-3 mb-6">
+            <p className="font-sans text-base text-ink-3 mb-6">
               Step 3 of 4 · Sport {currentSportSetupIndex + 1} of {sportSetups.length}
             </p>
 
             {/* Operating hours for this sport */}
             <div className="mb-6">
-              <div className="text-xs text-ink-3 mb-1.5">Operating hours</div>
+              <div className="text-base text-ink-3 mb-1.5">Operating hours</div>
               <OperatingHoursEditor
                 ranges={currentSetup.operatingHoursRanges}
                 onChange={updateCurrentSetupHours}
@@ -488,32 +488,32 @@ export default function OnboardingPage() {
             </div>
 
             {/* Courts for this sport */}
-            <div className="font-sans text-xs text-ink-3 mb-2">Courts</div>
+            <div className="font-sans text-base text-ink-3 mb-2">Courts</div>
             <div className="space-y-2">
               {currentSetup.courts.map((court, index) => (
                 <div key={index} className="bg-surface rounded-[16px] shadow-card p-3 flex gap-2 items-end">
                   <div className="flex-1">
-                    <label className="font-sans text-xs text-ink-3 block mb-1">Name</label>
+                    <label className="font-sans text-base text-ink-3 block mb-1">Name</label>
                     <input
                       type="text"
                       value={court.name}
                       onChange={(e) => updateCourtInCurrentSetup(index, 'name', e.target.value)}
-                      className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-base font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   <div className="w-28">
-                    <label className="font-sans text-xs text-ink-3 block mb-1">&#8369;/hour</label>
+                    <label className="font-sans text-base text-ink-3 block mb-1">&#8369;/hour</label>
                     <input
                       type="number"
                       value={court.hourlyRate}
                       onChange={(e) => updateCourtInCurrentSetup(index, 'hourlyRate', e.target.value)}
-                      className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-sm font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-base font-sans border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
                   {currentSetup.courts.length > 1 && (
                     <button
                       onClick={() => removeCourtFromCurrentSetup(index)}
-                      className="w-8 h-8 flex items-center justify-center text-warn font-sans text-sm"
+                      className="w-8 h-8 flex items-center justify-center text-warn font-sans text-base"
                       aria-label="Remove court"
                     >
                       &times;
@@ -525,7 +525,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={addCourtToCurrentSetup}
-              className="w-full mt-3 border border-dashed border-line text-ink-3 py-3 rounded-[16px] font-sans text-xs"
+              className="w-full mt-3 border border-dashed border-line text-ink-3 py-3 rounded-[16px] font-sans text-base"
             >
               + Add another court
             </button>
@@ -539,7 +539,7 @@ export default function OnboardingPage() {
                     setStep('sports');
                   }
                 }}
-                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium"
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-base font-medium"
               >
                 Back
               </button>
@@ -551,7 +551,7 @@ export default function OnboardingPage() {
                     setStep('review');
                   }
                 }}
-                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-xs font-medium"
+                className="flex-1 bg-primary text-white py-3 rounded-xl font-sans text-base font-medium"
               >
                 {currentSportSetupIndex < sportSetups.length - 1 ? 'Next sport' : 'Next'}
               </button>
@@ -567,21 +567,21 @@ export default function OnboardingPage() {
             <h1 className="font-sans font-bold text-2xl tracking-tight mb-1">
               Ready to <span className="text-primary font-serif italic">launch.</span>
             </h1>
-            <p className="font-sans text-xs text-ink-3 mb-6">
+            <p className="font-sans text-base text-ink-3 mb-6">
               Step 4 of 4 · Review your setup
             </p>
 
             {/* Facility summary */}
             <div className="bg-surface rounded-[16px] shadow-card p-4 mb-3">
-              <div className="font-sans text-xs font-semibold text-ink-3 mb-2">Facility</div>
+              <div className="font-sans text-base font-semibold text-ink-3 mb-2">Facility</div>
               <div className="font-sans text-lg font-semibold mb-1">{facilityName}</div>
-              <div className="font-sans text-xs text-ink-3">
+              <div className="font-sans text-base text-ink-3">
                 {subdomain}.korte.app
               </div>
-              <div className="font-sans text-xs text-ink-3 mt-1">
+              <div className="font-sans text-base text-ink-3 mt-1">
                 Owner: {ownerName} · {ownerEmail}
               </div>
-              <div className="font-sans text-xs text-ink-3 mt-1">
+              <div className="font-sans text-base text-ink-3 mt-1">
                 Login: <span className="text-ink">@{ownerUsername}</span>
               </div>
             </div>
@@ -589,40 +589,40 @@ export default function OnboardingPage() {
             {/* Sports summary — grouped by sport */}
             {sportSetups.map((sport, sportIndex) => (
               <div key={sportIndex} className="bg-surface rounded-[16px] shadow-card p-4 mb-3">
-                <div className="font-sans text-xs font-semibold text-ink-3 mb-2">{sport.name}</div>
+                <div className="font-sans text-base font-semibold text-ink-3 mb-2">{sport.name}</div>
 
-                <div className="font-sans text-xs text-ink-3 mb-2">
+                <div className="font-sans text-base text-ink-3 mb-2">
                   Hours: {sport.operatingHoursRanges.map((r) => `${r.start}:00 – ${r.end}:00`).join(', ')}
                 </div>
 
-                <div className="font-sans text-xs text-ink-3 mb-1">
+                <div className="font-sans text-base text-ink-3 mb-1">
                   {sport.courts.length} Court{sport.courts.length !== 1 ? 's' : ''}
                 </div>
                 {sport.courts.map((court, i) => (
                   <div key={i} className="flex justify-between py-1.5 border-b border-line-2 last:border-0">
-                    <span className="text-sm">{court.name}</span>
-                    <span className="font-sans text-xs text-ink-3">&#8369;{court.hourlyRate}/hr</span>
+                    <span className="text-base">{court.name}</span>
+                    <span className="font-sans text-base text-ink-3">&#8369;{court.hourlyRate}/hr</span>
                   </div>
                 ))}
               </div>
             ))}
 
             <div className="bg-surface rounded-[16px] shadow-card p-4 mb-6">
-              <div className="font-sans text-xs text-ink-3">
+              <div className="font-sans text-base text-ink-3">
                 You can add rental items and extras in Settings after launch.
               </div>
             </div>
 
             {registerError && (
               <div className="bg-warn/10 border border-warn/30 rounded-xl p-3 mb-4">
-                <p className="text-xs text-warn">{registerError}</p>
+                <p className="text-base text-warn">{registerError}</p>
               </div>
             )}
 
             <button
               onClick={handleFinish}
               disabled={registering}
-              className="w-full bg-primary text-white py-4 rounded-xl font-sans text-sm font-medium flex justify-between items-center px-5 disabled:opacity-50"
+              className="w-full bg-primary text-white py-4 rounded-xl font-sans text-base font-medium flex justify-between items-center px-5 disabled:opacity-50"
             >
               <span>{registering ? 'Creating...' : `Launch ${facilityName || 'your facility'}`}</span>
               {!registering && <span className="font-sans">&rarr;</span>}
@@ -634,7 +634,7 @@ export default function OnboardingPage() {
                 setStep('sport-setup');
               }}
               disabled={registering}
-              className="w-full mt-3 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-xs font-medium disabled:opacity-50"
+              className="w-full mt-3 bg-surface-3 text-ink-2 py-3 rounded-xl font-sans text-base font-medium disabled:opacity-50"
             >
               Back
             </button>

@@ -32,12 +32,12 @@ export function Header() {
           Korte
         </span>
         {!isOnline && (
-          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-warn-soft text-warn-text">
+          <span className="text-base font-medium px-2 py-0.5 rounded-full bg-warn-soft text-warn-text">
             Offline
           </span>
         )}
         {isOnline && pendingSync > 0 && (
-          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary-soft text-primary-deep">
+          <span className="text-base font-medium px-2 py-0.5 rounded-full bg-primary-soft text-primary-deep">
             Syncing {pendingSync}
           </span>
         )}
@@ -46,7 +46,7 @@ export function Header() {
         <button
           onClick={() => setShowMenu(!showMenu)}
           aria-label="User menu"
-          className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-semibold"
+          className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-base font-semibold"
         >
           {initials}
         </button>
@@ -55,19 +55,19 @@ export function Header() {
             <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
             <div role="menu" className="absolute right-0 top-10 bg-surface rounded-xl border border-line shadow-dropdown z-50 w-52 overflow-hidden">
               <div className="px-3.5 py-3 border-b border-line-2">
-                <div className="font-display font-semibold text-sm text-ink">{currentUser?.displayName}</div>
-                <div className="text-xs text-ink-3 mt-0.5 capitalize">{currentUser?.role.replace('_', ' ')}</div>
+                <div className="font-display font-semibold text-base text-ink">{currentUser?.displayName}</div>
+                <div className="text-base text-ink-3 mt-0.5 capitalize">{currentUser?.role.replace('_', ' ')}</div>
               </div>
               <div className="px-3.5 py-2.5 border-b border-line-2 flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-signal' : 'bg-warn'}`} />
-                <span className="text-xs text-ink-3">
+                <span className="text-base text-ink-3">
                   {isOnline ? 'Online' : 'Offline'}
                 </span>
               </div>
               <button
                 onClick={handleLogout}
                 aria-label="Sign out"
-                className="w-full px-3.5 py-2.5 text-left text-xs text-warn font-medium hover:bg-surface-2 transition-colors"
+                className="w-full px-3.5 py-2.5 text-left text-base text-warn font-medium hover:bg-surface-2 transition-colors"
               >
                 Sign out
               </button>

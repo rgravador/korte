@@ -85,19 +85,19 @@ function MemberDetailSheet({
         <div className="w-10 h-1 bg-line rounded-full mx-auto mb-4" />
 
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-surface-3 border border-line flex items-center justify-center text-xs font-medium text-ink-2 shrink-0">
+          <div className="w-10 h-10 rounded-full bg-surface-3 border border-line flex items-center justify-center text-base font-medium text-ink-2 shrink-0">
             {getInitials(member.firstName, member.lastName)}
           </div>
           <div className="flex-1">
             <h3 className="font-sans text-xl font-light">
               {member.firstName} {member.lastName}
             </h3>
-            <p className="font-sans text-xs text-ink-3 mt-0.5">
+            <p className="font-sans text-base text-ink-3 mt-0.5">
               {member.phone} · {member.email}
             </p>
           </div>
           <span
-            className={`px-2 py-0.5 rounded-full text-xs ${
+            className={`px-2 py-0.5 rounded-full text-base ${
               member.tier === 'vip'
                 ? 'bg-primary-soft text-primary-deep'
                 : 'bg-surface-3 text-ink-3'
@@ -109,22 +109,22 @@ function MemberDetailSheet({
 
         <div className="grid grid-cols-3 gap-1.5 mb-4">
           <div className="bg-surface-3 rounded-[10px] p-2.5">
-            <div className="font-sans text-xs text-ink-3 mb-1">Bookings</div>
+            <div className="font-sans text-base text-ink-3 mb-1">Bookings</div>
             <div className="font-sans text-xl leading-none">{member.totalBookings}</div>
           </div>
           <div className="bg-surface-3 rounded-[10px] p-2.5">
-            <div className="font-sans text-xs text-ink-3 mb-1">No-shows</div>
+            <div className="font-sans text-base text-ink-3 mb-1">No-shows</div>
             <div className="font-sans text-xl leading-none">{member.totalNoShows}</div>
           </div>
           <div className="bg-surface-3 rounded-[10px] p-2.5">
-            <div className="font-sans text-xs text-ink-3 mb-1">Last visit</div>
-            <div className="font-sans text-sm leading-none mt-1">
+            <div className="font-sans text-base text-ink-3 mb-1">Last visit</div>
+            <div className="font-sans text-base leading-none mt-1">
               {member.lastVisit ? formatRelativeDate(member.lastVisit) : 'Never'}
             </div>
           </div>
         </div>
 
-        <div className="font-sans text-xs text-ink-3 mb-1.5">
+        <div className="font-sans text-base text-ink-3 mb-1.5">
           Booking history
         </div>
 
@@ -138,10 +138,10 @@ function MemberDetailSheet({
                   className="flex items-center justify-between py-2 border-b border-line-2"
                 >
                   <div>
-                    <div className="font-medium text-xs text-ink">
+                    <div className="font-medium text-base text-ink">
                       {formatDate(booking.date)} · {formatHour(booking.startHour)}
                     </div>
-                    <div className="font-sans text-xs text-ink-3">
+                    <div className="font-sans text-base text-ink-3">
                       {court?.name} · {booking.durationMinutes} min
                     </div>
                   </div>
@@ -151,14 +151,14 @@ function MemberDetailSheet({
             })}
           </div>
         ) : (
-          <div className="text-center py-6 text-ink-3 text-xs">
+          <div className="text-center py-6 text-ink-3 text-base">
             No bookings yet
           </div>
         )}
 
         <button
           onClick={onClose}
-          className="w-full border border-line text-ink-3 py-3 rounded-lg text-xs font-medium mt-2"
+          className="w-full border border-line text-ink-3 py-3 rounded-lg text-base font-medium mt-2"
         >
           Close
         </button>
@@ -218,14 +218,14 @@ function AddMemberSheet({
             placeholder="Full name"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-base text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
           <input
             type="tel"
             placeholder="Phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+            className="w-full bg-surface-3 rounded-lg px-3 py-2.5 text-base text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -233,7 +233,7 @@ function AddMemberSheet({
           <button
             onClick={handleSubmit}
             disabled={!isValid || saving}
-            className={`flex-1 py-3 rounded-xl text-xs font-medium transition-colors ${
+            className={`flex-1 py-3 rounded-xl text-base font-medium transition-colors ${
               isValid && !saving
                 ? 'bg-primary text-white'
                 : 'bg-line text-ink-4 cursor-not-allowed'
@@ -244,7 +244,7 @@ function AddMemberSheet({
           <button
             onClick={onClose}
             disabled={saving}
-            className="flex-1 border border-line text-ink-3 py-3 rounded-xl text-xs font-medium"
+            className="flex-1 border border-line text-ink-3 py-3 rounded-xl text-base font-medium"
           >
             Cancel
           </button>
@@ -297,7 +297,7 @@ export default function MembersPage() {
   return (
     <AppShell>
         <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-1 text-ink">Members</h1>
-        <p className="font-sans text-xs text-ink-3 mb-4">
+        <p className="font-sans text-base text-ink-3 mb-4">
           {activeCount} active · {lapsedCount} lapsed
         </p>
 
@@ -319,7 +319,7 @@ export default function MembersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search members"
-            className="w-full bg-surface-3 rounded-xl pl-9 pr-3 py-2.5 text-xs text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
+            className="w-full bg-surface-3 rounded-xl pl-9 pr-3 py-2.5 text-base text-ink placeholder:text-ink-4 outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
 
@@ -329,7 +329,7 @@ export default function MembersPage() {
             <button
               key={chip.key}
               onClick={() => setActiveFilter(chip.key)}
-              className={`px-3 py-1 rounded-full text-xs transition-colors ${
+              className={`px-3 py-1 rounded-full text-base transition-colors ${
                 activeFilter === chip.key
                   ? 'bg-primary text-white'
                   : 'bg-surface-3 text-ink-3'
@@ -348,25 +348,25 @@ export default function MembersPage() {
               onClick={() => setSelectedMember(member)}
               className="w-full grid grid-cols-[32px_1fr_auto] gap-2.5 items-center py-2.5 border-b border-line-2 text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-surface-3 border border-line flex items-center justify-center text-xs font-medium text-ink-2">
+              <div className="w-8 h-8 rounded-full bg-surface-3 border border-line flex items-center justify-center text-base font-medium text-ink-2">
                 {getInitials(member.firstName, member.lastName)}
               </div>
               <div>
-                <div className="font-medium text-xs text-ink">
+                <div className="font-medium text-base text-ink">
                   {member.firstName} {member.lastName}
                 </div>
-                <div className="font-sans text-xs text-ink-3">
+                <div className="font-sans text-base text-ink-3">
                   {member.totalBookings} visits · last {formatRelativeDate(member.lastVisit)}
                 </div>
               </div>
-              <div className="font-sans text-xs text-ink-3 text-right">
+              <div className="font-sans text-base text-ink-3 text-right">
                 {member.totalBookings} bookings
               </div>
             </button>
           ))}
 
           {filteredMembers.length === 0 && (
-            <div className="text-center py-8 text-ink-3 text-xs">
+            <div className="text-center py-8 text-ink-3 text-base">
               No members found
             </div>
           )}

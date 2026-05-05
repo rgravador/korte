@@ -46,7 +46,7 @@ function BookingDetailSheet({
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="font-display text-lg md:text-xl font-semibold text-ink">{booking.memberName}</h3>
-            <p className="text-xs text-ink-3 mt-1">
+            <p className="text-base text-ink-3 mt-1">
               {court?.name} &middot; {formatHour(booking.startHour)} &middot; {booking.durationMinutes} min
             </p>
           </div>
@@ -55,18 +55,18 @@ function BookingDetailSheet({
 
         {booking.items.length > 0 && (
           <div className="bg-surface-2 rounded-xl p-3.5 mb-4">
-            <div className="text-[10px] font-semibold text-ink-3 uppercase tracking-wider mb-2.5">Add-on items</div>
+            <div className="text-base font-semibold text-ink-3 uppercase tracking-wider mb-2.5">Add-on items</div>
             {booking.items.map((item, i) => (
-              <div key={i} className="flex justify-between text-xs py-1 text-ink-2">
+              <div key={i} className="flex justify-between text-base py-1 text-ink-2">
                 <span>{item.itemName} x{item.quantity}</span>
                 <span>₱{(item.unitPrice * item.quantity).toLocaleString()}</span>
               </div>
             ))}
-            <div className="flex justify-between text-xs pt-2.5 mt-2 border-t border-line/60">
+            <div className="flex justify-between text-base pt-2.5 mt-2 border-t border-line/60">
               <span className="text-ink-3">Court fee</span>
               <span className="text-ink-2">₱{booking.courtFee.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between text-sm font-semibold mt-2.5 pt-2.5 border-t border-line/60">
+            <div className="flex justify-between text-base font-semibold mt-2.5 pt-2.5 border-t border-line/60">
               <span className="text-ink">Total</span>
               <span className="text-primary font-display">₱{booking.total.toLocaleString()}</span>
             </div>
@@ -75,7 +75,7 @@ function BookingDetailSheet({
 
         {booking.items.length === 0 && (
           <div className="bg-surface-2 rounded-xl p-3.5 mb-4">
-            <div className="flex justify-between text-sm font-semibold">
+            <div className="flex justify-between text-base font-semibold">
               <span className="text-ink">Court fee</span>
               <span className="text-primary font-display">₱{booking.courtFee.toLocaleString()}</span>
             </div>
@@ -83,19 +83,19 @@ function BookingDetailSheet({
         )}
 
         {isDownpayment ? (
-          <div className="text-xs text-ink-3 mb-4 space-y-0.5">
+          <div className="text-base text-ink-3 mb-4 space-y-0.5">
             <div>Downpayment collected: ₱{downpaymentAmount.toLocaleString()}</div>
             {balanceDue > 0 && <div className="text-warn">Balance to collect at check-in: ₱{balanceDue.toLocaleString()}</div>}
           </div>
         ) : (
-          <p className="text-xs text-signal-text mb-4">Payment collected</p>
+          <p className="text-base text-signal-text mb-4">Payment collected</p>
         )}
 
         {!confirmingCancel && <div className="flex gap-2">
           {booking.status === 'pending' && (
             <button
               onClick={() => onStatusChange(booking.id, 'confirmed')}
-              className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors"
+              className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors"
             >
               Confirm
             </button>
@@ -103,7 +103,7 @@ function BookingDetailSheet({
           {['confirmed', 'pending'].includes(booking.status) && (
             <button
               onClick={() => onStatusChange(booking.id, 'checked_in')}
-              className="flex-1 bg-signal hover:bg-signal/90 text-white py-3 rounded-xl text-xs font-semibold transition-colors"
+              className="flex-1 bg-signal hover:bg-signal/90 text-white py-3 rounded-xl text-base font-semibold transition-colors"
             >
               Check In
             </button>
@@ -112,13 +112,13 @@ function BookingDetailSheet({
             <>
               <button
                 onClick={() => onStatusChange(booking.id, 'no_show')}
-                className="flex-1 bg-warn-soft text-warn py-3 rounded-xl text-xs font-semibold hover:bg-warn/10 transition-colors"
+                className="flex-1 bg-warn-soft text-warn py-3 rounded-xl text-base font-semibold hover:bg-warn/10 transition-colors"
               >
                 No-show
               </button>
               <button
                 onClick={() => setConfirmingCancel(true)}
-                className="flex-1 border border-line text-ink-3 py-3 rounded-xl text-xs font-medium hover:bg-surface-2 transition-colors"
+                className="flex-1 border border-line text-ink-3 py-3 rounded-xl text-base font-medium hover:bg-surface-2 transition-colors"
               >
                 Cancel
               </button>
@@ -128,21 +128,21 @@ function BookingDetailSheet({
 
         {confirmingCancel && (
           <div className="mt-4 bg-warn/5 border border-warn/20 rounded-xl p-4">
-            <div className="text-xs font-semibold text-ink mb-1">Cancel this booking?</div>
-            <p className="text-[11px] text-ink-3 mb-3">
+            <div className="text-base font-semibold text-ink mb-1">Cancel this booking?</div>
+            <p className="text-base text-ink-3 mb-3">
               This will cancel {booking.memberName}&apos;s booking for {court?.name} at {formatHour(booking.startHour)}.
               This action cannot be undone.
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => onStatusChange(booking.id, 'cancelled')}
-                className="flex-1 bg-warn text-white py-3 rounded-xl text-xs font-semibold transition-colors"
+                className="flex-1 bg-warn text-white py-3 rounded-xl text-base font-semibold transition-colors"
               >
                 Yes, cancel booking
               </button>
               <button
                 onClick={() => setConfirmingCancel(false)}
-                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors"
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors"
               >
                 Keep booking
               </button>
@@ -214,7 +214,7 @@ export default function DashboardPage() {
           Good morning,<br />
           <span className="text-primary font-serif italic">{firstName}.</span>
         </h1>
-        <p className="text-xs md:text-sm text-ink-3 mb-5 md:mb-8">
+        <p className="text-base md:text-sm text-ink-3 mb-5 md:mb-8">
           {dayName} {dayDate} &middot; {tenant.name}
         </p>
 
@@ -226,7 +226,7 @@ export default function DashboardPage() {
             { label: 'Utilization', value: `${utilization}%` },
           ].map(({ label, value }) => (
             <div key={label} className="bg-surface shadow-card rounded-xl p-3 md:p-4">
-              <div className="text-[10px] md:text-xs font-medium text-ink-3 uppercase tracking-wider mb-1.5">{label}</div>
+              <div className="text-base md:text-xs font-medium text-ink-3 uppercase tracking-wider mb-1.5">{label}</div>
               <div className="font-display text-2xl md:text-3xl font-bold leading-none text-ink">{value}</div>
             </div>
           ))}
@@ -234,8 +234,8 @@ export default function DashboardPage() {
 
         {/* Bookings list */}
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-sm md:text-base font-semibold text-ink">Next up</h2>
-          <span className="text-[10px] md:text-xs font-medium text-ink-4">{todayCount} bookings</span>
+          <h2 className="font-display text-base md:text-base font-semibold text-ink">Next up</h2>
+          <span className="text-base md:text-xs font-medium text-ink-4">{todayCount} bookings</span>
         </div>
 
         <div className="bg-surface rounded-xl shadow-card overflow-hidden">
@@ -254,18 +254,18 @@ export default function DashboardPage() {
                 }`}
               >
                 <div>
-                  <div className="font-display text-sm md:text-base font-semibold leading-tight text-ink">
+                  <div className="font-display text-base md:text-base font-semibold leading-tight text-ink">
                     {formatHour(booking.startHour)}
                   </div>
-                  <div className="text-[10px] md:text-xs text-ink-4 mt-0.5">
+                  <div className="text-base md:text-xs text-ink-4 mt-0.5">
                     {booking.durationMinutes}m
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <div className="font-medium text-xs md:text-sm text-ink truncate">
+                  <div className="font-medium text-base md:text-sm text-ink truncate">
                     {booking.memberName}
                   </div>
-                  <div className="text-[11px] md:text-xs text-ink-3 truncate mt-0.5">
+                  <div className="text-base md:text-xs text-ink-3 truncate mt-0.5">
                     {court?.name}
                     {hasItems && ` · ${booking.items.map((i) => `${i.quantity} ${i.itemName.split(' ')[0].toLowerCase()}`).join(', ')}`}
                   </div>
@@ -276,7 +276,7 @@ export default function DashboardPage() {
           })}
 
           {todayBookings.length === 0 && (
-            <div className="text-center py-12 text-ink-4 text-xs">
+            <div className="text-center py-12 text-ink-4 text-base">
               No bookings today
             </div>
           )}

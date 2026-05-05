@@ -13,7 +13,7 @@ export function StatusTag({ status }: { status: BookingStatus }) {
 
   return (
     <span
-      className={`text-xs font-medium px-2.5 py-1 rounded-tag ${config.className}`}
+      className={`text-base font-medium px-2.5 py-1 rounded-tag ${config.className}`}
     >
       {config.label}
     </span>

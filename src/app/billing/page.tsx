@@ -12,7 +12,7 @@ import Image from 'next/image';
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <div className="text-xs font-semibold text-ink-3 mb-2">{title}</div>
+      <div className="text-base font-semibold text-ink-3 mb-2">{title}</div>
       {children}
     </div>
   );
@@ -26,7 +26,7 @@ function StatusBadge({ status }: { status: string }) {
   };
 
   return (
-    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${styles[status] ?? 'bg-surface-3 text-ink-3'}`}>
+    <span className={`text-base font-semibold px-2.5 py-1 rounded-full ${styles[status] ?? 'bg-surface-3 text-ink-3'}`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
@@ -42,40 +42,40 @@ function PlanCard({ plan, isCurrentPlan }: { plan: BillingAccountData['planOptio
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-display font-bold text-lg text-ink">{plan.name}</h3>
         {isCurrentPlan && (
-          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-soft text-primary-deep">
+          <span className="text-base font-semibold px-2 py-0.5 rounded-full bg-primary-soft text-primary-deep">
             Current
           </span>
         )}
       </div>
       <div className="mb-4">
         <span className="font-display font-bold text-2xl text-ink">&#8369;{plan.price}</span>
-        <span className="text-xs text-ink-3">/month</span>
+        <span className="text-base text-ink-3">/month</span>
         {plan.perExtraCourt && (
-          <div className="text-xs text-ink-3 mt-0.5">
+          <div className="text-base text-ink-3 mt-0.5">
             + &#8369;{plan.perExtraCourt}/court after {plan.includedCourts ?? 0} courts
           </div>
         )}
       </div>
       <ul className="space-y-2">
-        <li className="flex items-center gap-2 text-sm text-ink-2">
+        <li className="flex items-center gap-2 text-base text-ink-2">
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
           {(!plan.limits.sports || plan.limits.sports === Infinity) ? 'Unlimited sports' : `${plan.limits.sports} sport${plan.limits.sports !== 1 ? 's' : ''}`}
         </li>
-        <li className="flex items-center gap-2 text-sm text-ink-2">
+        <li className="flex items-center gap-2 text-base text-ink-2">
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
           {(!plan.limits.courts || plan.limits.courts === Infinity) ? 'Unlimited courts' : `${plan.limits.courts} courts`}
         </li>
-        <li className="flex items-center gap-2 text-sm text-ink-2">
+        <li className="flex items-center gap-2 text-base text-ink-2">
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
           {(!plan.limits.admins || plan.limits.admins === Infinity) ? 'Unlimited admins' : `${plan.limits.admins} admin${plan.limits.admins !== 1 ? 's' : ''}`}
         </li>
-        <li className="flex items-center gap-2 text-sm text-ink-2">
+        <li className="flex items-center gap-2 text-base text-ink-2">
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5 text-signal shrink-0">
             <path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z" />
           </svg>
@@ -135,7 +135,7 @@ export default function BillingPage() {
       <AppShell>
         <h1 className="font-display font-bold text-2xl md:text-3xl tracking-tight mb-5 text-ink">Billing</h1>
         <div className="bg-surface rounded-xl shadow-card p-6">
-          <p className="text-sm text-ink-3">Unable to load billing information. Please try again later.</p>
+          <p className="text-base text-ink-3">Unable to load billing information. Please try again later.</p>
         </div>
       </AppShell>
     );
@@ -159,34 +159,34 @@ export default function BillingPage() {
         <div className="bg-surface rounded-xl shadow-card p-4 space-y-3">
           {isFrozen && (
             <div className="rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3">
-              <p className="text-sm font-medium text-red-400">
+              <p className="text-base font-medium text-red-400">
                 Your account is frozen. Choose a plan and pay below to reactivate.
               </p>
             </div>
           )}
 
           <div className="flex items-center justify-between">
-            <span className="text-sm text-ink-2">Status</span>
+            <span className="text-base text-ink-2">Status</span>
             <StatusBadge status={isFrozen ? 'frozen' : billing.subscriptionStatus} />
           </div>
 
           {planTierLabel && (
             <div className="flex items-center justify-between">
-              <span className="text-sm text-ink-2">Plan</span>
-              <span className="text-sm font-semibold text-ink">{planTierLabel}</span>
+              <span className="text-base text-ink-2">Plan</span>
+              <span className="text-base font-semibold text-ink">{planTierLabel}</span>
             </div>
           )}
 
           {isTrial && (
             <>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-ink-2">Trial days remaining</span>
-                <span className="text-sm font-semibold text-amber-400">{billing.trialStatus.daysRemaining}</span>
+                <span className="text-base text-ink-2">Trial days remaining</span>
+                <span className="text-base font-semibold text-amber-400">{billing.trialStatus.daysRemaining}</span>
               </div>
               {billing.trialEndsAt && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-ink-2">Trial ends</span>
-                  <span className="text-sm text-ink">{new Date(billing.trialEndsAt).toLocaleDateString()}</span>
+                  <span className="text-base text-ink-2">Trial ends</span>
+                  <span className="text-base text-ink">{new Date(billing.trialEndsAt).toLocaleDateString()}</span>
                 </div>
               )}
             </>
@@ -196,14 +196,14 @@ export default function BillingPage() {
             <>
               {billing.currentPeriodEnd && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-ink-2">Next billing date</span>
-                  <span className="text-sm text-ink">{new Date(billing.currentPeriodEnd).toLocaleDateString()}</span>
+                  <span className="text-base text-ink-2">Next billing date</span>
+                  <span className="text-base text-ink">{new Date(billing.currentPeriodEnd).toLocaleDateString()}</span>
                 </div>
               )}
               {billing.planTier && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-ink-2">Amount due</span>
-                  <span className="text-sm font-semibold text-ink">
+                  <span className="text-base text-ink-2">Amount due</span>
+                  <span className="text-base font-semibold text-ink">
                     {billing.planOptions.find((p) => p.tier === billing.planTier)?.priceLabel ?? `₱${billing.planOptions.find((p) => p.tier === billing.planTier)?.price ?? 0}/mo`}
                   </span>
                 </div>
@@ -225,8 +225,8 @@ export default function BillingPage() {
             ))}
           </div>
           <div className="bg-surface rounded-xl shadow-card p-3 mt-3">
-            <p className="text-xs text-ink-3 mb-1">Need more? Contact us for a custom Max plan with higher limits.</p>
-            <p className="text-xs text-ink-2">
+            <p className="text-base text-ink-3 mb-1">Need more? Contact us for a custom Max plan with higher limits.</p>
+            <p className="text-base text-ink-2">
               Redgie Gravador · <a href="mailto:redgiegravador@gmail.com" className="text-primary hover:underline">redgiegravador@gmail.com</a> · <a href="tel:09688788901" className="text-primary hover:underline">09688788901</a>
             </p>
           </div>
@@ -236,14 +236,14 @@ export default function BillingPage() {
       {!isTrial && (
         <Section title="Payment">
           <div className="bg-surface rounded-xl shadow-card p-4 space-y-4">
-            <p className="text-sm text-ink-2">
+            <p className="text-base text-ink-2">
               Pay via GCash, Maya, or any QR PH-enabled bank app
             </p>
 
             <div className="flex justify-center">
               {qrError ? (
                 <div className="w-48 h-48 rounded-xl bg-surface-3 border border-line flex items-center justify-center">
-                  <p className="text-xs text-ink-3 text-center px-4">QR code not yet available. Contact Korte for payment details.</p>
+                  <p className="text-base text-ink-3 text-center px-4">QR code not yet available. Contact Korte for payment details.</p>
                 </div>
               ) : (
                 <Image
@@ -258,7 +258,7 @@ export default function BillingPage() {
             </div>
 
             <div className="rounded-lg bg-primary-soft/30 border border-primary/20 px-4 py-3">
-              <p className="text-sm text-ink-2">
+              <p className="text-base text-ink-2">
                 After payment, contact Korte to activate your subscription.
               </p>
             </div>

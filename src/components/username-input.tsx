@@ -87,10 +87,10 @@ export function UsernameInput({ value, onChange, placeholder = 'e.g. marco', cla
         )}
       </div>
       {status === 'taken' && (
-        <p className="text-xs text-warn mt-1">This username is already taken</p>
+        <p className="text-base text-warn mt-1">This username is already taken</p>
       )}
       {status === 'available' && (
-        <p className="text-xs text-signal mt-1">Username is available</p>
+        <p className="text-base text-signal mt-1">Username is available</p>
       )}
     </div>
   );

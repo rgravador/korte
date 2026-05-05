@@ -13,7 +13,7 @@ import { apiUpdateUser } from '@/lib/api';
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <div className="text-xs font-semibold text-ink-3 mb-2">{title}</div>
+      <div className="text-base font-semibold text-ink-3 mb-2">{title}</div>
       {children}
     </div>
   );
@@ -109,7 +109,7 @@ function SportConfigView({
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
             <path d="M10 4l-4 4 4 4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="text-xs font-medium">Back to Settings</span>
+          <span className="text-base font-medium">Back to Settings</span>
         </button>
       )}
 
@@ -121,8 +121,8 @@ function SportConfigView({
             onChange={(e) => setSportName(e.target.value)}
             className="flex-1 bg-surface-3 rounded-xl px-3 py-2 text-lg font-display font-bold border border-line focus:outline-none focus:border-primary"
           />
-          <button onClick={handleSaveName} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
-          <button onClick={() => { setEditingName(false); setSportName(sport.name); }} className="bg-surface-3 text-ink-3 px-4 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+          <button onClick={handleSaveName} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-base font-semibold transition-colors">Save</button>
+          <button onClick={() => { setEditingName(false); setSportName(sport.name); }} className="bg-surface-3 text-ink-3 px-4 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
         </div>
       ) : (
         <button onClick={() => setEditingName(true)} className="mb-5">
@@ -136,10 +136,10 @@ function SportConfigView({
           <div className="bg-surface rounded-xl shadow-card p-3 space-y-3">
             <OperatingHoursEditor ranges={hoursRanges} onChange={setHoursRanges} />
             <div className="flex gap-2">
-              <button onClick={async () => { await handleSaveHours(); setEditingHours(false); }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">
+              <button onClick={async () => { await handleSaveHours(); setEditingHours(false); }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors">
                 Save Hours
               </button>
-              <button onClick={() => { setHoursRanges(sport.operatingHoursRanges ?? [{ start: 6, end: 22 }]); setEditingHours(false); }} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">
+              <button onClick={() => { setHoursRanges(sport.operatingHoursRanges ?? [{ start: 6, end: 22 }]); setEditingHours(false); }} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">
                 Cancel
               </button>
             </div>
@@ -149,11 +149,11 @@ function SportConfigView({
             <div className="space-y-1">
               {(sport.operatingHoursRanges ?? [{ start: 6, end: 22 }]).map((range, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <span className="font-medium text-sm"><OperatingHoursDisplay ranges={[range]} /></span>
+                  <span className="font-medium text-base"><OperatingHoursDisplay ranges={[range]} /></span>
                 </div>
               ))}
             </div>
-            <div className="text-xs text-ink-3 mt-1.5">Tap to edit hours or add open windows</div>
+            <div className="text-base text-ink-3 mt-1.5">Tap to edit hours or add open windows</div>
           </button>
         )}
       </Section>
@@ -165,9 +165,9 @@ function SportConfigView({
             editingCourtId === court.id ? (
               <div key={court.id} className="bg-surface rounded-xl shadow-card p-3 space-y-2">
                 <input type="text" value={editCourtName} onChange={(e) => setEditCourtName(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 <input type="number" placeholder="Hourly rate (₱)" value={editCourtRate} onChange={(e) => setEditCourtRate(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 <div className="flex gap-2">
                   <button onClick={async () => {
                     const updates: Record<string, unknown> = {};
@@ -177,24 +177,24 @@ function SportConfigView({
                       try { await updateCourt(court.id, updates); } catch { toast.error('Could not update court.'); }
                     }
                     setEditingCourtId(null);
-                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
-                  <button onClick={() => setEditingCourtId(null)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors">Save</button>
+                  <button onClick={() => setEditingCourtId(null)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
                 </div>
               </div>
             ) : (
               <div key={court.id} className="bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
                 <button onClick={() => { setEditingCourtId(court.id); setEditCourtName(court.name); setEditCourtRate(String(court.hourlyRate)); }} className="text-left">
-                  <div className="font-medium text-sm">{court.name}</div>
-                  <div className="text-xs text-ink-3">₱{court.hourlyRate}/hr</div>
+                  <div className="font-medium text-base">{court.name}</div>
+                  <div className="text-base text-ink-3">₱{court.hourlyRate}/hr</div>
                 </button>
                 <div className="flex gap-2">
                   <button
                     onClick={() => updateCourt(court.id, { isActive: !court.isActive })}
-                    className={`text-xs px-2 py-1 rounded ${court.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}
+                    className={`text-base px-2 py-1 rounded ${court.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}
                   >
                     {court.isActive ? 'Active' : 'Off'}
                   </button>
-                  <button onClick={() => removeCourt(court.id)} className="text-xs px-2 py-1 rounded text-warn">Remove</button>
+                  <button onClick={() => removeCourt(court.id)} className="text-base px-2 py-1 rounded text-warn">Remove</button>
                 </div>
               </div>
             )
@@ -204,16 +204,16 @@ function SportConfigView({
         {showAddCourt ? (
           <div className="bg-surface rounded-xl shadow-card p-3 mt-2 space-y-2">
             <input type="text" placeholder="Court name" value={newCourtName} onChange={(e) => setNewCourtName(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             <input type="number" placeholder="Hourly rate (₱)" value={newCourtRate} onChange={(e) => setNewCourtRate(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             <div className="flex gap-2">
-              <button onClick={handleAddCourt} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Add Court</button>
-              <button onClick={() => setShowAddCourt(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+              <button onClick={handleAddCourt} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors">Add Court</button>
+              <button onClick={() => setShowAddCourt(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
             </div>
           </div>
         ) : (
-          <button onClick={() => { setNewCourtName(`Court ${sportCourts.length + 1}`); setShowAddCourt(true); }} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
+          <button onClick={() => { setNewCourtName(`Court ${sportCourts.length + 1}`); setShowAddCourt(true); }} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-base font-semibold hover:border-primary hover:text-primary transition-colors">
             + Add court
           </button>
         )}
@@ -226,9 +226,9 @@ function SportConfigView({
             editingItemId === item.id ? (
               <div key={item.id} className="bg-surface rounded-xl shadow-card p-3 space-y-2">
                 <input type="text" value={editItemName} onChange={(e) => setEditItemName(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 <input type="number" placeholder="Price (₱)" value={editItemPrice} onChange={(e) => setEditItemPrice(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 <div className="flex gap-2">
                   <button onClick={async () => {
                     const updates: Record<string, unknown> = {};
@@ -238,24 +238,24 @@ function SportConfigView({
                       try { await updateItem(item.id, updates); } catch { toast.error('Could not update item.'); }
                     }
                     setEditingItemId(null);
-                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
-                  <button onClick={() => setEditingItemId(null)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors">Save</button>
+                  <button onClick={() => setEditingItemId(null)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
                 </div>
               </div>
             ) : (
               <div key={item.id} className="bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
                 <button onClick={() => { setEditingItemId(item.id); setEditItemName(item.name); setEditItemPrice(String(item.price)); }} className="text-left">
-                  <div className="font-medium text-sm">{item.name}</div>
-                  <div className="text-xs text-ink-3">₱{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}</div>
+                  <div className="font-medium text-base">{item.name}</div>
+                  <div className="text-base text-ink-3">₱{item.price} · {item.type === 'rental' ? 'Rental' : 'Sale'}</div>
                 </button>
                 <div className="flex gap-2">
                   <button
                     onClick={() => updateItem(item.id, { isActive: !item.isActive })}
-                    className={`text-xs px-2 py-1 rounded ${item.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}
+                    className={`text-base px-2 py-1 rounded ${item.isActive ? 'bg-signal-soft text-signal-text' : 'bg-surface-3 text-ink-3'}`}
                   >
                     {item.isActive ? 'Active' : 'Off'}
                   </button>
-                  <button onClick={() => removeItem(item.id)} className="text-xs px-2 py-1 rounded text-warn">Remove</button>
+                  <button onClick={() => removeItem(item.id)} className="text-base px-2 py-1 rounded text-warn">Remove</button>
                 </div>
               </div>
             )
@@ -265,13 +265,13 @@ function SportConfigView({
         {showAddItem ? (
           <div className="bg-surface rounded-xl shadow-card p-3 mt-2 space-y-2">
             <input type="text" placeholder="Item name" value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             <input type="number" placeholder="Price (₱)" value={newItemPrice} onChange={(e) => setNewItemPrice(e.target.value)}
-              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+              className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             <div className="flex gap-1.5">
               {(['rental', 'sale'] as const).map((t) => (
                 <button key={t} onClick={() => setNewItemType(t)}
-                  className={`flex-1 text-xs py-3 rounded-xl font-semibold transition-colors ${newItemType === t ? 'bg-primary text-white' : 'border border-line text-ink-2 hover:bg-surface-2'}`}
+                  className={`flex-1 text-base py-3 rounded-xl font-semibold transition-colors ${newItemType === t ? 'bg-primary text-white' : 'border border-line text-ink-2 hover:bg-surface-2'}`}
                 >
                   {t === 'rental' ? 'Rental' : 'Sale'}
                 </button>
@@ -284,19 +284,19 @@ function SportConfigView({
                   await addItem({ sportId, name: newItemName.trim(), price: Number(newItemPrice), type: newItemType, isActive: true });
                   setNewItemName(''); setNewItemPrice(''); setNewItemType('rental'); setShowAddItem(false);
                 } catch { toast.error('Could not add item.'); }
-              }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Add Item</button>
-              <button onClick={() => setShowAddItem(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+              }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors">Add Item</button>
+              <button onClick={() => setShowAddItem(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
             </div>
           </div>
         ) : (
-          <button onClick={() => setShowAddItem(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
+          <button onClick={() => setShowAddItem(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-base font-semibold hover:border-primary hover:text-primary transition-colors">
             + Add item
           </button>
         )}
       </Section>
 
       {/* Danger zone */}
-      <button onClick={handleRemoveSport} className="text-xs text-warn hover:text-warn-text transition-colors">
+      <button onClick={handleRemoveSport} className="text-base text-warn hover:text-warn-text transition-colors">
         Remove {sport.name}
       </button>
     </>
@@ -379,18 +379,18 @@ export default function SettingsPage() {
         {editingFacility ? (
           <div className="bg-surface rounded-xl shadow-card p-3 space-y-3">
             <div>
-              <label className="text-xs text-ink-3 block mb-1">Name</label>
+              <label className="text-base text-ink-3 block mb-1">Name</label>
               <input type="text" value={facilityName} onChange={(e) => setFacilityName(e.target.value)}
-                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
             </div>
             <div className="flex gap-2">
-              <button onClick={handleSaveFacility} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
-              <button onClick={() => setEditingFacility(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+              <button onClick={handleSaveFacility} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors">Save</button>
+              <button onClick={() => setEditingFacility(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
             </div>
           </div>
         ) : (
           <button onClick={() => setEditingFacility(true)} className="w-full bg-surface rounded-xl shadow-card p-3 text-left">
-            <div className="font-medium text-sm">{tenant.name}</div>
+            <div className="font-medium text-base">{tenant.name}</div>
           </button>
         )}
       </Section>
@@ -407,7 +407,7 @@ export default function SettingsPage() {
                     setPaymentMode(mode);
                     if (mode === 'full') setDownpaymentPerHour('');
                   }}
-                  className={`flex-1 text-xs py-3 rounded-xl font-semibold transition-colors ${
+                  className={`flex-1 text-base py-3 rounded-xl font-semibold transition-colors ${
                     paymentMode === mode
                       ? 'bg-primary text-white'
                       : 'border border-line text-ink-2 hover:bg-surface-2'
@@ -419,15 +419,15 @@ export default function SettingsPage() {
             </div>
             {paymentMode === 'downpayment' && (
               <div>
-                <label className="text-xs text-ink-3 block mb-1">Downpayment per hour (₱)</label>
+                <label className="text-base text-ink-3 block mb-1">Downpayment per hour (₱)</label>
                 <input
                   type="number"
                   value={downpaymentPerHour}
                   onChange={(e) => setDownpaymentPerHour(e.target.value)}
                   placeholder="e.g. 100"
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                 />
-                <p className="text-xs text-ink-3 mt-1.5">Remaining balance is collected at check-in.</p>
+                <p className="text-base text-ink-3 mt-1.5">Remaining balance is collected at check-in.</p>
               </div>
             )}
             <div className="flex gap-2">
@@ -444,7 +444,7 @@ export default function SettingsPage() {
                     toast.error('Could not update payment policy.');
                   }
                 }}
-                className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors"
+                className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors"
               >
                 Save
               </button>
@@ -454,7 +454,7 @@ export default function SettingsPage() {
                   setDownpaymentPerHour(String(tenant.downpaymentPerHour || ''));
                   setEditingPayment(false);
                 }}
-                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors"
+                className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors"
               >
                 Cancel
               </button>
@@ -462,15 +462,15 @@ export default function SettingsPage() {
           </div>
         ) : (
           <button onClick={() => setEditingPayment(true)} className="w-full bg-surface rounded-xl shadow-card p-3 text-left">
-            <div className="font-medium text-sm">
+            <div className="font-medium text-base">
               {tenant.paymentMode === 'full' ? 'Full payment' : `Downpayment — ₱${tenant.downpaymentPerHour}/hr`}
             </div>
-            <div className="text-xs text-ink-3 mt-1">
+            <div className="text-base text-ink-3 mt-1">
               {tenant.paymentMode === 'full'
                 ? 'Full amount collected before confirming'
                 : 'Balance collected at check-in'}
             </div>
-            <div className="text-xs text-ink-3 mt-1.5">Tap to edit payment policy</div>
+            <div className="text-base text-ink-3 mt-1.5">Tap to edit payment policy</div>
           </button>
         )}
       </Section>
@@ -483,13 +483,13 @@ export default function SettingsPage() {
           <Section title="Add another sport">
             {showAddSport ? (
               <div className="bg-surface rounded-xl shadow-card p-3 space-y-2">
-                <div className="text-xs text-ink-3 mb-1">Select or type a sport</div>
+                <div className="text-base text-ink-3 mb-1">Select or type a sport</div>
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {PRESET_SPORTS.filter((p) => !sports.some((s) => s.name === p)).map((preset) => (
                     <button
                       key={preset}
                       onClick={() => handleAddSport(preset)}
-                      className="text-xs px-3 py-1.5 rounded-full bg-surface-3 text-ink-3 hover:bg-primary hover:text-white transition-colors"
+                      className="text-base px-3 py-1.5 rounded-full bg-surface-3 text-ink-3 hover:bg-primary hover:text-white transition-colors"
                     >
                       {preset}
                     </button>
@@ -497,13 +497,13 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex gap-2">
                   <input type="text" placeholder="Custom sport name" value={newSportName} onChange={(e) => setNewSportName(e.target.value)}
-                    className="flex-1 bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-                  <button onClick={() => newSportName.trim() && handleAddSport(newSportName.trim())} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-xs font-semibold transition-colors">Add</button>
+                    className="flex-1 bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  <button onClick={() => newSportName.trim() && handleAddSport(newSportName.trim())} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-base font-semibold transition-colors">Add</button>
                 </div>
-                <button onClick={() => setShowAddSport(false)} className="w-full text-xs text-ink-3 py-1">Cancel</button>
+                <button onClick={() => setShowAddSport(false)} className="w-full text-base text-ink-3 py-1">Cancel</button>
               </div>
             ) : (
-              <button onClick={() => setShowAddSport(true)} className="w-full border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
+              <button onClick={() => setShowAddSport(true)} className="w-full border border-dashed border-line text-ink-3 py-3 rounded-xl text-base font-semibold hover:border-primary hover:text-primary transition-colors">
                 + Add sport
               </button>
             )}
@@ -522,8 +522,8 @@ export default function SettingsPage() {
                   className="w-full bg-surface rounded-xl shadow-card p-3 text-left hover:bg-surface-3 transition-colors flex justify-between items-center"
                 >
                   <div>
-                    <div className="font-medium text-sm">{sport.name}</div>
-                    <div className="text-xs text-ink-3 mt-0.5">
+                    <div className="font-medium text-base">{sport.name}</div>
+                    <div className="text-base text-ink-3 mt-0.5">
                       {courtCount} court{courtCount !== 1 ? 's' : ''} · <OperatingHoursDisplay ranges={getTimeRanges(sport)} />
                     </div>
                   </div>
@@ -537,13 +537,13 @@ export default function SettingsPage() {
 
           {showAddSport ? (
             <div className="bg-surface rounded-xl shadow-card p-3 mt-2 space-y-2">
-              <div className="text-xs text-ink-3 mb-1">Select or type a sport</div>
+              <div className="text-base text-ink-3 mb-1">Select or type a sport</div>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {PRESET_SPORTS.filter((p) => !sports.some((s) => s.name === p)).map((preset) => (
                   <button
                     key={preset}
                     onClick={() => handleAddSport(preset)}
-                    className="text-xs px-3 py-1.5 rounded-full bg-surface-3 text-ink-3 hover:bg-primary hover:text-white transition-colors"
+                    className="text-base px-3 py-1.5 rounded-full bg-surface-3 text-ink-3 hover:bg-primary hover:text-white transition-colors"
                   >
                     {preset}
                   </button>
@@ -551,13 +551,13 @@ export default function SettingsPage() {
               </div>
               <div className="flex gap-2">
                 <input type="text" placeholder="Custom sport name" value={newSportName} onChange={(e) => setNewSportName(e.target.value)}
-                  className="flex-1 bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
-                <button onClick={() => newSportName.trim() && handleAddSport(newSportName.trim())} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-xs font-semibold transition-colors">Add</button>
+                  className="flex-1 bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                <button onClick={() => newSportName.trim() && handleAddSport(newSportName.trim())} className="bg-primary hover:bg-primary-deep text-white px-4 py-3 rounded-xl text-base font-semibold transition-colors">Add</button>
               </div>
-              <button onClick={() => setShowAddSport(false)} className="w-full text-xs text-ink-3 py-1">Cancel</button>
+              <button onClick={() => setShowAddSport(false)} className="w-full text-base text-ink-3 py-1">Cancel</button>
             </div>
           ) : (
-            <button onClick={() => setShowAddSport(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
+            <button onClick={() => setShowAddSport(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-base font-semibold hover:border-primary hover:text-primary transition-colors">
               + Add sport
             </button>
           )}
@@ -570,13 +570,13 @@ export default function SettingsPage() {
           {tenantUsers.map((user) => (
             editingUserId === user.id && isAdmin ? (
               <div key={user.id} className="bg-surface rounded-xl shadow-card p-3 space-y-2">
-                <div className="text-xs text-ink-3 mb-1">@{user.username} · {user.role === 'tenant_admin' ? 'Admin' : 'Staff'}</div>
+                <div className="text-base text-ink-3 mb-1">@{user.username} · {user.role === 'tenant_admin' ? 'Admin' : 'Staff'}</div>
                 <input type="text" placeholder="Display name" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 <input type="email" placeholder="Email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 <input type="text" placeholder="New password (leave blank to keep)" value={editPassword} onChange={(e) => setEditPassword(e.target.value)}
-                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                  className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
                 <div className="flex gap-2">
                   <button onClick={async () => {
                     const updates: { userId: string; displayName?: string; email?: string; password?: string } = { userId: user.id };
@@ -596,8 +596,8 @@ export default function SettingsPage() {
                     }
                     setEditingUserId(null);
                     setEditPassword('');
-                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Save</button>
-                  <button onClick={() => { setEditingUserId(null); setEditPassword(''); }} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+                  }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors">Save</button>
+                  <button onClick={() => { setEditingUserId(null); setEditPassword(''); }} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
                 </div>
               </div>
             ) : (
@@ -613,10 +613,10 @@ export default function SettingsPage() {
                 className={`w-full bg-surface rounded-xl shadow-card p-3 flex justify-between items-center text-left ${isAdmin ? 'hover:bg-surface-3 transition-colors' : ''}`}
               >
                 <div>
-                  <div className="font-medium text-sm">{user.displayName}</div>
-                  <div className="text-xs text-ink-3">@{user.username} · {user.role.replace('_', ' ')}</div>
+                  <div className="font-medium text-base">{user.displayName}</div>
+                  <div className="text-base text-ink-3">@{user.username} · {user.role.replace('_', ' ')}</div>
                 </div>
-                <span className={`text-xs px-2 py-1 rounded ${user.role === 'tenant_admin' ? 'bg-primary-soft text-primary-deep' : 'bg-signal-soft text-signal-text'}`}>
+                <span className={`text-base px-2 py-1 rounded ${user.role === 'tenant_admin' ? 'bg-primary-soft text-primary-deep' : 'bg-signal-soft text-signal-text'}`}>
                   {user.role === 'tenant_admin' ? 'Admin' : 'Staff'}
                 </span>
               </button>
@@ -628,29 +628,29 @@ export default function SettingsPage() {
           showAddStaff ? (
             <div className="bg-surface rounded-xl shadow-card p-3 mt-2 space-y-2">
               <input type="text" placeholder="Display name" value={staffDisplayName} onChange={(e) => setStaffDisplayName(e.target.value)}
-                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
               <UsernameInput
                 value={staffUsername}
                 onChange={setStaffUsername}
                 placeholder="Username"
-                className="bg-surface-3 rounded-xl px-3 py-2 pr-10 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="bg-surface-3 rounded-xl px-3 py-2 pr-10 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
               <input type="email" placeholder="Email" value={staffEmail} onChange={(e) => setStaffEmail(e.target.value)}
-                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
               <input type="text" placeholder="Password" value={staffPassword} onChange={(e) => setStaffPassword(e.target.value)}
-                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+                className="w-full bg-surface-3 rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
               <div className="flex gap-2">
                 <button onClick={() => {
                   if (!staffUsername.trim() || !staffPassword.trim() || !staffDisplayName.trim()) return;
                   createUser({ username: staffUsername.trim(), password: staffPassword.trim(), role: 'tenant_staff', displayName: staffDisplayName.trim(), email: staffEmail.trim() });
                   setStaffUsername(''); setStaffPassword(''); setStaffDisplayName(''); setStaffEmail('');
                   setShowAddStaff(false);
-                }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-xs font-semibold transition-colors">Add Staff</button>
-                <button onClick={() => setShowAddStaff(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-xs font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
+                }} className="flex-1 bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors">Add Staff</button>
+                <button onClick={() => setShowAddStaff(false)} className="flex-1 bg-surface-3 text-ink-2 py-3 rounded-xl text-base font-semibold hover:bg-surface-2 transition-colors">Cancel</button>
               </div>
             </div>
           ) : (
-            <button onClick={() => setShowAddStaff(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-xs font-semibold hover:border-primary hover:text-primary transition-colors">
+            <button onClick={() => setShowAddStaff(true)} className="w-full mt-2 border border-dashed border-line text-ink-3 py-3 rounded-xl text-base font-semibold hover:border-primary hover:text-primary transition-colors">
               + Add staff member
             </button>
           )
@@ -663,16 +663,16 @@ export default function SettingsPage() {
         <div className="space-y-1.5">
           <Link href="/members" className="w-full bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
             <div>
-              <div className="font-medium text-sm">Members</div>
-              <div className="text-xs text-ink-3">Manage your member roster</div>
+              <div className="font-medium text-base">Members</div>
+              <div className="text-base text-ink-3">Manage your member roster</div>
             </div>
             <span className="text-ink-3">&rarr;</span>
           </Link>
           {(currentUser?.role === 'tenant_admin' || currentUser?.role === 'system_admin') && (
             <Link href="/billing" className="w-full bg-surface rounded-xl shadow-card p-3 flex justify-between items-center">
               <div>
-                <div className="font-medium text-sm">Billing</div>
-                <div className="text-xs text-ink-3">Plan, payment, and account status</div>
+                <div className="font-medium text-base">Billing</div>
+                <div className="text-base text-ink-3">Plan, payment, and account status</div>
               </div>
               <span className="text-ink-3">&rarr;</span>
             </Link>
@@ -684,23 +684,23 @@ export default function SettingsPage() {
       <Section title="Connection">
         <div className="bg-surface rounded-xl shadow-card p-3 space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm">Server</span>
-            <span className="text-xs px-2 py-1 rounded bg-signal-soft text-signal-text">Connected</span>
+            <span className="text-base">Server</span>
+            <span className="text-base px-2 py-1 rounded bg-signal-soft text-signal-text">Connected</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm">Network</span>
-            <span className={`text-xs px-2 py-1 rounded ${isOnline ? 'bg-signal-soft text-signal-text' : 'bg-pending-bg text-pending-text'}`}>
+            <span className="text-base">Network</span>
+            <span className={`text-base px-2 py-1 rounded ${isOnline ? 'bg-signal-soft text-signal-text' : 'bg-pending-bg text-pending-text'}`}>
               {isOnline ? 'Online' : 'Offline'}
             </span>
           </div>
           {pendingSync > 0 && (
             <div className="flex justify-between items-center">
-              <span className="text-sm">Pending sync</span>
-              <span className="text-xs px-2 py-1 rounded bg-primary-soft text-primary-deep">{pendingSync} queued</span>
+              <span className="text-base">Pending sync</span>
+              <span className="text-base px-2 py-1 rounded bg-primary-soft text-primary-deep">{pendingSync} queued</span>
             </div>
           )}
           {lastSyncedAt && (
-            <div className="text-xs text-ink-3">Last synced: {new Date(lastSyncedAt).toLocaleString()}</div>
+            <div className="text-base text-ink-3">Last synced: {new Date(lastSyncedAt).toLocaleString()}</div>
           )}
         </div>
       </Section>

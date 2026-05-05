@@ -52,7 +52,7 @@ function ToastItem({ t, onDismiss }: { t: Toast; onDismiss: () => void }) {
       className={`${colors[t.type]} rounded-xl px-4 py-3 shadow-dropdown flex items-start gap-3 animate-slide-up`}
       role="alert"
     >
-      <p className="text-sm flex-1">{t.message}</p>
+      <p className="text-base flex-1">{t.message}</p>
       <button onClick={onDismiss} className="text-white/60 hover:text-white text-lg leading-none mt-0.5">&times;</button>
     </div>
   );

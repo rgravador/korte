@@ -62,7 +62,7 @@ export function OperatingHoursEditor({ ranges, onChange }: OperatingHoursEditorP
           {ranges.length > 1 && (
             <button
               onClick={() => removeRange(index)}
-              className="w-8 h-[42px] flex items-center justify-center text-warn text-sm rounded-lg hover:bg-warn-soft transition-colors"
+              className="w-8 h-[42px] flex items-center justify-center text-warn text-base rounded-lg hover:bg-warn-soft transition-colors"
               aria-label="Remove time range"
             >
               &times;
@@ -73,7 +73,7 @@ export function OperatingHoursEditor({ ranges, onChange }: OperatingHoursEditorP
 
       <button
         onClick={addRange}
-        className="w-full border border-dashed border-line text-ink-3 py-2 rounded-xl text-xs hover:border-primary/40 hover:text-primary transition-colors"
+        className="w-full border border-dashed border-line text-ink-3 py-2 rounded-xl text-base hover:border-primary/40 hover:text-primary transition-colors"
       >
         + Add another open window
       </button>

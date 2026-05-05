@@ -111,7 +111,7 @@ export default function ReportsPage() {
             <button
               key={p.label}
               onClick={() => setActivePeriod(i)}
-              className={`px-2.5 py-1 border rounded-full text-xs ${
+              className={`px-2.5 py-1 border rounded-full text-base ${
                 i === activePeriod
                   ? 'bg-primary text-white border-primary'
                   : 'border-line text-ink-2'
@@ -126,7 +126,7 @@ export default function ReportsPage() {
         <div className="font-sans text-[44px] font-bold leading-none tracking-tight">
           <span className="text-ink">{totalBookings}</span>
         </div>
-        <div className="font-sans text-xs text-ink-3 mt-1">
+        <div className="font-sans text-base text-ink-3 mt-1">
           Bookings · {periodConfig.label}
         </div>
 
@@ -162,11 +162,11 @@ export default function ReportsPage() {
         {/* No-show rate */}
         <div className="flex justify-between items-baseline mb-4">
           <div>
-            <div className="font-sans text-xs text-ink-3">No-show rate</div>
+            <div className="font-sans text-base text-ink-3">No-show rate</div>
             <div className="font-sans text-xl font-light">{noShowRate}%</div>
           </div>
           <div className="text-right">
-            <div className="font-sans text-xs text-ink-3">No-shows</div>
+            <div className="font-sans text-base text-ink-3">No-shows</div>
             <div className="font-sans text-xl font-light">{noShowCount}</div>
           </div>
         </div>
@@ -174,14 +174,14 @@ export default function ReportsPage() {
         <div className="h-px bg-line my-3" />
 
         {/* Utilization heatmap */}
-        <div className="font-sans text-xs text-ink-3 mb-2">
+        <div className="font-sans text-base text-ink-3 mb-2">
           Utilization · by hour
         </div>
 
         <div className="grid gap-0.5" style={{ gridTemplateColumns: '22px repeat(7, 1fr)' }}>
           {heatmapData.map((row, ri) => (
             <div key={ri} className="contents">
-              <div className="font-sans text-[11px] text-ink-3 flex items-center justify-end pr-0.5">
+              <div className="font-sans text-base text-ink-3 flex items-center justify-end pr-0.5">
                 {HOUR_LABELS[ri]}
               </div>
               {row.map((val, ci) => (
@@ -195,7 +195,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Day labels */}
-        <div className="flex justify-between text-xs text-ink-3 mt-1.5 pl-6">
+        <div className="flex justify-between text-base text-ink-3 mt-1.5 pl-6">
           {DAYS_OF_WEEK.map((d, i) => (
             <span key={i}>{d}</span>
           ))}

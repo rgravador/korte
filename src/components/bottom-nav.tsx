@@ -111,7 +111,7 @@ export function BottomNav() {
               <span className="absolute top-0 w-7 h-[3px] rounded-full bg-primary" />
             )}
             {item.icon}
-            <span className="text-[10px] font-medium">
+            <span className="text-base font-medium">
               {item.label}
             </span>
           </Link>

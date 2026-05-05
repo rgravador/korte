@@ -218,7 +218,7 @@ export default function SchedulePage() {
                   : 'bg-surface text-ink border border-line/60 hover:border-primary/30'
               }`}
             >
-              <span className="text-[11px] font-medium">{day.dayAbbr}</span>
+              <span className="text-base font-medium">{day.dayAbbr}</span>
               <span className="text-base font-bold leading-none mt-0.5">{day.dayNum}</span>
             </button>
           );
@@ -233,7 +233,7 @@ export default function SchedulePage() {
           min={todayStr}
           onChange={(e) => { setSelectedDate(e.target.value); setSelection(null); }}
           aria-label="Select date"
-          className="bg-surface rounded-xl px-3 py-2 text-sm border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="bg-surface rounded-xl px-3 py-2 text-base border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
         />
         <span className="font-display font-semibold text-lg tracking-tight text-ink">
           {formatSelectedDate(selectedDate)}
@@ -248,7 +248,7 @@ export default function SchedulePage() {
             <button
               key={chip.id}
               onClick={() => setCourtFilter(chip.id)}
-              className={`text-xs font-medium px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
+              className={`text-base font-medium px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
                 isActive
                   ? 'bg-primary text-white'
                   : 'bg-surface-3 text-ink-3 hover:bg-line'
@@ -267,17 +267,17 @@ export default function SchedulePage() {
           return (
             <div key={court.id} className="flex items-center gap-1.5">
               <div className={`w-2.5 h-2.5 rounded-full ${color.dot}`} />
-              <span className={`text-xs font-medium ${color.text}`}>{court.name}</span>
+              <span className={`text-base font-medium ${color.text}`}>{court.name}</span>
             </div>
           );
         })}
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-surface-3" />
-          <span className="text-xs text-ink-4">Booked</span>
+          <span className="text-base text-ink-4">Booked</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-amber/30" />
-          <span className="text-xs text-ink-4">Recurring</span>
+          <span className="text-base text-ink-4">Recurring</span>
         </div>
       </div>
 
@@ -296,8 +296,8 @@ export default function SchedulePage() {
               <div key={hour} className="bg-surface rounded-xl border border-line-2 overflow-hidden">
                 {/* Hour header */}
                 <div className="flex items-center justify-between px-3.5 py-2 bg-surface-2">
-                  <span className="text-sm font-semibold text-ink">{formatHour(hour)}</span>
-                  <span className={`text-[10px] font-medium ${openCount > 0 ? 'text-signal' : 'text-ink-4'}`}>
+                  <span className="text-base font-semibold text-ink">{formatHour(hour)}</span>
+                  <span className={`text-base font-medium ${openCount > 0 ? 'text-signal' : 'text-ink-4'}`}>
                     {openCount > 0 ? `${openCount} open` : 'Full'}
                   </span>
                 </div>
@@ -312,7 +312,7 @@ export default function SchedulePage() {
                       <button
                         key={court.id}
                         onClick={() => handleCellTap(court.id, hour)}
-                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                        className={`px-2.5 py-1.5 rounded-lg text-base font-medium transition-colors ${
                           isSel
                             ? `${color.bg} ring-1 ${color.border} ${color.text}`
                             : isBooked && isRecurring
@@ -353,7 +353,7 @@ export default function SchedulePage() {
               return (
                 <div
                   key={court.id}
-                  className="text-xs font-semibold text-center p-2 border-l border-line-2 flex items-center justify-center gap-1.5"
+                  className="text-base font-semibold text-center p-2 border-l border-line-2 flex items-center justify-center gap-1.5"
                 >
                   <span className={`w-2 h-2 rounded-full ${color.dot}`} />
                   <span className={color.text}>{court.name.replace('Court ', 'C')}</span>
@@ -371,7 +371,7 @@ export default function SchedulePage() {
                 gridTemplateColumns: `72px repeat(${gridColCount}, 1fr)`,
               }}
             >
-              <div className="text-xs text-ink-3 p-2 flex items-center font-medium">
+              <div className="text-base text-ink-3 p-2 flex items-center font-medium">
                 {formatHour(hour)}
               </div>
 
@@ -388,16 +388,16 @@ export default function SchedulePage() {
 
                 if (isBooked && isRecurring) {
                   cellClass += ' bg-amber/30 text-amber';
-                  content = <span className="text-xs font-semibold">Rec</span>;
+                  content = <span className="text-base font-semibold">Rec</span>;
                 } else if (isBooked) {
                   cellClass += ' bg-surface-3 text-ink-3';
-                  content = <span className="text-xs font-semibold">{getInitials(booking.memberName)}</span>;
+                  content = <span className="text-base font-semibold">{getInitials(booking.memberName)}</span>;
                 } else if (isSel) {
                   cellClass += ` ${color.bg} ring-2 ${color.border} ring-inset`;
-                  content = <span className={`text-xs font-semibold ${color.text}`}>✓</span>;
+                  content = <span className={`text-base font-semibold ${color.text}`}>✓</span>;
                 } else {
                   cellClass += ` ${color.bg} hover:${color.bg}`;
-                  content = <span className={`text-[10px] ${color.text} opacity-60`}>&bull;</span>;
+                  content = <span className={`text-base ${color.text} opacity-60`}>&bull;</span>;
                 }
 
                 return (
@@ -419,7 +419,7 @@ export default function SchedulePage() {
       {/* Selection action bar */}
       {selection && selection.hours.length > 0 && (
         <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface rounded-2xl shadow-dropdown border border-line px-5 py-3 flex items-center gap-4">
-          <div className="text-ink text-sm">
+          <div className="text-ink text-base">
             <span className="font-display font-bold">{selection.hours.length}h</span>
             <span className="text-ink-3 ml-1.5">
               {courts.find((c) => c.id === selection.courtId)?.name}
@@ -427,13 +427,13 @@ export default function SchedulePage() {
           </div>
           <button
             onClick={handleConfirmSelection}
-            className="bg-primary hover:bg-primary-deep text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors"
+            className="bg-primary hover:bg-primary-deep text-white text-base font-semibold px-4 py-2 rounded-xl transition-colors"
           >
             Book
           </button>
           <button
             onClick={handleClearSelection}
-            className="text-ink-3 hover:text-ink text-xs font-medium transition-colors"
+            className="text-ink-3 hover:text-ink text-base font-medium transition-colors"
           >
             Cancel
           </button>
@@ -466,14 +466,14 @@ export default function SchedulePage() {
             <h3 className="font-display text-xl font-semibold mb-1 text-ink">
               {selectedBooking.memberName}
             </h3>
-            <p className="text-xs text-ink-3 mb-4">
+            <p className="text-base text-ink-3 mb-4">
               {courts.find((c) => c.id === selectedBooking.courtId)?.name} &middot;{' '}
               {selectedBooking.startHour}:00 &middot;{' '}
               {selectedBooking.durationMinutes} min &middot;{' '}
               {selectedBooking.isRecurring ? 'Recurring' : 'One-time'}
             </p>
             <div className="bg-surface-2 rounded-xl p-3.5 mb-4">
-              <div className="flex justify-between text-sm font-semibold">
+              <div className="flex justify-between text-base font-semibold">
                 <span className="text-ink">Total</span>
                 <span className="text-primary font-display">
                   ₱{selectedBooking.total.toLocaleString()}
@@ -482,7 +482,7 @@ export default function SchedulePage() {
             </div>
             <button
               onClick={() => setSelectedBooking(null)}
-              className="w-full bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-sm font-semibold transition-colors"
+              className="w-full bg-primary hover:bg-primary-deep text-white py-3 rounded-xl text-base font-semibold transition-colors"
             >
               Close
             </button>

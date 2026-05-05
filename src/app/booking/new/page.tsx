@@ -303,7 +303,7 @@ function NewBookingForm() {
         {errors.length > 0 && (
           <div className="bg-warn/10 border border-warn/30 rounded-xl p-3 mb-4">
             {errors.map((err, i) => (
-              <p key={i} className="text-xs text-warn">{err}</p>
+              <p key={i} className="text-base text-warn">{err}</p>
             ))}
           </div>
         )}
@@ -312,7 +312,7 @@ function NewBookingForm() {
 
         {/* A) Court Selection */}
         <div className="mb-6">
-          <div className="text-xs font-medium text-ink-3 mb-2">Court</div>
+          <div className="text-base font-medium text-ink-3 mb-2">Court</div>
           <div className="flex gap-2">
             {activeCourts.map((court) => {
               const isSelected = court.id === selectedCourtId;
@@ -329,10 +329,10 @@ function NewBookingForm() {
                       : 'bg-surface-3 text-ink hover:bg-line'
                   }`}
                 >
-                  <div className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-ink'}`}>
+                  <div className={`text-base font-medium ${isSelected ? 'text-white' : 'text-ink'}`}>
                     {court.name}
                   </div>
-                  <div className={`text-xs mt-0.5 ${isSelected ? 'text-white/70' : 'text-ink-3'}`}>
+                  <div className={`text-base mt-0.5 ${isSelected ? 'text-white/70' : 'text-ink-3'}`}>
                     ₱{court.hourlyRate}/hr
                   </div>
                 </button>
@@ -344,11 +344,11 @@ function NewBookingForm() {
         {/* B) Date & Time Slots */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-xs font-medium text-ink-3">Date &amp; time slots</div>
+            <div className="text-base font-medium text-ink-3">Date &amp; time slots</div>
             {selectedHours.length > 0 && (
               <button
                 onClick={() => setSelectedHours([])}
-                className="text-[10px] text-primary font-medium"
+                className="text-base text-primary font-medium"
               >
                 Clear all
               </button>
@@ -363,12 +363,12 @@ function NewBookingForm() {
               setSelectedHours([]);
             }}
             min={today}
-            className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-xs text-ink border-none outline-none mb-3"
+            className="w-full bg-surface-3 rounded-xl px-3 py-2.5 text-base text-ink border-none outline-none mb-3"
           />
 
           {selectedCourtId ? (
             <>
-              <p className="text-[10px] text-ink-4 mb-2">Tap to select hours. Non-consecutive hours are fine.</p>
+              <p className="text-base text-ink-4 mb-2">Tap to select hours. Non-consecutive hours are fine.</p>
               <div className="grid grid-cols-4 gap-1.5">
                 {operatingHours.map((hour) => {
                   const isBooked = bookedHoursForCourtAndDate.has(hour);
@@ -379,7 +379,7 @@ function NewBookingForm() {
                       key={hour}
                       onClick={() => handleToggleHour(hour)}
                       disabled={isBooked}
-                      className={`rounded-lg px-2 py-2.5 text-[11px] text-center font-medium transition-colors ${
+                      className={`rounded-lg px-2 py-2.5 text-base text-center font-medium transition-colors ${
                         isSel
                           ? 'bg-primary text-white'
                           : isBooked
@@ -396,23 +396,23 @@ function NewBookingForm() {
               {/* Selection summary badge */}
               {selectedHours.length > 0 && (
                 <div className="mt-3 bg-primary-faint rounded-lg px-3 py-2 flex items-center justify-between">
-                  <span className="text-xs text-primary font-medium">
+                  <span className="text-base text-primary font-medium">
                     {formatSelectedTimes(selectedHours)}
                   </span>
-                  <span className="text-xs font-bold text-primary">
+                  <span className="text-base font-bold text-primary">
                     {totalHours} hr{totalHours > 1 ? 's' : ''}
                   </span>
                 </div>
               )}
             </>
           ) : (
-            <p className="text-xs text-ink-3">Select a court to see available times</p>
+            <p className="text-base text-ink-3">Select a court to see available times</p>
           )}
         </div>
 
         {/* C) Member Assignment */}
         <div className="mb-6">
-          <div className="text-xs font-medium text-ink-3 mb-2">Member</div>
+          <div className="text-base font-medium text-ink-3 mb-2">Member</div>
 
           {!selectedMemberId && !isWalkIn && !showWalkInForm && (
             <>
@@ -422,11 +422,11 @@ function NewBookingForm() {
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
                   placeholder="Search by name or phone..."
-                  className="flex-1 bg-surface-3 rounded-xl px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 border-none outline-none"
+                  className="flex-1 bg-surface-3 rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-4 border-none outline-none"
                 />
                 <button
                   onClick={handleShowWalkInForm}
-                  className="bg-surface-3 hover:bg-line rounded-xl px-3 py-2.5 text-xs text-ink-2 whitespace-nowrap transition-colors"
+                  className="bg-surface-3 hover:bg-line rounded-xl px-3 py-2.5 text-base text-ink-2 whitespace-nowrap transition-colors"
                 >
                   Walk-in
                 </button>
@@ -441,13 +441,13 @@ function NewBookingForm() {
                       className="w-full flex justify-between items-center px-3 py-2.5 border-b border-line-2 last:border-b-0 text-left hover:bg-surface-2 transition-colors"
                     >
                       <div>
-                        <div className="text-xs font-medium text-ink">
+                        <div className="text-base font-medium text-ink">
                           {member.firstName} {member.lastName}
                         </div>
-                        <div className="text-xs text-ink-3">{member.phone}</div>
+                        <div className="text-base text-ink-3">{member.phone}</div>
                       </div>
                       {member.tier === 'vip' && (
-                        <span className="text-xs text-primary-deep bg-primary-soft px-1.5 py-0.5 rounded-full">
+                        <span className="text-base text-primary-deep bg-primary-soft px-1.5 py-0.5 rounded-full">
                           VIP
                         </span>
                       )}
@@ -461,26 +461,26 @@ function NewBookingForm() {
           {/* Walk-in form */}
           {showWalkInForm && !isWalkIn && (
             <div className="bg-surface-2 rounded-xl p-3.5 border border-line/60 space-y-2.5">
-              <div className="text-[10px] font-semibold text-ink-3 uppercase tracking-wider">Walk-in details</div>
+              <div className="text-base font-semibold text-ink-3 uppercase tracking-wider">Walk-in details</div>
               <input
                 type="text"
                 value={walkInName}
                 onChange={(e) => setWalkInName(e.target.value)}
                 placeholder="Full name *"
-                className="w-full bg-surface rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full bg-surface rounded-lg px-3 py-2.5 text-base text-ink placeholder:text-ink-4 border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
               <input
                 type="tel"
                 value={walkInPhone}
                 onChange={(e) => setWalkInPhone(e.target.value)}
                 placeholder="Phone number"
-                className="w-full bg-surface rounded-lg px-3 py-2.5 text-xs text-ink placeholder:text-ink-4 border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full bg-surface rounded-lg px-3 py-2.5 text-base text-ink placeholder:text-ink-4 border border-line focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
               <div className="flex gap-2">
                 <button
                   onClick={handleConfirmWalkIn}
                   disabled={!walkInName.trim()}
-                  className={`flex-1 py-2.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`flex-1 py-2.5 rounded-lg text-base font-medium transition-colors ${
                     walkInName.trim()
                       ? 'bg-primary text-white'
                       : 'bg-line text-ink-4 cursor-not-allowed'
@@ -490,7 +490,7 @@ function NewBookingForm() {
                 </button>
                 <button
                   onClick={() => setShowWalkInForm(false)}
-                  className="flex-1 bg-surface-3 text-ink-3 py-2.5 rounded-lg text-xs font-medium"
+                  className="flex-1 bg-surface-3 text-ink-3 py-2.5 rounded-lg text-base font-medium"
                 >
                   Cancel
                 </button>
@@ -502,22 +502,22 @@ function NewBookingForm() {
             <div className="flex items-center gap-2">
               <div className="flex-1 bg-primary-soft rounded-xl px-3 py-2.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-primary-deep">
+                  <span className="text-base font-medium text-primary-deep">
                     {memberDisplayName}
                   </span>
                   {selectedMember?.tier === 'vip' && (
-                    <span className="text-xs text-primary-deep bg-surface/60 px-1.5 py-0.5 rounded-full">
+                    <span className="text-base text-primary-deep bg-surface/60 px-1.5 py-0.5 rounded-full">
                       VIP
                     </span>
                   )}
                   {isWalkIn && (
-                    <span className="text-[10px] text-primary-deep/60 bg-surface/40 px-1.5 py-0.5 rounded-full">
+                    <span className="text-base text-primary-deep/60 bg-surface/40 px-1.5 py-0.5 rounded-full">
                       New
                     </span>
                   )}
                 </div>
                 {isWalkIn && walkInPhone && (
-                  <div className="text-[10px] text-primary-deep/70 mt-0.5">{walkInPhone}</div>
+                  <div className="text-base text-primary-deep/70 mt-0.5">{walkInPhone}</div>
                 )}
               </div>
               <button
@@ -534,7 +534,7 @@ function NewBookingForm() {
 
         {/* D) Add Items */}
         <div className="mb-6">
-          <div className="text-xs font-medium text-ink-3 mb-2">Add items</div>
+          <div className="text-base font-medium text-ink-3 mb-2">Add items</div>
           <div className="bg-surface rounded-xl border border-line-2 overflow-hidden">
             {activeItems.map((item, idx) => {
               const qty = itemQuantities[item.id] ?? 0;
@@ -546,8 +546,8 @@ function NewBookingForm() {
                   }`}
                 >
                   <div className="flex-1">
-                    <div className="text-xs font-medium text-ink">{item.name}</div>
-                    <div className="text-xs text-ink-3">
+                    <div className="text-base font-medium text-ink">{item.name}</div>
+                    <div className="text-base text-ink-3">
                       ₱{item.price.toLocaleString()} &middot; {item.type}
                     </div>
                   </div>
@@ -555,7 +555,7 @@ function NewBookingForm() {
                     <button
                       onClick={() => handleUpdateQuantity(item.id, -1)}
                       disabled={qty === 0}
-                      className={`w-7 h-7 flex items-center justify-center rounded-full text-sm transition-colors ${
+                      className={`w-7 h-7 flex items-center justify-center rounded-full text-base transition-colors ${
                         qty === 0
                           ? 'bg-surface-3 text-ink-4 cursor-not-allowed'
                           : 'bg-surface-3 text-ink hover:bg-line'
@@ -563,10 +563,10 @@ function NewBookingForm() {
                     >
                       -
                     </button>
-                    <span className="text-xs text-ink w-5 text-center">{qty}</span>
+                    <span className="text-base text-ink w-5 text-center">{qty}</span>
                     <button
                       onClick={() => handleUpdateQuantity(item.id, 1)}
-                      className="w-7 h-7 flex items-center justify-center rounded-full bg-surface-3 text-ink hover:bg-line text-sm transition-colors"
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-surface-3 text-ink hover:bg-line text-base transition-colors"
                     >
                       +
                     </button>
@@ -580,28 +580,28 @@ function NewBookingForm() {
         {/* E) Booking Summary */}
         {selectedCourt && selectedHours.length > 0 && (
           <div className="bg-surface-2 rounded-xl p-4 mb-6 border border-line/60">
-            <div className="text-[10px] font-semibold text-ink-3 uppercase tracking-wider mb-3">Summary</div>
+            <div className="text-base font-semibold text-ink-3 uppercase tracking-wider mb-3">Summary</div>
 
             <div className="space-y-2 mb-3">
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between text-base">
                 <span className="text-ink-3">Court</span>
                 <span className="text-ink font-medium">{selectedCourt.name}</span>
               </div>
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between text-base">
                 <span className="text-ink-3">Date</span>
                 <span className="text-ink font-medium">{formatDate(selectedDate)}</span>
               </div>
-              <div className="flex justify-between text-xs items-start">
+              <div className="flex justify-between text-base items-start">
                 <span className="text-ink-3">Time</span>
                 <span className="text-ink font-medium text-right max-w-[60%]">
                   {formatSelectedTimes(selectedHours)}
                 </span>
               </div>
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between text-base">
                 <span className="text-ink-3">Total hours</span>
                 <span className="text-ink font-medium">{totalHours} hr{totalHours > 1 ? 's' : ''}</span>
               </div>
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between text-base">
                 <span className="text-ink-3">Member</span>
                 <span className="text-ink font-medium">{memberDisplayName ?? '—'}</span>
               </div>
@@ -615,7 +615,7 @@ function NewBookingForm() {
                   .map((item) => {
                     const qty = itemQuantities[item.id];
                     return (
-                      <div key={item.id} className="flex justify-between text-xs py-0.5">
+                      <div key={item.id} className="flex justify-between text-base py-0.5">
                         <span className="text-ink-3">{item.name} x{qty}</span>
                         <span className="text-ink">₱{(item.price * qty).toLocaleString()}</span>
                       </div>
@@ -625,27 +625,27 @@ function NewBookingForm() {
             )}
 
             <div className="border-t border-line/60 pt-2.5 space-y-1.5">
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between text-base">
                 <span className="text-ink-3">Court fee ({totalHours}h × ₱{selectedCourt.hourlyRate})</span>
                 <span className="text-ink">₱{courtFee.toLocaleString()}</span>
               </div>
               {itemsTotal > 0 && (
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between text-base">
                   <span className="text-ink-3">Items total</span>
                   <span className="text-ink">₱{itemsTotal.toLocaleString()}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm font-semibold pt-2 border-t border-line/60 mt-1">
+              <div className="flex justify-between text-base font-semibold pt-2 border-t border-line/60 mt-1">
                 <span className="text-ink">Total</span>
                 <span className="text-primary font-display">₱{total.toLocaleString()}</span>
               </div>
               {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0 && (
                 <>
-                  <div className="flex justify-between text-xs pt-1.5">
+                  <div className="flex justify-between text-base pt-1.5">
                     <span className="text-ink-3">Downpayment ({totalHours}h × ₱{tenant.downpaymentPerHour})</span>
                     <span className="text-ink font-medium">₱{(tenant.downpaymentPerHour * totalHours).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-xs">
+                  <div className="flex justify-between text-base">
                     <span className="text-ink-3">Balance due at check-in</span>
                     <span className="text-ink font-medium">₱{Math.max(0, total - tenant.downpaymentPerHour * totalHours).toLocaleString()}</span>
                   </div>
@@ -679,7 +679,7 @@ function NewBookingForm() {
                   ? 'Collect Downpayment'
                   : 'Collect Payment'}
               </h3>
-              <p className="text-center text-xs text-ink-3 mb-5">
+              <p className="text-center text-base text-ink-3 mb-5">
                 {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0
                   ? 'Please collect the downpayment from the customer before confirming.'
                   : 'Please collect the full amount from the customer before confirming.'}
@@ -688,21 +688,21 @@ function NewBookingForm() {
               <div className="bg-surface-2 rounded-xl p-4 mb-5 space-y-2">
                 {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0 ? (
                   <>
-                    <div className="flex justify-between text-xs">
+                    <div className="flex justify-between text-base">
                       <span className="text-ink-3">Total booking</span>
                       <span className="text-ink">₱{total.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-sm font-semibold pt-2 border-t border-line/60">
+                    <div className="flex justify-between text-base font-semibold pt-2 border-t border-line/60">
                       <span className="text-ink">Collect now</span>
                       <span className="text-primary font-display">₱{(tenant.downpaymentPerHour * totalHours).toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-xs">
+                    <div className="flex justify-between text-base">
                       <span className="text-ink-3">Balance at check-in</span>
                       <span className="text-ink">₱{Math.max(0, total - tenant.downpaymentPerHour * totalHours).toLocaleString()}</span>
                     </div>
                   </>
                 ) : (
-                  <div className="flex justify-between text-sm font-semibold">
+                  <div className="flex justify-between text-base font-semibold">
                     <span className="text-ink">Collect now</span>
                     <span className="text-primary font-display">₱{total.toLocaleString()}</span>
                   </div>
@@ -712,13 +712,13 @@ function NewBookingForm() {
               <div className="flex flex-col gap-2">
                 <button
                   onClick={handleConfirmPayment}
-                  className="w-full bg-primary hover:bg-primary-deep text-white py-3.5 rounded-xl text-sm font-semibold transition-colors"
+                  className="w-full bg-primary hover:bg-primary-deep text-white py-3.5 rounded-xl text-base font-semibold transition-colors"
                 >
                   Payment collected
                 </button>
                 <button
                   onClick={() => setShowPaymentPrompt(false)}
-                  className="w-full text-ink-3 py-2 text-xs font-medium"
+                  className="w-full text-ink-3 py-2 text-base font-medium"
                 >
                   Go back
                 </button>
@@ -731,7 +731,7 @@ function NewBookingForm() {
         <button
           onClick={handleConfirmClick}
           disabled={!canSubmit || submitting || showPaymentPrompt}
-          className={`w-full py-3.5 rounded-xl text-sm font-semibold transition-colors ${
+          className={`w-full py-3.5 rounded-xl text-base font-semibold transition-colors ${
             canSubmit && !submitting
               ? 'bg-primary text-white hover:bg-primary-deep'
               : 'bg-line text-ink-4 cursor-not-allowed'
@@ -753,7 +753,7 @@ export default function NewBookingPage() {
     <Suspense
       fallback={
         <div className="app-shell flex items-center justify-center">
-          <div className="text-xs text-ink-3">Loading...</div>
+          <div className="text-base text-ink-3">Loading...</div>
         </div>
       }
     >
