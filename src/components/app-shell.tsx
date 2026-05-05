@@ -373,8 +373,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main content area — shifts right on desktop for sidebar */}
       <div className="min-h-screen bg-surface-2 lg:pl-56">
-        <div className="w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto">
-          <div className="px-5 md:px-8 lg:px-10 pt-4 md:pt-6 pb-24 lg:pb-8">
+        <div className="w-full max-w-lg md:max-w-2xl lg:max-w-6xl mx-auto">
+          <div className="px-5 md:px-8 lg:px-8 pt-4 md:pt-6 pb-24 lg:pb-8">
             <MobileHeader />
             <SubscriptionBanner />
             {children}

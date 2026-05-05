@@ -34,13 +34,13 @@ function BookingDetailSheet({
   const balanceDue = isDownpayment ? Math.max(0, booking.total - downpaymentAmount) : 0;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-end lg:items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-ink/30 backdrop-blur-[2px]" />
       <div
-        className="relative bg-surface shadow-sheet rounded-t-2xl w-full max-w-lg md:max-w-xl p-5 md:p-6 pb-8"
+        className="relative bg-surface shadow-sheet rounded-t-2xl lg:rounded-2xl w-full max-w-lg md:max-w-xl p-5 md:p-6 pb-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-line rounded-full mx-auto mb-5" />
+        <div className="w-10 h-1 bg-line rounded-full mx-auto mb-5 lg:hidden" />
 
         <div className="flex justify-between items-start mb-4">
           <div>
