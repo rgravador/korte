@@ -97,7 +97,7 @@ function UserMenu() {
       <button
         onClick={() => setShowMenu(!showMenu)}
         aria-label="User menu"
-        className="w-8 h-8 rounded-full bg-navy-700 text-gold flex items-center justify-center text-base font-semibold"
+        className="w-8 h-8 rounded-full bg-navy-700 text-gold flex items-center justify-center text-xs font-semibold"
       >
         {initials}
       </button>
@@ -107,18 +107,18 @@ function UserMenu() {
           <div role="menu" className="absolute right-0 lg:left-0 lg:right-auto lg:bottom-full lg:mb-2 top-10 lg:top-auto bg-surface rounded-xl border border-line shadow-dropdown z-50 w-52 overflow-hidden">
             <div className="px-3.5 py-3 border-b border-line-2">
               <div className="font-display font-semibold text-base text-ink">{currentUser?.displayName}</div>
-              <div className="text-base text-ink-3 mt-0.5 capitalize">{currentUser?.role.replace('_', ' ')}</div>
+              <div className="text-sm text-ink-3 mt-0.5 capitalize">{currentUser?.role.replace('_', ' ')}</div>
             </div>
             <div className="px-3.5 py-2.5 border-b border-line-2 flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-signal' : 'bg-warn'}`} />
-              <span className="text-base text-ink-3">
+              <span className="text-sm text-ink-3">
                 {isOnline ? 'Online' : 'Offline'}
               </span>
             </div>
             <button
               onClick={handleLogout}
               aria-label="Sign out"
-              className="w-full px-3.5 py-2.5 text-left text-base text-warn font-medium hover:bg-surface-2 transition-colors"
+              className="w-full px-3.5 py-2.5 text-left text-sm text-warn font-medium hover:bg-surface-2 transition-colors"
             >
               Sign out
             </button>
@@ -163,7 +163,7 @@ function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-gold/15 text-gold'
                   : 'text-white/50 hover:bg-white/5 hover:text-white/80'
@@ -180,8 +180,8 @@ function Sidebar() {
       <div className="px-4 py-4 border-t border-white/10 flex items-center gap-3">
         <UserMenu />
         <div className="min-w-0">
-          <div className="text-base font-medium text-white truncate">{currentUser?.displayName}</div>
-          <div className="text-base text-white/40 capitalize truncate">{currentUser?.role.replace('_', ' ')}</div>
+          <div className="text-sm font-medium text-white truncate">{currentUser?.displayName}</div>
+          <div className="text-xs text-white/40 capitalize truncate">{currentUser?.role.replace('_', ' ')}</div>
         </div>
       </div>
     </aside>
@@ -223,7 +223,7 @@ function RefreshButton() {
         <path d="M12 1v3.5h-3.5M4 15v-3.5h3.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       {lastSyncLabel && (
-        <span className="text-base font-medium">{lastSyncLabel}</span>
+        <span className="text-xs font-medium">{lastSyncLabel}</span>
       )}
     </button>
   );
@@ -241,12 +241,12 @@ function MobileHeader() {
           Korte
         </span>
         {!isOnline && (
-          <span className="text-base font-medium px-2 py-0.5 rounded-full bg-warn-soft text-warn-text">
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warn-soft text-warn-text">
             Offline
           </span>
         )}
         {isOnline && pendingSync > 0 && (
-          <span className="text-base font-medium px-2 py-0.5 rounded-full bg-primary-soft text-primary-deep">
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary-soft text-primary-deep">
             Syncing {pendingSync}
           </span>
         )}
@@ -284,7 +284,7 @@ function MobileBottomNav() {
             }`}
           >
             {item.icon}
-            <span className={`text-base ${isActive ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
+            <span className={`text-xs ${isActive ? 'font-semibold' : 'font-medium'}`}>{item.label}</span>
           </Link>
         );
       })}
@@ -315,7 +315,7 @@ function SubscriptionBanner() {
           <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-red-400 shrink-0">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
           </svg>
-          <p className="text-base font-medium text-red-300">
+          <p className="text-sm font-medium text-red-300">
             {isAdmin ? (
               <>
                 Your account is frozen &mdash;{' '}
@@ -343,7 +343,7 @@ function SubscriptionBanner() {
           <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-amber-400 shrink-0">
             <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
           </svg>
-          <p className="text-base font-medium text-amber-300">
+          <p className="text-sm font-medium text-amber-300">
             {warningText}
             {isAdmin && (
               <>

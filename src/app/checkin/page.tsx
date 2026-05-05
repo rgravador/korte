@@ -110,7 +110,7 @@ export default function CheckinPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-2.5 py-1 border rounded-full font-sans text-base ${
+              className={`px-2.5 py-1 border rounded-full font-sans text-sm ${
                 filter === f
                   ? 'bg-primary text-white border-primary'
                   : 'border-line text-ink-2'
@@ -134,10 +134,10 @@ export default function CheckinPage() {
                 className="grid grid-cols-[44px_1fr_auto] gap-2.5 items-center py-2.5 border-b border-line-2"
               >
                 <div>
-                  <div className="font-sans text-base leading-tight">
+                  <div className="font-sans text-sm leading-tight">
                     {booking.startHour}:00
                   </div>
-                  <div className="font-sans text-base text-ink-3">
+                  <div className="font-sans text-xs text-ink-3">
                     {court?.name.replace('Court ', 'C')}
                   </div>
                 </div>
@@ -145,12 +145,12 @@ export default function CheckinPage() {
                   <div className="font-medium text-base text-ink mb-px">
                     {booking.memberName}
                   </div>
-                  <div className="font-sans text-base text-ink-3">
+                  <div className="font-sans text-xs text-ink-3">
                     {booking.durationMinutes} min · ₱{booking.total.toLocaleString()}
                     {hasItems && ` · ${booking.items.map((i) => `${i.quantity} ${i.itemName.split(' ')[0].toLowerCase()}`).join(', ')}`}
                   </div>
                   {canCheckIn && (
-                    <div className="font-sans text-base mt-0.5">
+                    <div className="font-sans text-xs mt-0.5">
                       {tenant.paymentMode === 'downpayment' && tenant.downpaymentPerHour > 0 ? (
                         <span className="text-warn">
                           Collect ₱{Math.max(0, booking.total - tenant.downpaymentPerHour * (booking.durationMinutes / 60)).toLocaleString()} balance
@@ -165,13 +165,13 @@ export default function CheckinPage() {
                   <div className="flex flex-col gap-1">
                     <button
                       onClick={() => handleCheckIn(booking.id)}
-                      className="font-sans text-base px-2 py-1 rounded bg-signal text-white"
+                      className="font-sans text-sm px-2 py-1 rounded bg-signal text-white"
                     >
                       Check in
                     </button>
                     <button
                       onClick={() => handleNoShow(booking.id)}
-                      className="font-sans text-base px-2 py-0.5 rounded text-warn"
+                      className="font-sans text-xs px-2 py-0.5 rounded text-warn"
                     >
                       No-show
                     </button>
@@ -199,27 +199,27 @@ export default function CheckinPage() {
             <circle cx="12" cy="12" r="9" />
             <path d="m9 12 2 2 4-4" />
           </svg>
-          <span className="font-sans text-base">Check-in</span>
+          <span className="font-sans text-xs">Check-in</span>
         </div>
         <Link href="/schedule" className="flex flex-col items-center gap-0.5 text-ink-3">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
             <rect x="3" y="4" width="18" height="17" rx="2" />
             <path d="M3 10h18M8 2v4M16 2v4" />
           </svg>
-          <span className="font-sans text-base">Today</span>
+          <span className="font-sans text-xs">Today</span>
         </Link>
         <Link href="/booking/new" className="flex flex-col items-center gap-0.5 text-ink-3">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
             <path d="M5 12h14M12 5v14" />
           </svg>
-          <span className="font-sans text-base">Walk-in</span>
+          <span className="font-sans text-xs">Walk-in</span>
         </Link>
         <Link href="/settings" className="flex flex-col items-center gap-0.5 text-ink-3">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
             <circle cx="12" cy="8" r="4" />
             <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
           </svg>
-          <span className="font-sans text-base">Account</span>
+          <span className="font-sans text-xs">Account</span>
         </Link>
       </nav>
     </div>

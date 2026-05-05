@@ -332,7 +332,7 @@ function NewBookingForm() {
                   <div className={`text-base font-medium ${isSelected ? 'text-white' : 'text-ink'}`}>
                     {court.name}
                   </div>
-                  <div className={`text-base mt-0.5 ${isSelected ? 'text-white/70' : 'text-ink-3'}`}>
+                  <div className={`text-sm mt-0.5 ${isSelected ? 'text-white/70' : 'text-ink-3'}`}>
                     ₱{court.hourlyRate}/hr
                   </div>
                 </button>
@@ -368,7 +368,7 @@ function NewBookingForm() {
 
           {selectedCourtId ? (
             <>
-              <p className="text-base text-ink-4 mb-2">Tap to select hours. Non-consecutive hours are fine.</p>
+              <p className="text-sm text-ink-4 mb-2">Tap to select hours. Non-consecutive hours are fine.</p>
               <div className="grid grid-cols-4 gap-1.5">
                 {operatingHours.map((hour) => {
                   const isBooked = bookedHoursForCourtAndDate.has(hour);
@@ -379,7 +379,7 @@ function NewBookingForm() {
                       key={hour}
                       onClick={() => handleToggleHour(hour)}
                       disabled={isBooked}
-                      className={`rounded-lg px-2 py-2.5 text-base text-center font-medium transition-colors ${
+                      className={`rounded-lg px-2 py-2.5 text-xs text-center font-medium transition-colors ${
                         isSel
                           ? 'bg-primary text-white'
                           : isBooked
@@ -396,10 +396,10 @@ function NewBookingForm() {
               {/* Selection summary badge */}
               {selectedHours.length > 0 && (
                 <div className="mt-3 bg-primary-faint rounded-lg px-3 py-2 flex items-center justify-between">
-                  <span className="text-base text-primary font-medium">
+                  <span className="text-sm text-primary font-medium">
                     {formatSelectedTimes(selectedHours)}
                   </span>
-                  <span className="text-base font-bold text-primary">
+                  <span className="text-sm font-bold text-primary">
                     {totalHours} hr{totalHours > 1 ? 's' : ''}
                   </span>
                 </div>
@@ -447,7 +447,7 @@ function NewBookingForm() {
                         <div className="text-base text-ink-3">{member.phone}</div>
                       </div>
                       {member.tier === 'vip' && (
-                        <span className="text-base text-primary-deep bg-primary-soft px-1.5 py-0.5 rounded-full">
+                        <span className="text-xs text-primary-deep bg-primary-soft px-1.5 py-0.5 rounded-full">
                           VIP
                         </span>
                       )}

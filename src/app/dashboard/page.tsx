@@ -226,7 +226,7 @@ export default function DashboardPage() {
             { label: 'Utilization', value: `${utilization}%` },
           ].map(({ label, value }) => (
             <div key={label} className="bg-surface shadow-card rounded-xl p-3 md:p-4">
-              <div className="text-base md:text-xs font-medium text-ink-3 uppercase tracking-wider mb-1.5">{label}</div>
+              <div className="text-xs md:text-xs font-medium text-ink-3 uppercase tracking-wider mb-1.5">{label}</div>
               <div className="font-display text-2xl md:text-3xl font-bold leading-none text-ink">{value}</div>
             </div>
           ))}
@@ -235,7 +235,7 @@ export default function DashboardPage() {
         {/* Bookings list */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display text-base md:text-base font-semibold text-ink">Next up</h2>
-          <span className="text-base md:text-xs font-medium text-ink-4">{todayCount} bookings</span>
+          <span className="text-sm md:text-xs font-medium text-ink-4">{todayCount} bookings</span>
         </div>
 
         <div className="bg-surface rounded-xl shadow-card overflow-hidden">
@@ -254,18 +254,18 @@ export default function DashboardPage() {
                 }`}
               >
                 <div>
-                  <div className="font-display text-base md:text-base font-semibold leading-tight text-ink">
+                  <div className="font-display text-sm md:text-base font-semibold leading-tight text-ink">
                     {formatHour(booking.startHour)}
                   </div>
-                  <div className="text-base md:text-xs text-ink-4 mt-0.5">
+                  <div className="text-xs md:text-xs text-ink-4 mt-0.5">
                     {booking.durationMinutes}m
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <div className="font-medium text-base md:text-sm text-ink truncate">
+                  <div className="font-medium text-sm md:text-sm text-ink truncate">
                     {booking.memberName}
                   </div>
-                  <div className="text-base md:text-xs text-ink-3 truncate mt-0.5">
+                  <div className="text-xs md:text-xs text-ink-3 truncate mt-0.5">
                     {court?.name}
                     {hasItems && ` · ${booking.items.map((i) => `${i.quantity} ${i.itemName.split(' ')[0].toLowerCase()}`).join(', ')}`}
                   </div>
