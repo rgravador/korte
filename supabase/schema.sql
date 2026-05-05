@@ -157,6 +157,9 @@ CREATE TABLE bookings (
   court_fee        NUMERIC(10,2) NOT NULL DEFAULT 0,
   items_total      NUMERIC(10,2) NOT NULL DEFAULT 0,
   total            NUMERIC(10,2) NOT NULL DEFAULT 0,
+  payment_mode     TEXT NOT NULL DEFAULT 'full'
+    CHECK (payment_mode IN ('full', 'downpayment')),
+  paid_amount      NUMERIC(10,2) NOT NULL DEFAULT 0,
   is_recurring     BOOLEAN NOT NULL DEFAULT false,
   notes            TEXT NOT NULL DEFAULT '',
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
